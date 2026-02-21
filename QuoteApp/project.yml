@@ -1,0 +1,16 @@
+name: QuoteApp
+options:
+  bundleIdPrefix: com.antigravity
+targets:
+  QuoteApp:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources: 
+      - path: Sources
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_VERSION: "5.0"

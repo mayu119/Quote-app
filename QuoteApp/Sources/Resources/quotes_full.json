@@ -1,0 +1,112 @@
+[
+  {
+    "id": "quote_001",
+    "quote_ja": "考えるな、動け。\nお前が悩んでいる間に、\nライバルはもう行動している。",
+    "quote_en": "Don't think, move. While you're worrying, your rivals are already taking action.",
+    "author": "Unknown",
+    "author_description": "不明",
+    "category": "awakening",
+    "punchline": "考えるな、動け。",
+    "background_image": "bg_fire_01",
+    "push_notification_hook": "今日の名言、読んだ瞬間に鳥肌立った..."
+  },
+  {
+    "id": "quote_002",
+    "quote_ja": "痛みは一時的だが、\n諦めは一生残る。",
+    "quote_en": "Pain is temporary, quitting lasts forever.",
+    "author": "Lance Armstrong",
+    "author_description": "元プロロードレース選手",
+    "category": "self_discipline",
+    "punchline": "痛みは一時的だが、諦めは一生残る。",
+    "background_image": "bg_gym_01",
+    "push_notification_hook": "90%の男がスルーする。でもお前は違うと信じてる。"
+  },
+  {
+    "id": "quote_003",
+    "quote_ja": "失敗を恐れるな。\n失敗しないことを恐れろ。",
+    "quote_en": "Don't fear failure. Fear not trying.",
+    "author": "Michael Jordan",
+    "author_description": "元プロバスケットボール選手",
+    "category": "mindset",
+    "punchline": "失敗を恐れるな。",
+    "background_image": "bg_mountain_01",
+    "push_notification_hook": "昨日と今日の名言を比べてみろ。気づくことがある。"
+  },
+  {
+    "id": "quote_004",
+    "quote_ja": "勝者は諦めない。\n諦める者は勝てない。",
+    "quote_en": "Winners never quit, quitters never win.",
+    "author": "Vince Lombardi",
+    "author_description": "アメリカンフットボールコーチ",
+    "category": "battle",
+    "punchline": "勝者は諦めない。",
+    "background_image": "bg_fight_01",
+    "push_notification_hook": "これ、朝イチで読むとマジで変わる。"
+  },
+  {
+    "id": "quote_005",
+    "quote_ja": "朝の1時間は\n夜の3時間に勝る。",
+    "quote_en": "One hour in the morning is worth three in the evening.",
+    "author": "Benjamin Franklin",
+    "author_description": "政治家・物理学者",
+    "category": "morning",
+    "punchline": "朝の1時間は夜の3時間に勝る。",
+    "background_image": "bg_sunrise_01",
+    "push_notification_hook": "今日のは、ちょっとヤバい。覚悟して読んでくれ。"
+  },
+  {
+    "id": "quote_006",
+    "quote_ja": "強さとは、\n倒されないことではない。\n倒されても立ち上がることだ。",
+    "quote_en": "Strength does not come from winning. Your struggles develop your strengths.",
+    "author": "Arnold Schwarzenegger",
+    "author_description": "ボディビルダー・俳優・政治家",
+    "category": "self_discipline",
+    "punchline": "強さとは、倒されても立ち上がることだ。",
+    "background_image": "bg_gym_02",
+    "push_notification_hook": "こういう名言を知ってるかどうかで差がつく。"
+  },
+  {
+    "id": "quote_007",
+    "quote_ja": "天才とは、\n1%のひらめきと\n99%の努力である。",
+    "quote_en": "Genius is one percent inspiration and ninety-nine percent perspiration.",
+    "author": "Thomas Edison",
+    "author_description": "発明家",
+    "category": "mindset",
+    "punchline": "天才とは、1%のひらめきと99%の努力である。",
+    "background_image": "bg_mountain_02",
+    "push_notification_hook": "毎朝これ読んでるけど、今日のはちょっと違った。"
+  },
+  {
+    "id": "quote_008",
+    "quote_ja": "やる気があるときに\nやるのは当たり前。\nやる気がないときに\nやるから成功する。",
+    "quote_en": "Anyone can do it when motivated. Success comes from doing it even when you're not.",
+    "author": "Unknown",
+    "author_description": "不明",
+    "category": "awakening",
+    "punchline": "やる気がないときにやるから成功する。",
+    "background_image": "bg_fire_02",
+    "push_notification_hook": "この名言、お前のために選んだ。"
+  },
+  {
+    "id": "quote_009",
+    "quote_ja": "お前が休んでいる間に、\n俺は練習している。",
+    "quote_en": "While you're resting, I'm practicing.",
+    "author": "Kobe Bryant",
+    "author_description": "元プロバスケットボール選手",
+    "category": "battle",
+    "punchline": "お前が休んでいる間に、俺は練習している。",
+    "background_image": "bg_fight_02",
+    "push_notification_hook": "シンプルだけど、刺さる。今日の名言。"
+  },
+  {
+    "id": "quote_010",
+    "quote_ja": "明日やろうは\nバカ野郎。",
+    "quote_en": "Tomorrow never comes for fools.",
+    "author": "日本の諺",
+    "author_description": "日本の伝統的な教え",
+    "category": "morning",
+    "punchline": "明日やろうはバカ野郎。",
+    "background_image": "bg_sunrise_02",
+    "push_notification_hook": "今日の名言、保存する価値ある。マジで。"
+  }
+]
