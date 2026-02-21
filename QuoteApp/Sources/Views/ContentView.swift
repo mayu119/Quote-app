@@ -1,63 +1,58 @@
 import SwiftUI
 import SwiftData
 
-/// メインコンテンツビュー（タブナビゲーション）
+/// メインコンテンツビュー（シンプル版 - quotes.json読み込みテスト用）
 struct ContentView: View {
     // MARK: - Environment
 
     @Environment(\.modelContext) private var modelContext
-    @EnvironmentObject private var userSettings: UserSettings
-
-    // MARK: - State
-
-    @State private var selectedTab = 0
-    @StateObject private var quoteDataService: QuoteDataService
-
-    // MARK: - Initializer
-
-    init() {
-        // Note: modelContextは後でEnvironmentから取得するため、
-        // ダミーのコンテキストで初期化し、onAppearで再設定
-        let schema = Schema([Quote.self])
-        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
-        let container = try! ModelContainer(for: schema, configurations: [config])
-        let context = container.mainContext
-
-        _quoteDataService = StateObject(wrappedValue: QuoteDataService(modelContext: context))
-    }
+    @Query private var quotes: [Quote]
 
     // MARK: - Body
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            // タブ1: 今日の名言
-            TodayQuoteView(quoteDataService: quoteDataService)
-                .tabItem {
-                    Label("今日の名言", systemImage: "quote.bubble.fill")
-                }
-                .tag(0)
+        NavigationStack {
+            VStack(spacing: 20) {
+                Text("名言アプリ - テスト版")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
 
-            // タブ2: お気に入り
-            FavoritesView(quoteDataService: quoteDataService)
-                .tabItem {
-                    Label("お気に入り", systemImage: "bookmark.fill")
-                }
-                .tag(1)
+                Text("読み込まれた名言数: \(quotes.count)")
+                    .font(.title2)
+                    .foregroundColor(.blue)
 
-            // タブ3: 設定
-            SettingsView()
-                .tabItem {
-                    Label("設定", systemImage: "gearshape.fill")
+                if let firstQuote = quotes.first {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("最初の名言:")
+                            .font(.headline)
+
+                        Text(firstQuote.quoteJa)
+                            .font(.body)
+                            .padding()
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(8)
+
+                        Text("- \(firstQuote.author)")
+                            .font(.caption)
+                            .italic()
+                    }
+                    .padding()
                 }
-                .tag(2)
-        }
-        .accentColor(Color(red: 0.85, green: 0.65, blue: 0.2)) // アクセントゴールド
-        .onAppear {
-            // 実際のmodelContextで再初期化
-            let realService = QuoteDataService(modelContext: modelContext)
-            // Note: @StateObjectは一度初期化されると変更できないため、
-            // 実際はQuoteDataServiceをEnvironmentObjectとして渡す方が良いが、
-            // ここでは簡略化のためそのまま使用
+
+                List {
+                    ForEach(quotes.prefix(10)) { quote in
+                        VStack(alignment: .leading) {
+                            Text(quote.quoteJa)
+                                .font(.body)
+                            Text(quote.author)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+            }
+            .navigationTitle("QuoteApp")
+            .padding()
         }
     }
 }
@@ -70,6 +65,5 @@ struct ContentView: View {
     let container = try! ModelContainer(for: schema, configurations: [config])
 
     ContentView()
-        .environmentObject(UserSettings())
         .modelContainer(container)
 }

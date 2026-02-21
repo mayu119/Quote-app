@@ -1,13 +1,5 @@
 import SwiftUI
 
-// MARK: - Model
-struct Quote {
-    let text: String
-    let author: String
-    let category: String
-    let imageName: String // 将来的な背景画像用
-}
-
 // MARK: - Main View
 struct MainQuoteView: View {
     let quote = Quote(
