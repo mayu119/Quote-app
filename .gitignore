@@ -1,0 +1,28 @@
+# OS X
+.DS_Store
+
+# Xcode
+build/
+DerivedData/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcscheme
+*.xcbkptlist
+*.xcuserstate
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# App Store Connect
+*.itmsp
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Local development
+*.log
+.cursor/

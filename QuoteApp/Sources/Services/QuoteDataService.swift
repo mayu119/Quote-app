@@ -100,6 +100,59 @@ final class QuoteDataService: ObservableObject {
         self.todayQuote = selectedQuote
         return selectedQuote
     }
+    
+    /// 複数件の名言を取得（スワイプ閲覧用・本日の15件固定ロジック）
+    func getDailyQuotes(limit: Int, isPremium: Bool) async throws -> [Quote] {
+        let descriptor = FetchDescriptor<Quote>()
+        let allQuotes = try modelContext.fetch(descriptor)
+        
+        guard !allQuotes.isEmpty else {
+            return [.fallback]
+        }
+        
+        let calendar = Calendar.current
+        let today = Date()
+        
+        if isPremium {
+            // プレミアムなら毎回新しくランダムに取得
+            let shuffled = allQuotes.shuffled()
+            let selected = Array(shuffled.prefix(limit > 0 ? limit : 50))
+            for quote in selected {
+                quote.lastShownDate = today
+            }
+            try modelContext.save()
+            return selected
+        } else {
+            // 無料ユーザー：今日すでに割り当てられた名言を探す
+            let todaysQuotes = allQuotes.filter { quote in
+                guard let lastShown = quote.lastShownDate else { return false }
+                return calendar.isDate(lastShown, inSameDayAs: today)
+            }
+            
+            if todaysQuotes.count >= limit {
+                // 既に今日分の名言が確保されている場合はそれをシャッフルして返す
+                return Array(todaysQuotes.shuffled().prefix(limit))
+            } else {
+                // 不足している分を新しくアサインする
+                let needed = limit - todaysQuotes.count
+                let unshownToday = allQuotes.filter { quote in
+                    if let lastShown = quote.lastShownDate {
+                        return !calendar.isDate(lastShown, inSameDayAs: today)
+                    }
+                    return true
+                }
+                
+                let selectedNewQuotes = Array(unshownToday.shuffled().prefix(needed))
+                for quote in selectedNewQuotes {
+                    quote.lastShownDate = today
+                }
+                try modelContext.save()
+                
+                let combined = todaysQuotes + selectedNewQuotes
+                return combined.shuffled()
+            }
+        }
+    }
 
     /// お気に入りに追加/削除
     func toggleFavorite(quote: Quote) throws {

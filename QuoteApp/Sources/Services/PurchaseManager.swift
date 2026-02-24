@@ -1,5 +1,5 @@
 import Foundation
-import RevenueCat
+import StoreKit
 
 /// アプリ内課金管理サービス（RevenueCat使用）
 /// - 無料プラン：1日1名言、広告なし
@@ -177,7 +177,7 @@ final class PurchaseManager: ObservableObject {
     // MARK: - Verification
 
     /// トランザクションを検証
-    private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
+    nonisolated private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
         switch result {
         case .unverified:
             throw PurchaseError.failedVerification

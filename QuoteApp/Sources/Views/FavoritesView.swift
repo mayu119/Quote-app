@@ -1,236 +1,187 @@
 import SwiftUI
 import SwiftData
 
-/// お気に入り一覧画面
 struct FavoritesView: View {
-    // MARK: - Properties
-
     @ObservedObject var quoteDataService: QuoteDataService
-    @EnvironmentObject private var userSettings: UserSettings
-
+    
     @State private var favoriteQuotes: [Quote] = []
     @State private var isLoading = true
     @State private var selectedQuote: Quote?
-    @State private var showQuoteDetail = false
-
-    let accentGold = Color(red: 0.85, green: 0.65, blue: 0.2)
-
-    // MARK: - Body
-
+    
     var body: some View {
         NavigationStack {
             ZStack {
                 Color.black.ignoresSafeArea()
-
+                
                 if isLoading {
-                    loadingView
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .scaleEffect(1.2)
                 } else if favoriteQuotes.isEmpty {
-                    emptyStateView
+                    VStack(spacing: 32) {
+                        Image(systemName: "bookmark")
+                            .font(.system(size: 40, weight: .light))
+                            .foregroundColor(.white.opacity(0.3))
+                        Text("No saved quotes.")
+                            .font(.system(size: 14, weight: .semibold, design: .monospaced))
+                            .tracking(2)
+                            .foregroundColor(.white.opacity(0.5))
+                    }
                 } else {
-                    favoriteListView
+                    ScrollView {
+                        LazyVStack(spacing: 40) {
+                            ForEach(favoriteQuotes, id: \.id) { quote in
+                                MinimalFavoriteCard(quote: quote)
+                                    .onTapGesture {
+                                        selectedQuote = quote
+                                    }
+                            }
+                        }
+                        .padding(.vertical, 40)
+                    }
                 }
             }
-            .navigationTitle("お気に入り")
-            .navigationBarTitleDisplayMode(.large)
-            .preferredColorScheme(.dark)
+            .navigationTitle("SAVED")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color.black, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .task {
                 loadFavorites()
             }
-            .sheet(item: $selectedQuote) { quote in
-                QuoteDetailView(quote: quote, quoteDataService: quoteDataService)
+            .fullScreenCover(item: $selectedQuote) { quote in
+                MinimalQuoteDetailView(quote: quote, quoteDataService: quoteDataService)
             }
         }
     }
-
-    // MARK: - Subviews
-
-    private var loadingView: some View {
-        ProgressView()
-            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-            .scaleEffect(1.5)
-    }
-
-    private var emptyStateView: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "bookmark.slash")
-                .font(.system(size: 60))
-                .foregroundColor(.gray)
-
-            Text("お気に入りがありません")
-                .font(.headline)
-                .foregroundColor(.white)
-
-            Text("名言を保存して、\nいつでも見返せるようにしましょう")
-                .font(.subheadline)
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-        }
-        .padding()
-    }
-
-    private var favoriteListView: some View {
-        ScrollView {
-            LazyVStack(spacing: 16) {
-                ForEach(favoriteQuotes, id: \.id) { quote in
-                    FavoriteQuoteCard(quote: quote)
-                        .onTapGesture {
-                            selectedQuote = quote
-                            showQuoteDetail = true
-                        }
-                }
-            }
-            .padding()
-        }
-    }
-
-    // MARK: - Methods
-
+    
     private func loadFavorites() {
         isLoading = true
-
         do {
             favoriteQuotes = try quoteDataService.getFavoriteQuotes()
             isLoading = false
         } catch {
-            print("⚠️ お気に入りの取得に失敗しました: \(error)")
+            print("⚠️ Error loading: \(error)")
             isLoading = false
         }
     }
 }
 
-// MARK: - Favorite Quote Card
-
-struct FavoriteQuoteCard: View {
+struct MinimalFavoriteCard: View {
     let quote: Quote
-
-    let accentGold = Color(red: 0.85, green: 0.65, blue: 0.2)
-
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // カテゴリバッジ
-            Text(quote.category.displayText)
-                .font(.caption)
-                .foregroundColor(.white.opacity(0.8))
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(accentGold.opacity(0.3))
-                .clipShape(Capsule())
-
-            // 名言本文
+        VStack(alignment: .leading, spacing: 16) {
             Text(quote.quoteJa)
-                .font(.body)
-                .foregroundColor(.white)
-                .lineLimit(3)
-                .lineSpacing(6)
-
-            // 偉人名
-            Text("— \(quote.author)")
-                .font(.caption)
-                .foregroundColor(.white.opacity(0.6))
+                .font(.custom("HiraginoSans-W6", size: 18))
+                .foregroundColor(.white.opacity(0.9))
+                .lineSpacing(8)
+                .lineLimit(4)
+            
+            HStack(spacing: 12) {
+                Rectangle()
+                    .fill(Color.white.opacity(0.4))
+                    .frame(width: 20, height: 1)
+                
+                Text(quote.author.uppercased())
+                    .font(.system(size: 11, weight: .bold))
+                    .tracking(4)
+                    .foregroundColor(.white.opacity(0.5))
+            }
         }
-        .padding(20)
+        .padding(.horizontal, 24)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.white.opacity(0.1))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                )
-        )
     }
 }
 
-// MARK: - Quote Detail View
-
-struct QuoteDetailView: View {
+struct MinimalQuoteDetailView: View {
     let quote: Quote
     @ObservedObject var quoteDataService: QuoteDataService
     @Environment(\.dismiss) private var dismiss
-
+    
     @State private var appear = false
-    let accentGold = Color(red: 0.85, green: 0.65, blue: 0.2)
-
+    
     var body: some View {
         ZStack {
-            // 背景
             Color.black.ignoresSafeArea()
-
-            VStack(alignment: .leading, spacing: 32) {
-                // クローズボタン
+            
+            VStack {
+                // Top Header (Close)
                 HStack {
                     Spacer()
                     Button(action: { dismiss() }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 32))
-                            .foregroundColor(.white.opacity(0.6))
+                        Image(systemName: "xmark")
+                            .font(.system(size: 20, weight: .light))
+                            .foregroundColor(.white.opacity(0.5))
+                            .padding()
                     }
                 }
-
+                
                 Spacer()
-
-                // 名言
-                VStack(alignment: .leading, spacing: 24) {
-                    Image(systemName: "quote.opening")
-                        .font(.system(size: 40, weight: .black))
-                        .foregroundColor(accentGold)
-
+                
+                // Content
+                VStack(alignment: .leading, spacing: 40) {
                     Text(quote.quoteJa)
-                        .font(.system(size: 28, weight: .heavy))
+                        .font(.custom("HiraginoSans-W8", size: 36))
+                        .fontWeight(.black)
                         .foregroundColor(.white)
-                        .lineSpacing(10)
-
-                    Text("— \(quote.author)")
-                        .font(.headline)
-                        .foregroundColor(.white.opacity(0.7))
+                        .lineSpacing(14)
+                        .minimumScaleFactor(0.4)
+                        .fixedSize(horizontal: false, vertical: true)
+                    
+                    HStack(spacing: 20) {
+                        Rectangle()
+                            .fill(Color.white.opacity(0.8))
+                            .frame(width: 40, height: 1)
+                        
+                        Text(quote.author.uppercased())
+                            .font(.system(size: 13, weight: .black))
+                            .tracking(6)
+                            .foregroundColor(.white.opacity(0.8))
+                    }
                 }
-
+                .padding(.horizontal, 32)
+                .opacity(appear ? 1 : 0)
+                .offset(y: appear ? 0 : 30)
+                
                 Spacer()
-
-                // アクションボタン
-                HStack(spacing: 20) {
+                
+                // Actions
+                HStack(spacing: 40) {
                     Button(action: {
                         try? quoteDataService.toggleFavorite(quote: quote)
                         dismiss()
                     }) {
-                        Label("保存解除", systemImage: "bookmark.slash.fill")
-                            .foregroundColor(.red)
+                        VStack(spacing: 8) {
+                            Image(systemName: "bookmark.slash")
+                                .font(.system(size: 20, weight: .light))
+                            Text("REMOVE")
+                                .font(.system(size: 10, weight: .bold))
+                                .tracking(2)
+                        }
+                        .foregroundColor(.white.opacity(0.5))
                     }
-                    .buttonStyle(.bordered)
-
-                    Spacer()
-
+                    
                     Button(action: {
-                        // シェア処理
+                        // Share
                     }) {
-                        Label("共有", systemImage: "square.and.arrow.up")
-                            .foregroundColor(accentGold)
+                        VStack(spacing: 8) {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.system(size: 20, weight: .light))
+                            Text("SHARE")
+                                .font(.system(size: 10, weight: .bold))
+                                .tracking(2)
+                        }
+                        .foregroundColor(.white.opacity(0.9))
                     }
-                    .buttonStyle(.bordered)
                 }
+                .padding(.bottom, 40)
             }
-            .padding(32)
-            .opacity(appear ? 1 : 0)
-            .onAppear {
-                withAnimation(.easeOut(duration: 0.5)) {
-                    appear = true
-                }
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 1.0)) {
+                appear = true
             }
         }
     }
-}
-
-// MARK: - Preview
-
-#Preview {
-    let schema = Schema([Quote.self])
-    let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(for: schema, configurations: [config])
-    let context = container.mainContext
-
-    let service = QuoteDataService(modelContext: context)
-
-    FavoritesView(quoteDataService: service)
-        .environmentObject(UserSettings())
-        .modelContainer(container)
 }

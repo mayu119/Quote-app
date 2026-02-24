@@ -48,15 +48,8 @@ struct QuoteApp: App {
             print("⚠️ 通知権限のリクエストに失敗しました: \(error)")
         }
 
-        // 2. 名言データの初期ロード
-        let context = modelContainer.mainContext
-        let dataService = QuoteDataService(modelContext: context)
-
-        do {
-            try await dataService.loadInitialQuotes()
-        } catch {
-            print("⚠️ 名言データのロードに失敗しました: \(error)")
-        }
+        // 2. データの初期ロードはContentViewのレンダリング前に完了させるため、ここでは実行しません。
+        // ContentView側の .task で順序立てて実行します。
 
         // 3. 通知のスケジュール（設定がONの場合）
         if userSettings.notificationEnabled {

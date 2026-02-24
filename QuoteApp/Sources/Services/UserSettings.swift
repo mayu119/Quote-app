@@ -35,12 +35,37 @@ final class UserSettings: ObservableObject {
         }
     }
 
-    // MARK: - アプリ初回起動
+    // MARK: - 初回起動
 
     /// アプリが初回起動かどうか
     @Published var isFirstLaunch: Bool {
         didSet {
             defaults.set(isFirstLaunch, forKey: Keys.isFirstLaunch)
+        }
+    }
+    
+    // MARK: - 閲覧回数制限 (Daily Limit)
+
+    /// 今日の名言スワイプ閲覧回数
+    @Published var dailySwipeCount: Int {
+        didSet {
+            defaults.set(dailySwipeCount, forKey: Keys.dailySwipeCount)
+        }
+    }
+
+    /// 最後に閲覧日をリセットした日付
+    @Published var lastSwipeDate: String {
+        didSet {
+            defaults.set(lastSwipeDate, forKey: Keys.lastSwipeDate)
+        }
+    }
+
+    // MARK: - 背景設定 (Background)
+
+    /// プレミアムユーザーが選択した背景のインデックス
+    @Published var selectedBackgroundIndex: Int {
+        didSet {
+            defaults.set(selectedBackgroundIndex, forKey: Keys.selectedBackgroundIndex)
         }
     }
 
@@ -69,6 +94,22 @@ final class UserSettings: ObservableObject {
 
         // 初回起動
         self.isFirstLaunch = defaults.object(forKey: Keys.isFirstLaunch) == nil ? true : defaults.bool(forKey: Keys.isFirstLaunch)
+        
+        // 閲覧制限の初期化
+        let todayStr = UserSettings.dateString(for: Date())
+        let savedDate = defaults.string(forKey: Keys.lastSwipeDate) ?? ""
+        if savedDate != todayStr {
+            self.dailySwipeCount = 0
+            self.lastSwipeDate = todayStr
+            defaults.set(0, forKey: Keys.dailySwipeCount)
+            defaults.set(todayStr, forKey: Keys.lastSwipeDate)
+        } else {
+            self.dailySwipeCount = defaults.integer(forKey: Keys.dailySwipeCount)
+            self.lastSwipeDate = savedDate
+        }
+
+        // 背景設定の初期化
+        self.selectedBackgroundIndex = defaults.integer(forKey: Keys.selectedBackgroundIndex)
     }
 
     // MARK: - Methods
@@ -92,6 +133,25 @@ final class UserSettings: ObservableObject {
     func toggleNotification() {
         notificationEnabled.toggle()
     }
+    
+    /// 閲覧回数をインクリメントし、必要であればリセットする
+    func incrementSwipeCount() {
+        let todayStr = UserSettings.dateString(for: Date())
+        if lastSwipeDate != todayStr {
+            dailySwipeCount = 1
+            lastSwipeDate = todayStr
+        } else {
+            dailySwipeCount += 1
+        }
+    }
+    
+    /// 日付を文字列にする（リセット判定用）
+    private static func dateString(for date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = TimeZone.current
+        return formatter.string(from: date)
+    }
 
     // MARK: - UserDefaults Keys
 
@@ -100,5 +160,8 @@ final class UserSettings: ObservableObject {
         static let notificationTime = "notificationTime"
         static let isPremiumUser = "isPremiumUser"
         static let isFirstLaunch = "isFirstLaunch"
+        static let dailySwipeCount = "dailySwipeCount"
+        static let lastSwipeDate = "lastSwipeDate"
+        static let selectedBackgroundIndex = "selectedBackgroundIndex"
     }
 }
