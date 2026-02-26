@@ -2,15 +2,18 @@ import Foundation
 import SwiftData
 
 /// 名言データ管理サービス
-/// - JSONからの読み込み
-/// - SwiftDataへの永続化
-/// - ランダム選択（重複排除ロジック付き）
 @MainActor
 final class QuoteDataService: ObservableObject {
+
     // MARK: - Properties
 
     private let modelContext: ModelContext
-    private let duplicatePreventionDays: Int = 30 // 30日間は同じ名言を表示しない
+    private let duplicatePreventionDays: Int = 30
+
+    /// JSONデータを更新したらこの値をインクリメントする
+    /// v8: Unicodeクォート正規化＋著者マッピング完全版で504件を高精度振り分け
+    private static let currentDataVersion: Int = 8
+    private static let dataVersionKey = "quotesDataVersion"
 
     @Published var quotes: [Quote] = []
     @Published var todayQuote: Quote?
@@ -23,144 +26,199 @@ final class QuoteDataService: ObservableObject {
 
     // MARK: - Public Methods
 
-    /// 初期セットアップ：JSONから名言をロードしてSwiftDataに保存
+    /// 初期セットアップ: JSONからロード → SwiftDataに保存
+    /// バージョンアップ時はお気に入りを保護しつつフルリフレッシュ
     func loadInitialQuotes() async throws {
-        // 既にデータが存在するかチェック
         let descriptor = FetchDescriptor<Quote>()
         let existingQuotes = try modelContext.fetch(descriptor)
+        let savedVersion = UserDefaults.standard.integer(forKey: Self.dataVersionKey)
 
-        if !existingQuotes.isEmpty {
-            print("📚 既存の名言データが存在します: \(existingQuotes.count)件")
-            self.quotes = existingQuotes
-            return
-        }
+        // 重いJSONパースをバックグラウンドスレッドで実行（メインスレッドブロック防止）
+        let validQuotes = try await Self.parseQuotesJSON()
 
-        // JSONファイルから読み込み
-        guard let url = Bundle.main.url(forResource: "quotes", withExtension: "json") else {
-            throw QuoteError.jsonFileNotFound
-        }
+        guard !validQuotes.isEmpty else { throw QuoteError.noValidQuotes }
 
-        let data = try Data(contentsOf: url)
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        if existingQuotes.isEmpty {
+            // 初回ロード: 全件挿入
+            for q in validQuotes { modelContext.insert(q) }
+            print("✅ 名言データをロードしました: \(validQuotes.count)件")
 
-        let loadedQuotes = try decoder.decode([Quote].self, from: data)
+        } else if savedVersion < Self.currentDataVersion {
+            // バージョンアップ: お気に入りIDを保護してフルリフレッシュ
+            let favoritedIds = Set(existingQuotes.filter { $0.isFavorited }.map { $0.id })
+            let lastShownMap = Dictionary(uniqueKeysWithValues:
+                existingQuotes.compactMap { q -> (String, Date)? in
+                    guard let d = q.lastShownDate else { return nil }
+                    return (q.id, d)
+                }
+            )
+            for q in existingQuotes { modelContext.delete(q) }
+            for q in validQuotes {
+                if favoritedIds.contains(q.id) { q.isFavorited = true }
+                if let d = lastShownMap[q.id]   { q.lastShownDate = d }
+                modelContext.insert(q)
+            }
+            print("✅ 名言データをv\(Self.currentDataVersion)に更新しました: \(validQuotes.count)件")
 
-        // バリデーション（空文字チェック - 競合の最大弱点を絶対に踏まない）
-        let validQuotes = loadedQuotes.filter { $0.isValid }
-
-        if validQuotes.isEmpty {
-            throw QuoteError.noValidQuotes
-        }
-
-        // SwiftDataに保存
-        for quote in validQuotes {
-            modelContext.insert(quote)
+        } else {
+            // 最新バージョン: 差分のみ追加
+            let existingIds = Set(existingQuotes.map { $0.id })
+            let newQuotes = validQuotes.filter { !existingIds.contains($0.id) }
+            for q in newQuotes { modelContext.insert(q) }
+            if !newQuotes.isEmpty {
+                print("✅ 名言データに+\(newQuotes.count)件追加しました")
+            }
         }
 
         try modelContext.save()
+        UserDefaults.standard.set(Self.currentDataVersion, forKey: Self.dataVersionKey)
+        self.quotes = try modelContext.fetch(descriptor)
+    }
 
-        self.quotes = validQuotes
-        print("✅ 名言データをロードしました: \(validQuotes.count)件")
+    /// JSONパースをバックグラウンドスレッドで実行（メインスレッドブロック防止）
+    private nonisolated static func parseQuotesJSON() async throws -> [Quote] {
+        guard let url = Bundle.main.url(forResource: "quotes", withExtension: "json") else {
+            throw QuoteError.jsonFileNotFound
+        }
+        let data = try Data(contentsOf: url)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let loadedQuotes = try decoder.decode([Quote].self, from: data)
+        return loadedQuotes.filter { $0.isValid }
     }
 
     /// 今日の名言を取得（重複排除ロジック付き）
     func getTodayQuote() async throws -> Quote {
         let descriptor = FetchDescriptor<Quote>()
         let allQuotes = try modelContext.fetch(descriptor)
+        guard !allQuotes.isEmpty else { return Quote.fallback }
 
-        guard !allQuotes.isEmpty else {
-            // フォールバック名言を返す（データ欠損時の保険）
-            print("⚠️ 名言データが空です。フォールバック名言を返します。")
-            return Quote.fallback
-        }
-
-        // 重複排除ロジック：過去N日以内に表示した名言を除外
         let cutoffDate = Calendar.current.date(byAdding: .day, value: -duplicatePreventionDays, to: Date()) ?? Date()
-
-        let availableQuotes = allQuotes.filter { quote in
-            if let lastShown = quote.lastShownDate {
-                return lastShown < cutoffDate
-            }
-            return true // まだ一度も表示されていない名言
+        let available = allQuotes.filter { q in
+            guard let last = q.lastShownDate else { return true }
+            return last < cutoffDate
         }
-
-        let selectedQuote: Quote
-        if !availableQuotes.isEmpty {
-            selectedQuote = availableQuotes.randomElement()!
-        } else {
-            // 全ての名言が最近表示済みの場合は、全体からランダム選択
-            selectedQuote = allQuotes.randomElement()!
-        }
-
-        // 最終表示日時を更新
-        selectedQuote.lastShownDate = Date()
+        let selected = available.isEmpty ? allQuotes.randomElement()! : available.randomElement()!
+        selected.lastShownDate = Date()
         try modelContext.save()
-
-        self.todayQuote = selectedQuote
-        return selectedQuote
+        self.todayQuote = selected
+        return selected
     }
-    
-    /// 複数件の名言を取得（スワイプ閲覧用・本日の15件固定ロジック）
-    func getDailyQuotes(limit: Int, isPremium: Bool) async throws -> [Quote] {
+
+    /// 複数の名言を取得（アフィニティスコア反映済み）
+    /// - Parameters:
+    ///   - mediumCategory: 中カテゴリフィルタ（nilで全体）
+    ///   - largeCategory:  大カテゴリフィルタ（mediumCategoryがnilの時のみ有効）
+    func getDailyQuotes(
+        limit: Int,
+        isPremium: Bool,
+        mediumCategory: QuoteMediumCategory? = nil,
+        largeCategory: QuoteLargeCategory? = nil,
+        preferredCategories: [String] = [],
+        affinityScores: [String: Int] = [:]
+    ) async throws -> [Quote] {
+
         let descriptor = FetchDescriptor<Quote>()
-        let allQuotes = try modelContext.fetch(descriptor)
+
+        var pool = try modelContext.fetch(descriptor)
         
-        guard !allQuotes.isEmpty else {
-            return [.fallback]
+        if let cat = mediumCategory {
+            pool = pool.filter { $0.category == cat }
         }
-        
+        guard !pool.isEmpty else { return [.fallback] }
+
+        // 大カテゴリフィルタ（中カテゴリ未指定時のみ、post-fetchで絞り込み）
+        if let large = largeCategory, mediumCategory == nil {
+            pool = pool.filter { $0.category.largeCategory == large }
+            if pool.isEmpty { pool = try modelContext.fetch(FetchDescriptor<Quote>()) }
+        }
+
+        // 中カテゴリ指定で件数が少ない場合は全体プールにフォールバック
+        if mediumCategory != nil && pool.count < 5 {
+            pool = try modelContext.fetch(FetchDescriptor<Quote>())
+        }
+
+        // ---- Step 1: preferredCategories による 7:3 ミックス ----
+        // preferredCategories には大カテゴリ/中カテゴリ両方の rawValue が混在し得る
+        if mediumCategory == nil && largeCategory == nil && !preferredCategories.isEmpty {
+            let preferred = Set(preferredCategories)
+            var preferredPool = pool.filter { q in
+                preferred.contains(q.category.rawValue) ||
+                preferred.contains(q.category.largeCategory.rawValue)
+            }.shuffled()
+            var otherPool = pool.filter { q in
+                !preferred.contains(q.category.rawValue) &&
+                !preferred.contains(q.category.largeCategory.rawValue)
+            }.shuffled()
+
+            let preferredCount = Int(Double(limit) * 0.7)
+            var balanced: [Quote] = []
+            balanced.append(contentsOf: preferredPool.prefix(preferredCount))
+            balanced.append(contentsOf: otherPool.prefix(limit - balanced.count))
+            if balanced.count < limit {
+                let used = Set(balanced.map { $0.id })
+                balanced.append(contentsOf: pool.filter { !used.contains($0.id) }.shuffled().prefix(limit - balanced.count))
+            }
+            pool = balanced
+        }
+
+        // ---- Step 2: アフィニティスコアで重み付けソート ----
+        if !affinityScores.isEmpty {
+            pool = pool.sorted { a, b in
+                let sa = affinityScores[a.category.rawValue] ?? 0
+                let sb = affinityScores[b.category.rawValue] ?? 0
+                return sa > sb
+            }
+            pool = stableShuffleByScore(pool, scores: affinityScores)
+        } else {
+            pool = pool.shuffled()
+        }
+
         let calendar = Calendar.current
         let today = Date()
-        
+
         if isPremium {
-            // プレミアムなら毎回新しくランダムに取得
-            let shuffled = allQuotes.shuffled()
-            let selected = Array(shuffled.prefix(limit > 0 ? limit : 50))
-            for quote in selected {
-                quote.lastShownDate = today
-            }
+            let selected = Array(pool.prefix(limit > 0 ? limit : 50))
+            for q in selected { q.lastShownDate = today }
             try modelContext.save()
             return selected
         } else {
-            // 無料ユーザー：今日すでに割り当てられた名言を探す
-            let todaysQuotes = allQuotes.filter { quote in
-                guard let lastShown = quote.lastShownDate else { return false }
-                return calendar.isDate(lastShown, inSameDayAs: today)
+            let todaysQuotes = pool.filter { q in
+                guard let last = q.lastShownDate else { return false }
+                return calendar.isDate(last, inSameDayAs: today)
             }
-            
             if todaysQuotes.count >= limit {
-                // 既に今日分の名言が確保されている場合はそれをシャッフルして返す
                 return Array(todaysQuotes.shuffled().prefix(limit))
-            } else {
-                // 不足している分を新しくアサインする
-                let needed = limit - todaysQuotes.count
-                let unshownToday = allQuotes.filter { quote in
-                    if let lastShown = quote.lastShownDate {
-                        return !calendar.isDate(lastShown, inSameDayAs: today)
-                    }
-                    return true
-                }
-                
-                let selectedNewQuotes = Array(unshownToday.shuffled().prefix(needed))
-                for quote in selectedNewQuotes {
-                    quote.lastShownDate = today
-                }
-                try modelContext.save()
-                
-                let combined = todaysQuotes + selectedNewQuotes
-                return combined.shuffled()
             }
+            let needed = limit - todaysQuotes.count
+            let unshown = pool.filter { q in
+                if let last = q.lastShownDate { return !calendar.isDate(last, inSameDayAs: today) }
+                return true
+            }
+            let newOnes = Array(unshown.prefix(needed))
+            for q in newOnes { q.lastShownDate = today }
+            try modelContext.save()
+            return (todaysQuotes + newOnes).shuffled()
         }
     }
 
-    /// お気に入りに追加/削除
-    func toggleFavorite(quote: Quote) throws {
-        quote.isFavorited.toggle()
+    /// お気に入り toggle
+    func toggleFavorite(quote: Quote, isPremium: Bool) throws {
+        if quote.isFavorited {
+            quote.isFavorited = false
+            try modelContext.save()
+            return
+        }
+        if !isPremium {
+            let favorites = try getFavoriteQuotes()
+            if favorites.count >= Config.freeUserFavoriteLimit {
+                throw QuoteError.favoriteLimitReached
+            }
+        }
+        quote.isFavorited = true
         try modelContext.save()
     }
 
-    /// お気に入り一覧を取得
     func getFavoriteQuotes() throws -> [Quote] {
         let descriptor = FetchDescriptor<Quote>(
             predicate: #Predicate { $0.isFavorited == true },
@@ -169,43 +227,54 @@ final class QuoteDataService: ObservableObject {
         return try modelContext.fetch(descriptor)
     }
 
-    /// カテゴリ別に名言を取得
-    func getQuotes(by category: QuoteCategory) throws -> [Quote] {
+    /// 中カテゴリで絞り込み
+    func getQuotes(by mediumCategory: QuoteMediumCategory) throws -> [Quote] {
         let descriptor = FetchDescriptor<Quote>(
-            predicate: #Predicate { $0.category == category },
             sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
         )
-        return try modelContext.fetch(descriptor)
+        let all = try modelContext.fetch(descriptor)
+        return all.filter { $0.category == mediumCategory }
     }
 
-    /// ランダムな名言を取得（ウィジェット用）
+    /// 大カテゴリで絞り込み（post-fetch フィルタ）
+    func getQuotes(by largeCategory: QuoteLargeCategory) throws -> [Quote] {
+        let descriptor = FetchDescriptor<Quote>(
+            sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
+        )
+        let all = try modelContext.fetch(descriptor)
+        return all.filter { $0.category.largeCategory == largeCategory }
+    }
+
     func getRandomQuote() throws -> Quote {
         let descriptor = FetchDescriptor<Quote>()
-        let allQuotes = try modelContext.fetch(descriptor)
+        let all = try modelContext.fetch(descriptor)
+        return all.isEmpty ? Quote.fallback : all.randomElement() ?? Quote.fallback
+    }
 
-        guard !allQuotes.isEmpty else {
-            return Quote.fallback
+    // MARK: - Private Helpers
+
+    /// スコア帯ごとにシャッフル（同スコア内はランダム）
+    private func stableShuffleByScore(_ quotes: [Quote], scores: [String: Int]) -> [Quote] {
+        var groups: [Int: [Quote]] = [:]
+        for q in quotes {
+            let s = scores[q.category.rawValue] ?? 0
+            groups[s, default: []].append(q)
         }
-
-        return allQuotes.randomElement() ?? Quote.fallback
+        return groups.keys.sorted(by: >).flatMap { groups[$0]!.shuffled() }
     }
 }
 
 // MARK: - Errors
 
 enum QuoteError: LocalizedError {
-    case jsonFileNotFound
-    case noValidQuotes
-    case emptyQuoteText
+    case jsonFileNotFound, noValidQuotes, emptyQuoteText, favoriteLimitReached
 
     var errorDescription: String? {
         switch self {
-        case .jsonFileNotFound:
-            return "名言データファイル（quotes.json）が見つかりません。"
-        case .noValidQuotes:
-            return "有効な名言データがありません。"
-        case .emptyQuoteText:
-            return "名言のテキストが空です。"
+        case .jsonFileNotFound:   return "名言データファイル（quotes.json）が見つかりません。"
+        case .noValidQuotes:      return "有効な名言データがありません。"
+        case .emptyQuoteText:     return "名言のテキストが空です。"
+        case .favoriteLimitReached: return "無料ユーザーはお気に入りを10個まで保存できます。\nプレミアムプランで無制限に保存しましょう。"
         }
     }
 }

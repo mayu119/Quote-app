@@ -16,7 +16,7 @@
     "quote_en": "Pain is temporary, quitting lasts forever.",
     "author": "Lance Armstrong",
     "author_description": "元プロロードレース選手",
-    "category": "self_discipline",
+    "category": "athletes",
     "punchline": "痛みは一時的だが、諦めは一生残る。",
     "background_image": "bg_gym_01",
     "push_notification_hook": "90%の男がスルーする。でもお前は違うと信じてる。"
@@ -27,7 +27,7 @@
     "quote_en": "Don't fear failure. Fear not trying.",
     "author": "Michael Jordan",
     "author_description": "元プロバスケットボール選手",
-    "category": "mindset",
+    "category": "athletes",
     "punchline": "失敗を恐れるな。",
     "background_image": "bg_mountain_01",
     "push_notification_hook": "昨日と今日の名言を比べてみろ。気づくことがある。"
@@ -38,7 +38,7 @@
     "quote_en": "Winners never quit, quitters never win.",
     "author": "Vince Lombardi",
     "author_description": "アメリカンフットボールコーチ",
-    "category": "battle",
+    "category": "athletes",
     "punchline": "勝者は諦めない。",
     "background_image": "bg_fight_01",
     "push_notification_hook": "これ、朝イチで読むとマジで変わる。"
@@ -49,7 +49,7 @@
     "quote_en": "One hour in the morning is worth three in the evening.",
     "author": "Benjamin Franklin",
     "author_description": "政治家・物理学者",
-    "category": "morning",
+    "category": "philosophers",
     "punchline": "朝の1時間は夜の3時間に勝る。",
     "background_image": "bg_sunrise_01",
     "push_notification_hook": "今日のは、ちょっとヤバい。覚悟して読んでくれ。"
@@ -60,7 +60,7 @@
     "quote_en": "Strength does not come from winning. Your struggles develop your strengths.",
     "author": "Arnold Schwarzenegger",
     "author_description": "ボディビルダー・俳優・政治家",
-    "category": "self_discipline",
+    "category": "athletes",
     "punchline": "強さとは、倒されても立ち上がることだ。",
     "background_image": "bg_gym_02",
     "push_notification_hook": "こういう名言を知ってるかどうかで差がつく。"
@@ -93,7 +93,7 @@
     "quote_en": "While you're resting, I'm practicing.",
     "author": "Kobe Bryant",
     "author_description": "元プロバスケットボール選手",
-    "category": "battle",
+    "category": "athletes",
     "punchline": "お前が休んでいる間に、俺は練習している。",
     "background_image": "bg_fight_02",
     "push_notification_hook": "シンプルだけど、刺さる。今日の名言。"

@@ -20,23 +20,23 @@ final class ShareManager {
     ///   - quote: 名言オブジェクト
     ///   - viewController: 呼び出し元のViewController
     ///   - format: シェア画像フォーマット（Stories or Square）
+    @MainActor
     func shareQuote(
         quote: Quote,
+        quoteIndex: Int,
+        backgroundName: String,
         from viewController: UIViewController,
         format: ShareImageFormat = .stories
     ) {
-        // 1. 画像生成
-        guard let shareImage = generateShareImage(quote: quote, format: format) else {
-            print("⚠️ シェア画像の生成に失敗しました")
-            return
-        }
+        // 1. 画像生成と文言取得 (SwiftUIベースのViewから取得)
+        let activityItems = getShareItems(
+            quote: quote,
+            quoteIndex: quoteIndex,
+            backgroundName: backgroundName,
+            format: format
+        )
 
-        // 2. シェア文言（釣り場理論準拠）
-        let shareText = getShareText(quote: quote)
-
-        // 3. UIActivityViewController
-        let activityItems: [Any] = [shareImage, shareText]
-
+        // 2. UIActivityViewController
         let activityViewController = UIActivityViewController(
             activityItems: activityItems,
             applicationActivities: nil
@@ -57,14 +57,78 @@ final class ShareManager {
         viewController.present(activityViewController, animated: true)
     }
 
-    // MARK: - SwiftUI用のシェア
+    /// Instagram Storiesに直接シェアする専用メソッド
+    @MainActor
+    func shareToInstagramStories(
+        quote: Quote,
+        quoteIndex: Int,
+        backgroundName: String,
+        format: ShareImageFormat
+    ) -> Bool {
+        // 1. レンダリングして画像を取得
+        let shareView = QuoteShareSnapshotView(
+            quote: quote,
+            quoteIndex: quoteIndex,
+            backgroundName: backgroundName,
+            format: format
+        )
+        let renderer = ImageRenderer(content: shareView)
+        renderer.scale = 1.0
+        guard let stickerImage = renderer.uiImage else { return false }
+        
+        // 2. 背景に使用する画像（縦長で全画面を覆うもの）
+        let bgImage = UIImage(named: backgroundName) ?? UIImage()
 
-    /// SwiftUI用のシェアアイテム生成
-    func getShareItems(quote: Quote, format: ShareImageFormat = .stories) -> [Any] {
+        // 3. Instagram StoriesのURL Schemeを構築
+        guard let url = URL(string: "instagram-stories://share?source_application=9W24U28U8Q") else { return false } // BundleIDやAppIDを指定（無くても動作することが多いが推奨）
+        
+        if UIApplication.shared.canOpenURL(url) {
+            // Instagramアプリがインストールされている場合
+            
+            var pasteboardItems: [String: Any] = [:]
+            
+            // if square mode, we pass the 1080x1080 image as a sticker, and use the original background to fill the screen
+            if format == .square {
+                pasteboardItems["com.instagram.sharedSticker.stickerImage"] = stickerImage.pngData()
+                pasteboardItems["com.instagram.sharedSticker.backgroundImage"] = bgImage.pngData()
+            } else {
+                // If it's already stories format, the image is 1080x1920, just use it as background
+                pasteboardItems["com.instagram.sharedSticker.backgroundImage"] = stickerImage.pngData()
+            }
+            
+            let pasteboardOptions = [UIPasteboard.OptionsKey.expirationDate: Date().addingTimeInterval(60 * 5)]
+            UIPasteboard.general.setItems([pasteboardItems], options: pasteboardOptions)
+            
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            return true
+        } else {
+            print("Instagram app is not installed.")
+            return false
+        }
+    }
+
+// MARK: - SwiftUI用のシェア
+
+    /// SwiftUI用のシェアアイテム生成 (MainActor)
+    @MainActor
+    func getShareItems(quote: Quote, quoteIndex: Int, backgroundName: String, format: ShareImageFormat = .stories) -> [Any] {
         var items: [Any] = []
 
-        if let image = generateShareImage(quote: quote, format: format) {
+        let shareView = QuoteShareSnapshotView(
+            quote: quote,
+            quoteIndex: quoteIndex,
+            backgroundName: backgroundName,
+            format: format
+        )
+        
+        let renderer = ImageRenderer(content: shareView)
+        // Set scale to 1.0 because our view is explicitly 1080x1080 / 1080x1920 logical points
+        renderer.scale = 1.0
+        
+        if let image = renderer.uiImage {
             items.append(image)
+        } else {
+            print("⚠️ シェア画像のレンダリングに失敗しました")
         }
 
         items.append(getShareText(quote: quote))
@@ -73,35 +137,6 @@ final class ShareManager {
     }
 
     // MARK: - Private Methods
-
-    /// シェア画像を生成
-    private func generateShareImage(quote: Quote, format: ShareImageFormat) -> UIImage? {
-        let backgroundImage = loadBackgroundImage(for: quote)
-
-        switch format {
-        case .stories:
-            return ImageGenerator.generateInstagramStoriesImage(
-                quote: quote,
-                backgroundImage: backgroundImage
-            )
-        case .square:
-            return ImageGenerator.generateShareImage(
-                quote: quote,
-                backgroundImage: backgroundImage
-            )
-        }
-    }
-
-    /// 背景画像を読み込み
-    private func loadBackgroundImage(for quote: Quote) -> UIImage? {
-        // 背景画像の取得を試みる
-        if let image = UIImage(named: quote.backgroundImage) {
-            return image
-        }
-
-        // フォールバック: デフォルト背景
-        return UIImage(named: "majestic_peak")
-    }
 
     /// シェア文言を取得（釣り場理論準拠）
     private func getShareText(quote: Quote) -> String {
@@ -143,6 +178,96 @@ struct ShareSheet: UIViewControllerRepresentable {
     }
 }
 
+// MARK: - QuoteShareSnapshotView
+
+struct QuoteShareSnapshotView: View {
+    var quote: Quote
+    var quoteIndex: Int
+    var backgroundName: String
+    var format: ShareImageFormat
+    
+    var isSquare: Bool {
+        format == .square
+    }
+
+    var body: some View {
+        ZStack {
+            Color.black
+            
+            // 1. Background Image
+            Image(backgroundName)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: isSquare ? 1080 : 1080, height: isSquare ? 1080 : 1920)
+                .blur(radius: 4)
+                .opacity(0.85)
+                .clipped()
+            
+            // 2. Chiaroscuro Gradient
+            RadialGradient(
+                gradient: Gradient(colors: [.clear, .black.opacity(0.6), .black.opacity(1.0)]),
+                center: .center,
+                startRadius: 150,
+                endRadius: (isSquare ? 1080 : 1920) * 0.8
+            )
+            
+            // 3. Bottom Gradient
+            VStack {
+                Spacer()
+                LinearGradient(
+                    colors: [.clear, .black.opacity(0.5)],
+                    startPoint: .top, endPoint: .bottom
+                )
+                .frame(height: isSquare ? 400 : 700)
+            }
+            
+            // 4. Quote Index Watermark
+            Text(String(format: "%02d", quoteIndex))
+                .font(.system(size: isSquare ? 450 : 500, weight: .black, design: .monospaced))
+                .foregroundColor(.white.opacity(0.04))
+                .offset(x: isSquare ? 150 : 200, y: isSquare ? -50 : -80)
+            
+            // 5. Content
+            VStack {
+                Spacer()
+                
+                VStack(alignment: .leading, spacing: isSquare ? 60 : 80) {
+                    Image(systemName: "quote.opening")
+                        .font(.system(size: isSquare ? 120 : 150, weight: .black))
+                        .foregroundColor(.white.opacity(0.15))
+                        .offset(x: -20, y: 30)
+                    
+                    Text(quote.quoteJa)
+                        .font(.custom("HiraginoSans-W8", size: isSquare ? 75 : 90))
+                        .fontWeight(.black)
+                        .foregroundColor(.white.opacity(0.95))
+                        .lineSpacing(25)
+                        .minimumScaleFactor(0.4)
+                        .shadow(color: .black.opacity(0.4), radius: 15, x: 0, y: 5)
+                        .fixedSize(horizontal: false, vertical: true)
+                    
+                    HStack(spacing: 30) {
+                        Rectangle()
+                            .fill(Color.white.opacity(0.8))
+                            .frame(width: 80, height: 3)
+                        
+                        Text(quote.author.uppercased())
+                            .font(.system(size: 28, weight: .bold))
+                            .tracking(10)
+                            .foregroundColor(.white.opacity(0.8))
+                    }
+                }
+                .padding(.horizontal, 100)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                Spacer()
+                Spacer() // Push content slightly up
+            }
+        }
+        .frame(width: 1080, height: isSquare ? 1080 : 1920)
+        .ignoresSafeArea(.all)
+    }
+}
 // MARK: - ShareQuoteView (SwiftUI用の完全なシェアビュー)
 
 struct ShareQuoteView: View {
@@ -201,7 +326,12 @@ struct ShareQuoteView: View {
             }
             .preferredColorScheme(.dark)
             .sheet(isPresented: $showShareSheet) {
-                ShareSheet(items: ShareManager.shared.getShareItems(quote: quote, format: shareFormat))
+                ShareSheet(items: ShareManager.shared.getShareItems(
+                    quote: quote,
+                    quoteIndex: 1,
+                    backgroundName: quote.backgroundImage,
+                    format: shareFormat
+                ))
             }
         }
     }

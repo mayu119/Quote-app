@@ -1,11 +1,8 @@
 import WidgetKit
 import SwiftUI
-import SwiftData
 
-/// ホーム画面ウィジェット
-/// - Small（2×2）/ Medium（4×2）の2種類
-/// - 1日1回更新
-/// - 短縮版パンチラインを表示
+// MARK: - Widget Definition
+
 struct QuoteWidget: Widget {
     let kind: String = "QuoteWidget"
 
@@ -16,7 +13,7 @@ struct QuoteWidget: Widget {
         }
         .configurationDisplayName("今日の名言")
         .description("毎日新しい名言があなたを待っています")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
 
@@ -30,108 +27,70 @@ struct QuoteEntry: TimelineEntry {
 // MARK: - Widget Quote Model
 
 struct WidgetQuote {
-    let punchline: String
-    let author: String
-    let category: String
-    let categoryEmoji: String
+    let punchline:   String
+    let author:      String
+    let category:    String
+    let categoryJa:  String
+    var backgroundImageData: Data? = nil
 
     static var placeholder: WidgetQuote {
-        WidgetQuote(
-            punchline: "考えるな、動け。",
-            author: "Unknown",
-            category: "覚醒・行動",
-            categoryEmoji: "🔥"
-        )
+        WidgetQuote(punchline: "考えるな、動け。", author: "Unknown", category: "AWAKENING", categoryJa: "行動覚醒")
     }
-
     static var fallback: WidgetQuote {
-        WidgetQuote(
-            punchline: "行動しろ。考えるのはそのあとだ。",
-            author: "Unknown",
-            category: "覚醒・行動",
-            categoryEmoji: "🔥"
-        )
+        WidgetQuote(punchline: "行動しろ。考えるのはそのあとだ。", author: "Unknown", category: "AWAKENING", categoryJa: "行動覚醒")
     }
 }
 
 // MARK: - Timeline Provider
 
 struct QuoteProvider: TimelineProvider {
+
+    /// App Group 識別子（UserSettings.appGroupID と一致させること）
+    private let appGroupID = "group.com.antigravity.QuoteApp"
+    private let sharedKey  = "widget_today_quote"
+
     func placeholder(in context: Context) -> QuoteEntry {
         QuoteEntry(date: Date(), quote: .placeholder)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (QuoteEntry) -> Void) {
-        let entry = QuoteEntry(date: Date(), quote: .placeholder)
-        completion(entry)
+        let quote = context.isPreview ? .placeholder : readSharedQuote()
+        completion(QuoteEntry(date: Date(), quote: quote))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<QuoteEntry>) -> Void) {
-        Task {
-            let quote = await fetchTodayQuote()
-            let entry = QuoteEntry(date: Date(), quote: quote)
+        let quote = readSharedQuote()
+        let entry = QuoteEntry(date: Date(), quote: quote)
 
-            // 次の更新は翌日の朝6時
-            let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
-            var components = Calendar.current.dateComponents([.year, .month, .day], from: tomorrow)
-            components.hour = 6
-            components.minute = 0
+        // 翌日朝6時に更新
+        var components = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+        components.day = (components.day ?? 1) + 1
+        components.hour = 6; components.minute = 0
+        let nextUpdate = Calendar.current.date(from: components) ?? Date().addingTimeInterval(86400)
 
-            let nextUpdate = Calendar.current.date(from: components) ?? tomorrow
-
-            let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
-            completion(timeline)
-        }
+        completion(Timeline(entries: [entry], policy: .after(nextUpdate)))
     }
 
-    // MARK: - Fetch Quote
+    // MARK: - Shared UserDefaults
 
-    @MainActor
-    private func fetchTodayQuote() async -> WidgetQuote {
-        do {
-            // SwiftDataコンテナを作成
-            let schema = Schema([WidgetQuoteData.self])
-            let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-            let modelContainer = try ModelContainer(for: schema, configurations: [modelConfiguration])
-            let context = modelContainer.mainContext
-
-            // ランダムな名言を取得（簡略版）
-            let descriptor = FetchDescriptor<WidgetQuoteData>()
-            let quotes = try context.fetch(descriptor)
-
-            guard let randomQuote = quotes.randomElement() else {
-                return .fallback
-            }
-
-            return WidgetQuote(
-                punchline: randomQuote.punchline,
-                author: randomQuote.author,
-                category: randomQuote.categoryDisplay,
-                categoryEmoji: randomQuote.categoryEmoji
-            )
-        } catch {
-            print("⚠️ ウィジェット：名言取得エラー: \(error)")
+    /// App Group UserDefaults から今日の名言を読む
+    /// ※ Xcode の Signing & Capabilities で App Group を追加する必要があります:
+    ///   App Target + Widget Target 両方に "group.com.antigravity.QuoteApp" を追加
+    private func readSharedQuote() -> WidgetQuote {
+        guard let ud   = UserDefaults(suiteName: appGroupID),
+              let dict = ud.dictionary(forKey: sharedKey),
+              let pl   = dict["punchline"] as? String, !pl.isEmpty,
+              let auth = dict["author"] as? String
+        else {
             return .fallback
         }
-    }
-}
-
-// MARK: - Widget Quote Data (SwiftData Model for Widget)
-
-@Model
-final class WidgetQuoteData {
-    var id: String
-    var punchline: String
-    var author: String
-    var categoryDisplay: String
-    var categoryEmoji: String
-
-    init(id: String, punchline: String, author: String, categoryDisplay: String, categoryEmoji: String) {
-        self.id = id
-        self.punchline = punchline
-        self.author = author
-        self.categoryDisplay = categoryDisplay
-        self.categoryEmoji = categoryEmoji
+        return WidgetQuote(
+            punchline:  pl,
+            author:     auth,
+            category:   dict["category"] as? String ?? "AWAKENING",
+            categoryJa: dict["category_ja"] as? String ?? "行動覚醒",
+            backgroundImageData: dict["background_image_data"] as? Data
+        )
     }
 }
 
@@ -145,109 +104,114 @@ struct QuoteWidgetEntryView: View {
 
     var body: some View {
         ZStack {
-            // 背景
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color.black,
-                    Color(red: 0.1, green: 0.1, blue: 0.15)
-                ]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-
-            // コンテンツ
-            if family == .systemSmall {
-                smallWidgetView
+            if let data = entry.quote.backgroundImageData, let uiImage = UIImage(data: data) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .overlay(
+                        LinearGradient(
+                            colors: [Color.black.opacity(0.3), Color.black.opacity(0.7)],
+                            startPoint: .top, endPoint: .bottom
+                        )
+                    )
             } else {
-                mediumWidgetView
+                LinearGradient(
+                    colors: [Color.black, Color(red: 0.08, green: 0.08, blue: 0.12)],
+                    startPoint: .topLeading, endPoint: .bottomTrailing
+                )
+            }
+
+            switch family {
+            case .systemSmall:  smallView
+            case .systemMedium: mediumView
+            case .systemLarge:  largeView
+            default:            mediumView
             }
         }
     }
 
-    // MARK: - Small Widget
+    // MARK: - Small (2×2)
 
-    private var smallWidgetView: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // カテゴリバッジ
-            Text(entry.quote.categoryEmoji)
-                .font(.title3)
-
-            Spacer()
-
-            // パンチライン
+    private var smallView: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(entry.quote.categoryJa)
+                .font(.system(size: 9, weight: .black, design: .monospaced))
+                .tracking(2).foregroundColor(accentGold).padding(.bottom, 8)
             Text(entry.quote.punchline)
-                .font(.system(size: 16, weight: .bold, design: .default))
-                .foregroundColor(.white)
-                .lineLimit(4)
-                .minimumScaleFactor(0.7)
-
+                .font(.system(size: 14, weight: .bold)).foregroundColor(.white)
+                .lineLimit(5).minimumScaleFactor(0.7)
             Spacer()
-
-            // 偉人名
             Text("— \(entry.quote.author)")
-                .font(.caption2)
-                .foregroundColor(.white.opacity(0.6))
-                .lineLimit(1)
+                .font(.system(size: 10, weight: .regular))
+                .foregroundColor(.white.opacity(0.5)).lineLimit(1)
         }
-        .padding(16)
+        .padding(14)
     }
 
-    // MARK: - Medium Widget
+    // MARK: - Medium (4×2)
 
-    private var mediumWidgetView: some View {
+    private var mediumView: some View {
         HStack(spacing: 16) {
-            // 左側: 装飾
             VStack {
                 Image(systemName: "quote.opening")
-                    .font(.system(size: 40, weight: .black))
-                    .foregroundColor(accentGold)
+                    .font(.system(size: 32, weight: .black)).foregroundColor(accentGold)
                     .shadow(color: accentGold.opacity(0.5), radius: 8)
-
                 Spacer()
-
-                Text(entry.quote.categoryEmoji)
-                    .font(.title)
+                Text(entry.quote.category)
+                    .font(.system(size: 8, weight: .black, design: .monospaced))
+                    .tracking(1).foregroundColor(.white.opacity(0.3))
             }
-            .frame(width: 60)
-
-            // 右側: テキスト
+            .frame(width: 50)
             VStack(alignment: .leading, spacing: 12) {
-                // パンチライン
                 Text(entry.quote.punchline)
-                    .font(.system(size: 18, weight: .bold, design: .default))
-                    .foregroundColor(.white)
-                    .lineLimit(4)
-                    .minimumScaleFactor(0.7)
-
+                    .font(.system(size: 16, weight: .bold)).foregroundColor(.white)
+                    .lineLimit(4).minimumScaleFactor(0.7)
                 Spacer()
-
-                // 偉人名
                 HStack(spacing: 8) {
-                    Rectangle()
-                        .fill(accentGold)
-                        .frame(width: 20, height: 2)
-
+                    Rectangle().fill(accentGold).frame(width: 16, height: 1)
                     Text(entry.quote.author.uppercased())
-                        .font(.caption)
-                        .tracking(1.5)
-                        .foregroundColor(.white.opacity(0.7))
+                        .font(.system(size: 10, weight: .bold)).tracking(1.5)
+                        .foregroundColor(.white.opacity(0.6)).lineLimit(1)
                 }
             }
         }
         .padding(16)
     }
+
+    // MARK: - Large (4×4)
+
+    private var largeView: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            HStack {
+                Text("ASCENDANCE")
+                    .font(.system(size: 9, weight: .black, design: .monospaced)).tracking(4)
+                    .foregroundColor(.white.opacity(0.25))
+                Spacer()
+                Text(entry.quote.categoryJa)
+                    .font(.system(size: 9, weight: .black, design: .monospaced)).tracking(2)
+                    .foregroundColor(accentGold)
+            }
+            Spacer()
+            Image(systemName: "quote.opening")
+                .font(.system(size: 48, weight: .black)).foregroundColor(accentGold.opacity(0.8))
+                .shadow(color: accentGold.opacity(0.4), radius: 12)
+            Text(entry.quote.punchline)
+                .font(.system(size: 22, weight: .bold)).foregroundColor(.white)
+                .lineSpacing(8).minimumScaleFactor(0.6)
+            Spacer()
+            HStack(spacing: 16) {
+                Rectangle().fill(Color.white.opacity(0.6)).frame(width: 32, height: 1)
+                Text(entry.quote.author.uppercased())
+                    .font(.system(size: 12, weight: .black)).tracking(4)
+                    .foregroundColor(.white.opacity(0.7))
+            }
+        }
+        .padding(20)
+    }
 }
 
-// MARK: - Preview
+// MARK: - Previews
 
-#Preview(as: .systemSmall) {
-    QuoteWidget()
-} timeline: {
-    QuoteEntry(date: .now, quote: .placeholder)
-}
-
-#Preview(as: .systemMedium) {
-    QuoteWidget()
-} timeline: {
-    QuoteEntry(date: .now, quote: .placeholder)
-}
+#Preview(as: .systemSmall)  { QuoteWidget() } timeline: { QuoteEntry(date: .now, quote: .placeholder) }
+#Preview(as: .systemMedium) { QuoteWidget() } timeline: { QuoteEntry(date: .now, quote: .placeholder) }
+#Preview(as: .systemLarge)  { QuoteWidget() } timeline: { QuoteEntry(date: .now, quote: .placeholder) }

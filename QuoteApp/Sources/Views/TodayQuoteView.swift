@@ -272,7 +272,7 @@ struct TodayQuoteView: View {
 
         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
             do {
-                try quoteDataService.toggleFavorite(quote: quote)
+                try quoteDataService.toggleFavorite(quote: quote, isPremium: userSettings.isPremiumUser)
             } catch {
                 print("⚠️ お気に入りの切り替えに失敗しました: \(error)")
             }

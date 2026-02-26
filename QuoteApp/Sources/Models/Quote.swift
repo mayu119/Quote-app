@@ -22,8 +22,8 @@ final class Quote: Codable {
     /// 一行の人物説明
     var authorDescription: String
 
-    /// カテゴリ
-    var category: QuoteCategory
+    /// カテゴリ（中カテゴリ）
+    var category: QuoteMediumCategory
 
     /// ウィジェット用の短縮版（1-2行）
     var punchline: String
@@ -51,7 +51,7 @@ final class Quote: Codable {
         quoteEn: String? = nil,
         author: String,
         authorDescription: String,
-        category: QuoteCategory,
+        category: QuoteMediumCategory,
         punchline: String,
         backgroundImage: String,
         pushNotificationHook: String,
@@ -98,7 +98,7 @@ final class Quote: Codable {
         self.quoteEn = try container.decodeIfPresent(String.self, forKey: .quoteEn)
         self.author = try container.decode(String.self, forKey: .author)
         self.authorDescription = try container.decode(String.self, forKey: .authorDescription)
-        self.category = try container.decode(QuoteCategory.self, forKey: .category)
+        self.category = try container.decode(QuoteMediumCategory.self, forKey: .category)
         self.punchline = try container.decode(String.self, forKey: .punchline)
         self.backgroundImage = try container.decode(String.self, forKey: .backgroundImage)
         self.pushNotificationHook = try container.decode(String.self, forKey: .pushNotificationHook)
@@ -125,48 +125,177 @@ final class Quote: Codable {
     }
 }
 
-// MARK: - QuoteCategory
+// MARK: - QuoteLargeCategory (大カテゴリ 3種)
 
-/// 名言カテゴリ
-enum QuoteCategory: String, Codable, CaseIterable {
-    case selfDiscipline = "self_discipline"     // 💪 自己鍛錬
-    case awakening = "awakening"                // 🔥 覚醒・行動
-    case mindset = "mindset"                    // 🧠 マインドセット
-    case battle = "battle"                      // ⚔️ 戦い・勝負
-    case morning = "morning"                    // 🌅 朝・習慣
+enum QuoteLargeCategory: String, Codable, CaseIterable {
+    case legends        = "legends"        // 偉人・有名人
+    case action         = "action"         // 行動・マインドセット
+    case life           = "life"           // 人生・感情
 
-    /// 表示用のアイコン付きテキスト
-    var displayText: String {
+    var displayName: String {
         switch self {
-        case .selfDiscipline:
-            return "💪 自己鍛錬"
-        case .awakening:
-            return "🔥 覚醒・行動"
-        case .mindset:
-            return "🧠 マインドセット"
-        case .battle:
-            return "⚔️ 戦い・勝負"
-        case .morning:
-            return "🌅 朝・習慣"
+        case .legends:       return "偉人・有名人"
+        case .action:        return "行動・マインドセット"
+        case .life:          return "人生・感情"
         }
     }
 
-    /// カテゴリに合った背景画像のプレフィックス
-    var backgroundImagePrefix: String {
+    var displayEn: String {
         switch self {
-        case .selfDiscipline:
-            return "bg_gym"
-        case .awakening:
-            return "bg_fire"
-        case .mindset:
-            return "bg_mountain"
-        case .battle:
-            return "bg_fight"
-        case .morning:
-            return "bg_sunrise"
+        case .legends:       return "LEGENDS"
+        case .action:        return "ACTION"
+        case .life:          return "LIFE"
         }
     }
 }
+
+// MARK: - QuoteMediumCategory (中カテゴリ 16種)
+
+enum QuoteMediumCategory: String, Codable, CaseIterable {
+
+    // MARK: legends (6)
+    case politiciansLeaders   = "politicians_leaders"
+    case philosophers         = "philosophers"
+    case entrepreneurs        = "entrepreneurs"
+    case athletes             = "athletes"
+    case artists              = "artists"
+    case influencers          = "influencers"
+
+    // MARK: action (5)
+    case selfDiscipline       = "self_discipline"
+    case awakening            = "awakening"
+    case mindset              = "mindset"
+    case battle               = "battle"
+    case morning              = "morning"
+
+    // MARK: life (5)
+    case loveRelationships    = "love_relationships"
+    case gratitudeHappiness   = "gratitude_happiness"
+    case adversity            = "adversity"
+    case timeMortality        = "time_mortality"
+    case selfAcceptance       = "self_acceptance"
+
+    // MARK: - Large Category Mapping
+
+    var largeCategory: QuoteLargeCategory {
+        switch self {
+        case .politiciansLeaders, .philosophers, .entrepreneurs, .athletes, .artists, .influencers:
+            return .legends
+        case .selfDiscipline, .awakening, .mindset, .battle, .morning:
+            return .action
+        case .loveRelationships, .gratitudeHappiness, .adversity, .timeMortality, .selfAcceptance:
+            return .life
+        }
+    }
+
+    // MARK: - Fallback Decoder
+
+    /// 不明なカテゴリ値（旧バージョン等）でもクラッシュしないようにフォールバック
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let rawValue = try container.decode(String.self)
+        if let category = QuoteMediumCategory(rawValue: rawValue) {
+            self = category
+        } else {
+            // v6以前の旧カテゴリ値をフォールバック
+            switch rawValue {
+            case "scientists_inventors", "writers_poets", "military_strategists",
+                 "eastern_philosophy", "western_philosophy", "stoicism",
+                 "religion_spirit", "modern_thought":
+                self = .philosophers
+            case "tech_entrepreneurs", "investors", "executives_ceo",
+                 "startup_founders", "sales_marketing":
+                self = .entrepreneurs
+            case "ball_sports", "martial_arts", "endurance",
+                 "mental_strength", "team_sports":
+                self = .athletes
+            case "musicians", "film_actors", "novelists",
+                 "visual_artists", "comedy_entertainment":
+                self = .artists
+            case "youtubers", "self_help_coaches", "fitness_health",
+                 "lifestyle", "business_influencers":
+                self = .influencers
+            default:
+                print("⚠️ Unknown category '\(rawValue)', falling back to .mindset")
+                self = .mindset
+            }
+        }
+    }
+
+    // MARK: - Display
+
+    var displayText: String {
+        switch self {
+        case .politiciansLeaders:  return "POLITICIANS"
+        case .philosophers:        return "PHILOSOPHERS"
+        case .entrepreneurs:       return "ENTREPRENEURS"
+        case .athletes:            return "ATHLETES"
+        case .artists:             return "ARTISTS"
+        case .influencers:         return "INFLUENCERS"
+        case .selfDiscipline:      return "DISCIPLINE"
+        case .awakening:           return "AWAKENING"
+        case .mindset:             return "MINDSET"
+        case .battle:              return "BATTLE"
+        case .morning:             return "MORNING"
+        case .loveRelationships:   return "LOVE"
+        case .gratitudeHappiness:  return "GRATITUDE"
+        case .adversity:           return "ADVERSITY"
+        case .timeMortality:       return "TIME"
+        case .selfAcceptance:      return "SELF"
+        }
+    }
+
+    var displayTitleJa: String {
+        switch self {
+        case .politiciansLeaders:  return "政治家・リーダー"
+        case .philosophers:        return "哲学者"
+        case .entrepreneurs:       return "起業家"
+        case .athletes:            return "アスリート"
+        case .artists:             return "アーティスト"
+        case .influencers:         return "インフルエンサー"
+        case .selfDiscipline:      return "自分を鍛える"
+        case .awakening:           return "行動を起こす"
+        case .mindset:             return "思考を研ぐ"
+        case .battle:              return "勝負に出る"
+        case .morning:             return "朝を制する"
+        case .loveRelationships:   return "愛・人間関係"
+        case .gratitudeHappiness:  return "感謝・幸福"
+        case .adversity:           return "逆境・困難"
+        case .timeMortality:       return "時間・死生観"
+        case .selfAcceptance:      return "自己受容"
+        }
+    }
+
+    var backgroundImagePrefix: String {
+        switch largeCategory {
+        case .legends:
+            switch self {
+            case .politiciansLeaders: return "bg_mountain"
+            case .philosophers:       return "bg_mountain"
+            case .entrepreneurs:      return "bg_city"
+            case .athletes:           return "bg_gym"
+            case .artists:            return "bg_art"
+            case .influencers:        return "bg_sunrise"
+            default:                  return "bg_mountain"
+            }
+        case .action:
+            switch self {
+            case .selfDiscipline: return "bg_gym"
+            case .awakening:      return "bg_fire"
+            case .mindset:        return "bg_mountain"
+            case .battle:         return "bg_fight"
+            case .morning:        return "bg_sunrise"
+            default:              return "bg_default"
+            }
+        case .life:          return "bg_default"
+        }
+    }
+}
+
+// MARK: - Backward Compatibility
+
+/// 旧 QuoteCategory への後方互換エイリアス
+typealias QuoteCategory = QuoteMediumCategory
 
 // MARK: - Validation & Fallback
 
@@ -182,14 +311,14 @@ extension Quote {
     static var fallback: Quote {
         Quote(
             id: "fallback_001",
-            quoteJa: "行動しろ。考えるのはそのあとだ。",
-            quoteEn: "Act. Think later.",
-            author: "Unknown",
-            authorDescription: "不明",
-            category: .awakening,
-            punchline: "行動しろ。考えるのはそのあとだ。",
-            backgroundImage: "bg_default",
-            pushNotificationHook: "今日の名言、シンプルだけど強烈。"
+            quoteJa: "ハングリーであれ。愚かであれ。",
+            quoteEn: "Stay hungry. Stay foolish.",
+            author: "Steve Jobs",
+            authorDescription: "Apple共同創業者",
+            category: .entrepreneurs,
+            punchline: "ハングリーであれ。愚かであれ。",
+            backgroundImage: "bg_extra_1",
+            pushNotificationHook: "現状に満足していませんか？"
         )
     }
 }

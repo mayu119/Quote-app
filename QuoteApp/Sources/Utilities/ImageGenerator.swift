@@ -82,7 +82,27 @@ final class ImageGenerator {
         backgroundImage: UIImage?
     ) {
         if let bgImage = backgroundImage {
-            bgImage.draw(in: rect)
+            let imageRatio = bgImage.size.width / bgImage.size.height
+            let rectRatio = rect.width / rect.height
+            
+            var drawRect = rect
+            if imageRatio > rectRatio {
+                // 横に長い（またはrectが縦長）
+                let newWidth = rect.height * imageRatio
+                drawRect.origin.x = (rect.width - newWidth) / 2
+                drawRect.size.width = newWidth
+            } else {
+                // 縦に長い（またはrectが横長）
+                let newHeight = rect.width / imageRatio
+                drawRect.origin.y = (rect.height - newHeight) / 2
+                drawRect.size.height = newHeight
+            }
+            
+            // はみ出し部分をクリップ（切り抜き）して中央をアスペクトフィルで描画
+            context.cgContext.saveGState()
+            context.cgContext.clip(to: rect)
+            bgImage.draw(in: drawRect)
+            context.cgContext.restoreGState()
         } else {
             // フォールバック: グラデーション背景
             let colors = [
