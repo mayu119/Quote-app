@@ -1,80 +1,89 @@
-//
-//  com_antigravity_QuoteAppLiveActivity.swift
-//  com.antigravity.QuoteApp
-//
-//  Created by 林真幸 on 2026/02/26.
-//
-
 import ActivityKit
 import WidgetKit
 import SwiftUI
 
-struct com_antigravity_QuoteAppAttributes: ActivityAttributes {
-    public struct ContentState: Codable, Hashable {
-        // Dynamic stateful properties about your activity go here!
-        var emoji: String
-    }
+// MARK: - Live Activity UI
 
-    // Fixed non-changing properties about your activity go here!
-    var name: String
-}
-
+@available(iOS 16.1, *)
 struct com_antigravity_QuoteAppLiveActivity: Widget {
+    
+    // アプリと統一感のあるアクセントゴールド
+    let accentGold = Color(red: 0.85, green: 0.75, blue: 0.45)
+    
     var body: some WidgetConfiguration {
-        ActivityConfiguration(for: com_antigravity_QuoteAppAttributes.self) { context in
-            // Lock screen/banner UI goes here
-            VStack {
-                Text("Hello \(context.state.emoji)")
+        ActivityConfiguration(for: QuoteLiveActivityAttributes.self) { context in
+            // MARK: - Lock Screen & Banner UI
+            ZStack {
+                // 背景 (Obsidian風)
+                Color.black.opacity(0.8)
+                
+                VStack(spacing: 6) {
+                    HStack {
+                        Text(context.state.categoryJa)
+                            .font(.system(size: 10, weight: .bold, design: .monospaced))
+                            .tracking(2)
+                            .foregroundColor(accentGold)
+                        Spacer()
+                    }
+                    
+                    Text(context.state.punchline)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    HStack {
+                        Spacer()
+                        Text("— \(context.state.author)")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.white.opacity(0.6))
+                    }
+                }
+                .padding()
             }
-            .activityBackgroundTint(Color.cyan)
-            .activitySystemActionForegroundColor(Color.black)
-
+            .activityBackgroundTint(Color.black.opacity(0.8))
+            .activitySystemActionForegroundColor(Color.white)
+            
         } dynamicIsland: { context in
+            // MARK: - Dynamic Island UI
             DynamicIsland {
-                // Expanded UI goes here.  Compose the expanded UI through
-                // various regions, like leading/trailing/center/bottom
+                // Expanded
                 DynamicIslandExpandedRegion(.leading) {
-                    Text("Leading")
+                    Text(context.state.categoryJa)
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundColor(accentGold)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text("Trailing")
+                    Image(systemName: "quote.closing")
+                        .foregroundColor(.white.opacity(0.4))
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text("Bottom \(context.state.emoji)")
-                    // more content
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(context.state.punchline)
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.leading)
+                        
+                        Text("— \(context.state.author)")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.white.opacity(0.6))
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                    }
+                    .padding(.top, 4)
                 }
             } compactLeading: {
-                Text("L")
+                Image(systemName: "quote.opening")
+                    .foregroundColor(accentGold)
             } compactTrailing: {
-                Text("T \(context.state.emoji)")
+                Text(context.state.author.prefix(5))
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.white)
             } minimal: {
-                Text(context.state.emoji)
+                Image(systemName: "quote.closing")
+                    .foregroundColor(accentGold)
             }
-            .widgetURL(URL(string: "http://www.apple.com"))
-            .keylineTint(Color.red)
+            .widgetURL(URL(string: "quoteapp://open"))
+            .keylineTint(accentGold)
         }
     }
-}
-
-extension com_antigravity_QuoteAppAttributes {
-    fileprivate static var preview: com_antigravity_QuoteAppAttributes {
-        com_antigravity_QuoteAppAttributes(name: "World")
-    }
-}
-
-extension com_antigravity_QuoteAppAttributes.ContentState {
-    fileprivate static var smiley: com_antigravity_QuoteAppAttributes.ContentState {
-        com_antigravity_QuoteAppAttributes.ContentState(emoji: "😀")
-     }
-     
-     fileprivate static var starEyes: com_antigravity_QuoteAppAttributes.ContentState {
-         com_antigravity_QuoteAppAttributes.ContentState(emoji: "🤩")
-     }
-}
-
-#Preview("Notification", as: .content, using: com_antigravity_QuoteAppAttributes.preview) {
-   com_antigravity_QuoteAppLiveActivity()
-} contentStates: {
-    com_antigravity_QuoteAppAttributes.ContentState.smiley
-    com_antigravity_QuoteAppAttributes.ContentState.starEyes
 }

@@ -152,12 +152,39 @@ struct ContentView: View {
         .onChange(of: visibleQuoteId) { oldId, newId in
             guard oldId != newId, let newId else { return }
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
-            if let idx = dailyQuotes.firstIndex(where: { $0.id == newId }),
-               idx + 1 < dailyQuotes.count {
-                let nextBg = dailyQuotes[idx + 1].backgroundImage
-                let service = backgroundService
-                Task { @MainActor in
-                    _ = service.cachedImage(named: nextBg)
+            
+            if let idx = dailyQuotes.firstIndex(where: { $0.id == newId }) {
+                let currentQuote = dailyQuotes[idx]
+
+                // Analytics: 名言表示
+                AnalyticsService.shared.logQuoteView(
+                    quoteId: currentQuote.id,
+                    author: currentQuote.author,
+                    categoryMedium: currentQuote.category.rawValue,
+                    categoryLarge: currentQuote.category.largeCategory.rawValue,
+                    quoteIndex: idx + 1,
+                    isPremium: userSettings.isPremiumUser
+                )
+
+                // Analytics: スワイプ
+                if let oldId {
+                    AnalyticsService.shared.logQuoteSwipe(
+                        fromQuoteId: oldId,
+                        toQuoteIndex: idx + 1,
+                        swipeCountInSession: idx + 1
+                    )
+                }
+
+                // Live Activity (Dynamic Lock Screen) 更新
+                NotificationService.shared.startDynamicLockScreenActivity(with: NotificationQuote(from: currentQuote))
+                
+                // 次の背景画像のキャッシュ
+                if idx + 1 < dailyQuotes.count {
+                    let nextBg = dailyQuotes[idx + 1].backgroundImage
+                    let service = backgroundService
+                    Task { @MainActor in
+                        _ = service.cachedImage(named: nextBg)
+                    }
                 }
             }
         }
@@ -234,6 +261,11 @@ struct ContentView: View {
 
             // パーソナライズ通知スケジュール（お気に入りカテゴリ優先）
             await scheduleNotificationsWithQuotes(quotes)
+            
+            // iOS 26 Dynamic Lock Screen / Live Activity更新
+            if let todayQuote = quotes.first {
+                NotificationService.shared.startDynamicLockScreenActivity(with: NotificationQuote(from: todayQuote))
+            }
 
         } catch {
             print("🚨 Failed: \(error)")
@@ -247,6 +279,16 @@ struct ContentView: View {
     private func switchCategory(medium: QuoteMediumCategory?, large: QuoteLargeCategory?) {
         guard selectedMediumCategory != medium || selectedLargeCategory != large else { return }
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+
+        // Analytics: カテゴリスイッチ
+        AnalyticsService.shared.logCategorySwitch(
+            fromMedium: selectedMediumCategory?.rawValue,
+            fromLarge: selectedLargeCategory?.rawValue,
+            toMedium: medium?.rawValue,
+            toLarge: large?.rawValue,
+            isPremium: userSettings.isPremiumUser
+        )
+
         selectedMediumCategory = medium
         selectedLargeCategory = large
         withAnimation(.easeOut(duration: 0.6)) { isTransitioningCategory = true }
@@ -293,7 +335,10 @@ struct ContentView: View {
                     .font(.system(size: 13, weight: .light)).lineSpacing(8)
                     .multilineTextAlignment(.center).foregroundColor(.white.opacity(0.6))
                     .padding(.horizontal, 40)
-                Button(action: { activeCover = .premiumWall }) {
+                Button(action: {
+                    AnalyticsService.shared.logPaywallView(trigger: "daily_limit")
+                    activeCover = .premiumWall
+                }) {
                     Text("UNLOCK UNLIMITED")
                         .font(.system(size: 12, weight: .black)).tracking(2)
                         .foregroundColor(.black).padding(.horizontal, 32).padding(.vertical, 16)

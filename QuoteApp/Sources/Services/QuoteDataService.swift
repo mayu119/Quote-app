@@ -11,8 +11,8 @@ final class QuoteDataService: ObservableObject {
     private let duplicatePreventionDays: Int = 30
 
     /// JSONデータを更新したらこの値をインクリメントする
-    /// v8: Unicodeクォート正規化＋著者マッピング完全版で504件を高精度振り分け
-    private static let currentDataVersion: Int = 8
+    /// v11: 著者1002人達成・2017件
+    private static let currentDataVersion: Int = 11
     private static let dataVersionKey = "quotesDataVersion"
 
     @Published var quotes: [Quote] = []

@@ -71,6 +71,10 @@ struct OnboardingView: View {
             }
         }
         .preferredColorScheme(.dark)
+        .onAppear {
+            // Analytics: 最初のステップ表示
+            AnalyticsService.shared.logOnboardingStepView(stepIndex: 0)
+        }
     }
 
     // MARK: - Steps
@@ -239,16 +243,27 @@ struct OnboardingView: View {
         if currentStep < 2 {
             // ジャンル選択ステップを終える時に保存（大カテゴリ rawValue を格納）
             if currentStep == 1 {
-                userSettings.preferredCategories = selectedLargeCategories.map { $0.rawValue }
+                let genres = selectedLargeCategories.map { $0.rawValue }
+                userSettings.preferredCategories = genres
+                // Analytics: ジャンル選択
+                AnalyticsService.shared.logOnboardingGenreSelect(genres: genres)
+                AnalyticsService.shared.updatePreferredCategories(genres)
             }
 
             withAnimation(.spring()) {
                 currentStep += 1
             }
+            // Analytics: ステップ表示
+            AnalyticsService.shared.logOnboardingStepView(stepIndex: currentStep + 1)
         } else {
             // 通知権限リクエスト
             Task {
-                let _ = try? await NotificationService.shared.requestAuthorization()
+                let granted = (try? await NotificationService.shared.requestAuthorization()) ?? false
+                // Analytics: オンボーディング完了
+                AnalyticsService.shared.logOnboardingComplete(
+                    selectedGenreCount: selectedLargeCategories.count,
+                    notificationGranted: granted
+                )
                 await MainActor.run {
                     withAnimation {
                         showPremiumAtEnd = true

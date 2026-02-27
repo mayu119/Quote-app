@@ -1,9 +1,30 @@
 import SwiftUI
 import SwiftData
 import WidgetKit
+import UIKit
+
+#if canImport(FirebaseCore)
+import FirebaseCore
+#endif
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        #if canImport(FirebaseCore)
+        FirebaseApp.configure()
+        print("✅ Firebase initialized.")
+        #endif
+        return true
+    }
+
+    func applicationDidEnterBackground(_ application: UIApplication) {
+        AnalyticsService.shared.logAppBackground()
+    }
+}
 
 @main
 struct QuoteApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     @StateObject private var userSettings = UserSettings()
 
@@ -42,12 +63,23 @@ struct QuoteApp: App {
 
     @MainActor
     private func initializeApp() async {
-        // 通知権限リクエストのみ（スケジュールは ContentView で名言データ取得後に実行）
+        // Analytics: セッション開始
+        AnalyticsService.shared.logSessionStart(isPremium: userSettings.isPremiumUser)
+
+        // Analytics: 初回起動
+        if userSettings.isFirstLaunch {
+            let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
+            AnalyticsService.shared.logFirstOpen(appVersion: appVersion)
+        }
+
+        // 通知権限リクエスト
         do {
             let granted = try await NotificationService.shared.requestAuthorization()
             if granted { print("✅ 通知権限が許可されました") }
+            AnalyticsService.shared.logNotificationPermission(granted: granted)
         } catch {
             print("⚠️ 通知権限リクエスト失敗: \(error)")
+            AnalyticsService.shared.logNotificationPermission(granted: false)
         }
     }
 }

@@ -14,6 +14,7 @@ struct PremiumView: View {
     @State private var selectedProduct: Product?
     @State private var showAlert = false
     @State private var alertMessage = ""
+    @State private var paywallOpenTime = Date()
 
     let accentGold = Color(red: 0.85, green: 0.65, blue: 0.2)
 
@@ -58,6 +59,13 @@ struct PremiumView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("閉じる") {
+                        // Analytics: ペイウォール閉じる
+                        let duration = Int(Date().timeIntervalSince(paywallOpenTime))
+                        AnalyticsService.shared.logPaywallDismiss(
+                            trigger: "manual",
+                            timeOnPaywallSec: duration,
+                            planViewed: selectedProduct?.id
+                        )
                         dismiss()
                     }
                     .foregroundColor(.white)
@@ -151,6 +159,11 @@ struct PremiumView: View {
                 )
                 .onTapGesture {
                     selectedProduct = product
+                    // Analytics: プラン選択
+                    AnalyticsService.shared.logPaywallPlanSelect(
+                        planType: product.id.contains("yearly") ? "yearly" : "monthly",
+                        price: product.displayPrice
+                    )
                 }
             }
         }
@@ -186,6 +199,8 @@ struct PremiumView: View {
             Button(action: {
                 Task {
                     await purchaseManager.restorePurchases()
+                    let success = userSettings.isPremiumUser
+                    AnalyticsService.shared.logPurchaseRestore(success: success)
                     alertMessage = "購入を復元しました"
                     showAlert = true
                 }
@@ -227,10 +242,27 @@ struct PremiumView: View {
 
     private func purchaseProduct() async {
         guard let product = selectedProduct else { return }
+        let planType = product.id.contains("yearly") ? "yearly" : "monthly"
+
+        // Analytics: 購入開始
+        AnalyticsService.shared.logPurchaseInitiate(
+            planType: planType,
+            price: product.displayPrice,
+            trigger: "paywall"
+        )
 
         do {
             let success = try await purchaseManager.purchase(product)
             if success {
+                // Analytics: 購入成功
+                AnalyticsService.shared.logPurchaseSuccess(
+                    planType: planType,
+                    price: product.displayPrice,
+                    trigger: "paywall",
+                    totalQuotesViewed: 0,
+                    totalFavorites: 0
+                )
+
                 alertMessage = "プレミアムプランを購入しました！"
                 showAlert = true
 
@@ -239,6 +271,11 @@ struct PremiumView: View {
                 dismiss()
             }
         } catch {
+            // Analytics: 購入失敗
+            AnalyticsService.shared.logPurchaseFail(
+                planType: planType,
+                errorMessage: error.localizedDescription
+            )
             alertMessage = "購入に失敗しました: \(error.localizedDescription)"
             showAlert = true
         }

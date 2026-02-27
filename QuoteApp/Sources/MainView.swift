@@ -137,13 +137,13 @@ struct MainQuoteView: View {
                 }
                 .frame(
                     width: proxy.size.width,
-                    height: (isShareMode && shareFormat == .square) ? proxy.size.width : proxy.size.height
+                    height: proxy.size.height
                 )
                 .clipShape(RoundedRectangle(cornerRadius: isShareMode ? 40 : 0, style: .continuous))
                 .scaleEffect(isShareMode ? 0.70 : 1.0)
                 .offset(
                     x: isShareMode ? 0 : swipeOffset.width,
-                    y: isShareMode ? ((shareFormat == .square) ? 0 : -40) : swipeOffset.height * 0.2
+                    y: isShareMode ? -40 : swipeOffset.height * 0.2
                 )
                 .rotationEffect(.degrees(isShareMode ? 0 : Double(swipeOffset.width / 15)))
                 .shadow(color: .black.opacity(isShareMode ? 0.6 : 0), radius: 30, x: 0, y: 15)
@@ -185,20 +185,45 @@ struct MainQuoteView: View {
                                 swipeOffset = .zero
                             }
                         }
-                        // Swipe Left → 保存 (Save)
+                        // Swipe Left → 保存 (Save) または 解除 (Remove)
                         else if translation.width < -threshold {
                             triggerHeavyHaptic()
-                            withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
-                                isLiked = true
-                                quote.isFavorited = true
-                                try? modelContext.save()
-                                swipeOffset = .zero
-                            }
-                            userSettings.recordSave(category: quote.category)
-                            // パーティクルエフェクト
-                            particleScale = 0.2; particleOpacity = 1.0
-                            withAnimation(.easeOut(duration: 0.7)) {
-                                particleScale = 2.5; particleOpacity = 0.0
+                            
+                            if isLiked {
+                                // すでに「いいね」済みの場合は解除
+                                withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
+                                    isLiked = false
+                                    quote.isFavorited = false
+                                    try? modelContext.save()
+                                    swipeOffset = .zero
+                                }
+                                // 解除時はAnalytics送信
+                                AnalyticsService.shared.logFavoriteRemove(
+                                    quoteId: quote.id,
+                                    author: quote.author,
+                                    categoryMedium: quote.category.rawValue,
+                                    totalFavorites: 0 // 正確な数はDataService側で取るのが望ましいが、簡易的に
+                                )
+                            } else {
+                                // 保存
+                                withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
+                                    isLiked = true
+                                    quote.isFavorited = true
+                                    try? modelContext.save()
+                                    swipeOffset = .zero
+                                }
+                                userSettings.recordSave(category: quote.category)
+                                AnalyticsService.shared.logFavoriteAdd(
+                                    quoteId: quote.id,
+                                    author: quote.author,
+                                    categoryMedium: quote.category.rawValue,
+                                    totalFavorites: 1
+                                )
+                                // パーティクルエフェクト
+                                particleScale = 0.2; particleOpacity = 1.0
+                                withAnimation(.easeOut(duration: 0.7)) {
+                                    particleScale = 2.5; particleOpacity = 0.0
+                                }
                             }
                         }
                         // スナップバック
@@ -474,16 +499,16 @@ struct MainQuoteView: View {
                     Spacer()
                     ZStack {
                         Circle()
-                            .fill(RadialGradient(colors: [.orange.opacity(0.3), .clear], center: .center, startRadius: 0, endRadius: 120))
+                            .fill(RadialGradient(colors: [(isLiked ? Color.red : Color.orange).opacity(0.3), .clear], center: .center, startRadius: 0, endRadius: 120))
                             .frame(width: 250 * heartbeat, height: 250 * heartbeat)
                         VStack(spacing: 12) {
-                            Image(systemName: "bookmark.fill")
+                            Image(systemName: isLiked ? "bookmark.slash.fill" : "bookmark.fill")
                                 .font(.system(size: 36 * heartbeat, weight: .ultraLight))
-                                .foregroundColor(.orange.opacity(0.9))
-                                .shadow(color: .orange.opacity(0.8), radius: 15 * rawProgress)
-                            Text("SAVE")
+                                .foregroundColor((isLiked ? Color.red : Color.orange).opacity(0.9))
+                                .shadow(color: (isLiked ? Color.red : Color.orange).opacity(0.8), radius: 15 * rawProgress)
+                            Text(isLiked ? "REMOVE" : "SAVE")
                                 .font(.system(size: 14, weight: .black, design: .monospaced))
-                                .tracking(4).foregroundColor(.orange.opacity(0.8))
+                                .tracking(4).foregroundColor((isLiked ? Color.red : Color.orange).opacity(0.8))
                         }
                     }
                     .padding(.trailing, 10).opacity(rawProgress * 1.2)
@@ -506,14 +531,6 @@ struct MainQuoteView: View {
                     .tracking(6)
                     .foregroundColor(.white)
                     .shadow(radius: 5)
-                
-                Picker("Format", selection: $shareFormat) {
-                    Text("STORIES").tag(ShareImageFormat.stories)
-                    Text("SQUARE").tag(ShareImageFormat.square)
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                .frame(width: 200)
-                .colorScheme(.dark)
                 
                 HStack(spacing: 40) {
                     ShareOptionButton(icon: "photo.circle.fill", title: "SAVE IMAGE", color: .white) {

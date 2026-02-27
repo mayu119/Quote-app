@@ -87,22 +87,19 @@ final class ShareManager {
             
             var pasteboardItems: [String: Any] = [:]
             
-            // if square mode, we pass the 1080x1080 image as a sticker, and use the original background to fill the screen
-            if format == .square {
-                pasteboardItems["com.instagram.sharedSticker.stickerImage"] = stickerImage.pngData()
-                pasteboardItems["com.instagram.sharedSticker.backgroundImage"] = bgImage.pngData()
-            } else {
-                // If it's already stories format, the image is 1080x1920, just use it as background
-                pasteboardItems["com.instagram.sharedSticker.backgroundImage"] = stickerImage.pngData()
-            }
+            // Stories format, the image is 1080x1920, just use it as background
+            pasteboardItems["com.instagram.sharedSticker.backgroundImage"] = stickerImage.pngData()
             
             let pasteboardOptions = [UIPasteboard.OptionsKey.expirationDate: Date().addingTimeInterval(60 * 5)]
             UIPasteboard.general.setItems([pasteboardItems], options: pasteboardOptions)
             
             UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            // Analytics: Instagram Storiesシェア
+            AnalyticsService.shared.logShareInstagramStories(quoteId: quote.id, author: quote.author, success: true)
             return true
         } else {
             print("Instagram app is not installed.")
+            AnalyticsService.shared.logShareInstagramStories(quoteId: quote.id, author: quote.author, success: false)
             return false
         }
     }
@@ -157,7 +154,6 @@ final class ShareManager {
 
 enum ShareImageFormat {
     case stories    // Instagram Stories用（1080x1920）
-    case square     // 汎用シェア用（1080x1080）
 }
 
 // MARK: - SwiftUI Integration
@@ -186,10 +182,6 @@ struct QuoteShareSnapshotView: View {
     var backgroundName: String
     var format: ShareImageFormat
     
-    var isSquare: Bool {
-        format == .square
-    }
-
     var body: some View {
         ZStack {
             Color.black
@@ -198,7 +190,7 @@ struct QuoteShareSnapshotView: View {
             Image(backgroundName)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
-                .frame(width: isSquare ? 1080 : 1080, height: isSquare ? 1080 : 1920)
+                .frame(width: 1080, height: 1920)
                 .blur(radius: 4)
                 .opacity(0.85)
                 .clipped()
@@ -208,7 +200,7 @@ struct QuoteShareSnapshotView: View {
                 gradient: Gradient(colors: [.clear, .black.opacity(0.6), .black.opacity(1.0)]),
                 center: .center,
                 startRadius: 150,
-                endRadius: (isSquare ? 1080 : 1920) * 0.8
+                endRadius: 1920 * 0.8
             )
             
             // 3. Bottom Gradient
@@ -218,27 +210,27 @@ struct QuoteShareSnapshotView: View {
                     colors: [.clear, .black.opacity(0.5)],
                     startPoint: .top, endPoint: .bottom
                 )
-                .frame(height: isSquare ? 400 : 700)
+                .frame(height: 700)
             }
             
             // 4. Quote Index Watermark
             Text(String(format: "%02d", quoteIndex))
-                .font(.system(size: isSquare ? 450 : 500, weight: .black, design: .monospaced))
+                .font(.system(size: 500, weight: .black, design: .monospaced))
                 .foregroundColor(.white.opacity(0.04))
-                .offset(x: isSquare ? 150 : 200, y: isSquare ? -50 : -80)
+                .offset(x: 200, y: -80)
             
             // 5. Content
             VStack {
                 Spacer()
                 
-                VStack(alignment: .leading, spacing: isSquare ? 60 : 80) {
+                VStack(alignment: .leading, spacing: 80) {
                     Image(systemName: "quote.opening")
-                        .font(.system(size: isSquare ? 120 : 150, weight: .black))
+                        .font(.system(size: 150, weight: .black))
                         .foregroundColor(.white.opacity(0.15))
                         .offset(x: -20, y: 30)
                     
                     Text(quote.quoteJa)
-                        .font(.custom("HiraginoSans-W8", size: isSquare ? 75 : 90))
+                        .font(.custom("HiraginoSans-W8", size: 90))
                         .fontWeight(.black)
                         .foregroundColor(.white.opacity(0.95))
                         .lineSpacing(25)
@@ -264,7 +256,7 @@ struct QuoteShareSnapshotView: View {
                 Spacer() // Push content slightly up
             }
         }
-        .frame(width: 1080, height: isSquare ? 1080 : 1920)
+        .frame(width: 1080, height: 1920)
         .ignoresSafeArea(.all)
     }
 }
@@ -275,7 +267,6 @@ struct ShareQuoteView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var showShareSheet = false
-    @State private var shareFormat: ShareImageFormat = .stories
 
     let accentGold = Color(red: 0.85, green: 0.65, blue: 0.2)
 
@@ -289,9 +280,6 @@ struct ShareQuoteView: View {
                     sharePreview
 
                     Spacer()
-
-                    // フォーマット選択
-                    formatSelector
 
                     // シェアボタン
                     Button(action: {
@@ -330,7 +318,7 @@ struct ShareQuoteView: View {
                     quote: quote,
                     quoteIndex: 1,
                     backgroundName: quote.backgroundImage,
-                    format: shareFormat
+                    format: .stories
                 ))
             }
         }
@@ -354,7 +342,7 @@ struct ShareQuoteView: View {
                             endPoint: .bottomTrailing
                         )
                     )
-                    .frame(width: 300, height: shareFormat == .stories ? 533 : 300)
+                    .frame(width: 300, height: 533)
 
                 VStack(alignment: .leading, spacing: 16) {
                     Image(systemName: "quote.opening")
@@ -376,63 +364,6 @@ struct ShareQuoteView: View {
         }
     }
 
-    private var formatSelector: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("フォーマット")
-                .font(.caption)
-                .foregroundColor(.gray)
-
-            HStack(spacing: 16) {
-                FormatButton(
-                    title: "Stories",
-                    subtitle: "9:16",
-                    isSelected: shareFormat == .stories
-                ) {
-                    shareFormat = .stories
-                }
-
-                FormatButton(
-                    title: "Square",
-                    subtitle: "1:1",
-                    isSelected: shareFormat == .square
-                ) {
-                    shareFormat = .square
-                }
-            }
-        }
-        .padding(.horizontal)
-    }
-}
-
-// MARK: - Format Button
-
-struct FormatButton: View {
-    let title: String
-    let subtitle: String
-    let isSelected: Bool
-    let action: () -> Void
-
-    let accentGold = Color(red: 0.85, green: 0.65, blue: 0.2)
-
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 8) {
-                Text(title)
-                    .font(.headline)
-                    .foregroundColor(isSelected ? accentGold : .white)
-
-                Text(subtitle)
-                    .font(.caption2)
-                    .foregroundColor(.gray)
-            }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? accentGold : Color.white.opacity(0.2), lineWidth: 2)
-            )
-        }
-    }
 }
 
 // MARK: - Preview

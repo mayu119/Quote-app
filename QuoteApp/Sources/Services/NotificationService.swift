@@ -1,5 +1,6 @@
 import Foundation
 import UserNotifications
+import ActivityKit
 import UIKit
 
 /// 通知用の名言データ（リッチ通知用）
@@ -312,6 +313,47 @@ final class NotificationService: ObservableObject {
             if let trigger = req.trigger as? UNCalendarNotificationTrigger {
                 let dc = trigger.dateComponents
                 print("  → [\(req.identifier)] \(dc.hour ?? 0):\(String(format: "%02d", dc.minute ?? 0))")
+            }
+        }
+    }
+    
+    // MARK: - iOS 26 Dynamic Lock Screen (Live Activities)
+    
+    /// iOS 26のダイナミックロック画面通知としてLive Activityを開始/更新する
+    func startDynamicLockScreenActivity(with quote: NotificationQuote?) {
+        let resolved = resolveQuote(quote)
+        
+        // 既存の同じLive Activityがあれば更新、なければ新規作成
+        if #available(iOS 16.1, *) {
+            let state = QuoteLiveActivityAttributes.ContentState(
+                punchline: resolved.punchline,
+                author: resolved.author,
+                categoryJa: resolved.categoryJa.isEmpty ? "DAILY QUOTE" : resolved.categoryJa
+            )
+            
+            Task {
+                // 既存のActivityを更新
+                var hasUpdated = false
+                for activity in Activity<QuoteLiveActivityAttributes>.activities {
+                    await activity.update(using: state)
+                    hasUpdated = true
+                    print("✅ Live Activity を更新しました")
+                }
+                
+                // 既存がない場合は新規開始
+                if !hasUpdated {
+                    let attributes = QuoteLiveActivityAttributes()
+                    do {
+                        _ = try Activity.request(
+                            attributes: attributes,
+                            contentState: state,
+                            pushType: nil
+                        )
+                        print("✅ Live Activity を新規開始しました")
+                    } catch {
+                        print("⚠️ Live Activity 開始失敗: \(error.localizedDescription)")
+                    }
+                }
             }
         }
     }

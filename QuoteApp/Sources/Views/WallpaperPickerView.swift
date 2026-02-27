@@ -107,6 +107,13 @@ struct WallpaperPickerView: View {
                     Button("APPLY") {
                         if !tempSelected.isEmpty {
                             userSettings.selectedBackgrounds = tempSelected
+                            // Analytics: 壁紙変更
+                            if let bg = tempSelected.first {
+                                AnalyticsService.shared.logWallpaperChange(
+                                    wallpaperName: bg,
+                                    isPremium: userSettings.isPremiumUser
+                                )
+                            }
                         }
                         dismiss()
                     }
