@@ -6,7 +6,13 @@ struct SettingsView: View {
     @State private var showTimePicker = false
     @State private var tempTime: Date = Date()
     @State private var editingSlot: TimeSlot = .single
+    @State private var showPremiumWall = false
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
+
+    // Legal URLs
+    private let termsURL = URL(string: "https://mayu119.github.io/Quote-app/terms.html")!
+    private let privacyURL = URL(string: "https://mayu119.github.io/Quote-app/privacy.html")!
 
     /// どの通知時刻スロットを編集中か
     enum TimeSlot: Equatable {
@@ -14,17 +20,36 @@ struct SettingsView: View {
         case premium(Int)
     }
 
-    private let premiumSlotLabels = ["Morning", "Afternoon", "Evening"]
+    private let premiumSlotLabels = ["朝", "昼", "夜"]
     private let premiumSlotIcons  = ["sunrise.fill", "sun.max.fill", "moon.stars.fill"]
+    private let accentRose = Color(red: 0.86, green: 0.55, blue: 0.60)
+    private let accentPeach = Color(red: 0.95, green: 0.79, blue: 0.68)
+    private let cardFill = Color.white.opacity(0.84)
+    private let ink = Color(red: 0.31, green: 0.24, blue: 0.24)
+    private let subInk = Color(red: 0.50, green: 0.42, blue: 0.40)
 
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.99, green: 0.95, blue: 0.93),
+                        Color(red: 0.98, green: 0.91, blue: 0.90),
+                        Color(red: 0.95, green: 0.94, blue: 0.98)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
 
                 ScrollView {
                     VStack(spacing: 64) {
+                        if !userSettings.isPremiumUser {
+                            premiumEntryCard
+                        }
                         notificationSection
+                        liveActivitySection
+                        displaySection
                         premiumSection
                         aboutSection
                         #if DEBUG
@@ -36,42 +61,97 @@ struct SettingsView: View {
                     .padding(.top, 40)
                 }
             }
-            .navigationTitle("SETTINGS")
+            .navigationTitle("設定")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color.black, for: .navigationBar)
+            .toolbarBackground(Color(red: 0.98, green: 0.94, blue: 0.93), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarColorScheme(.light, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "xmark")
                             .font(.system(size: 16, weight: .light))
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(subInk)
                     }
                 }
             }
         }
+        .fullScreenCover(isPresented: $showPremiumWall) {
+            PremiumView()
+                .environmentObject(userSettings)
+        }
+    }
+
+    private var premiumEntryCard: some View {
+        Button(action: {
+            showPremiumWall = true
+        }) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("PREMIUM")
+                            .font(.system(size: 11, weight: .black, design: .monospaced))
+                            .tracking(3)
+                            .foregroundColor(subInk)
+                        Text("プレミアムプランを見る")
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(ink)
+                        Text("年額プラン・月額プラン・購入復元はここから確認できます。")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(subInk)
+                            .multilineTextAlignment(.leading)
+                    }
+                    Spacer()
+                    Image(systemName: "crown.fill")
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundColor(accentRose)
+                }
+
+                HStack {
+                    Text("プランを開く")
+                        .font(.system(size: 13, weight: .black))
+                        .tracking(2)
+                    Spacer()
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 13, weight: .bold))
+                }
+                .foregroundColor(.white)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 14)
+                .background(accentRose)
+                .clipShape(Capsule())
+            }
+            .padding(24)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                LinearGradient(
+                    colors: [Color.white, Color(red: 1.0, green: 0.96, blue: 0.94)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .shadow(color: accentRose.opacity(0.14), radius: 18, x: 0, y: 10)
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Notification Section
 
     private var notificationSection: some View {
         VStack(alignment: .leading, spacing: 32) {
-            Text("NOTIFICATIONS")
-                .font(.system(size: 10, weight: .black))
-                .tracking(4)
-                .foregroundColor(.white.opacity(0.3))
+            sectionTitle("通知")
 
             VStack(spacing: 24) {
                 // Toggle
                 HStack {
-                    Text("Daily Delivery")
-                        .font(.system(size: 14, weight: .light))
-                        .foregroundColor(.white)
+                    Text("毎日の名言配信")
+                        .font(.system(size: 16, weight: .light))
+                        .foregroundColor(ink)
                     Spacer()
                     Toggle("", isOn: $userSettings.notificationEnabled)
                         .labelsHidden()
-                        .tint(.white)
+                        .tint(accentRose)
                         .onChange(of: userSettings.notificationEnabled) { _, newValue in
                             handleNotificationToggle(newValue)
                         }
@@ -91,6 +171,51 @@ struct SettingsView: View {
         .sheet(isPresented: $showTimePicker) {
             timePickerSheet
         }
+        .padding(24)
+        .background(cardFill)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+    }
+
+    // MARK: - Live Activity Section
+    private var liveActivitySection: some View {
+        VStack(alignment: .leading, spacing: 32) {
+            sectionTitle("ロック画面")
+
+            VStack(spacing: 24) {
+                HStack {
+                    ZStack(alignment: .leading) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Live Activityの表示")
+                                .font(.system(size: 16, weight: .light))
+                                .foregroundColor(ink)
+                            Text("常に名言をロック画面に表示します")
+                                .font(.system(size: 12, weight: .light))
+                                .foregroundColor(subInk)
+                        }
+                        
+                        if !userSettings.isPremiumUser {
+                            Color.black.opacity(0.001) // タップ領域確保
+                                .onTapGesture {
+                                    // プレミアムへの誘導を入れるか、そのまま無効化しておく
+                                }
+                        }
+                    }
+                    Spacer()
+                    Toggle("", isOn: $userSettings.liveActivityEnabled)
+                        .labelsHidden()
+                        .tint(accentRose)
+                        .disabled(!userSettings.isPremiumUser) // 無料版は切り替えできないようにする
+                        .onChange(of: userSettings.liveActivityEnabled) { _, newValue in
+                            if !newValue {
+                                NotificationService.shared.cancelDynamicLockScreenActivity()
+                            }
+                        }
+                }
+            }
+        }
+        .padding(24)
+        .background(cardFill)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 
     // MARK: - Single Time Row (Free)
@@ -102,13 +227,13 @@ struct SettingsView: View {
             showTimePicker = true
         }) {
             HStack {
-                Text("Delivery Time")
-                    .font(.system(size: 14, weight: .light))
-                    .foregroundColor(.white)
+                Text("配信時間")
+                    .font(.system(size: 16, weight: .light))
+                    .foregroundColor(ink)
                 Spacer()
                 Text(formatTime(userSettings.notificationTime))
-                    .font(.system(size: 14, weight: .bold, design: .monospaced))
-                    .foregroundColor(.white)
+                    .font(.system(size: 16, weight: .bold, design: .monospaced))
+                    .foregroundColor(accentRose)
             }
         }
     }
@@ -120,11 +245,11 @@ struct SettingsView: View {
             HStack {
                 Image(systemName: "crown.fill")
                     .font(.system(size: 10))
-                    .foregroundColor(.yellow.opacity(0.7))
-                Text("PREMIUM DELIVERY")
-                    .font(.system(size: 10, weight: .black, design: .monospaced))
+                    .foregroundColor(accentRose.opacity(0.8))
+                Text("プレミアム配信")
+                    .font(.system(size: 12, weight: .black, design: .monospaced))
                     .tracking(3)
-                    .foregroundColor(.white.opacity(0.4))
+                    .foregroundColor(subInk)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -147,18 +272,18 @@ struct SettingsView: View {
             HStack(spacing: 16) {
                 Image(systemName: premiumSlotIcons[index])
                     .font(.system(size: 14, weight: .light))
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(subInk)
                     .frame(width: 20)
 
                 Text(premiumSlotLabels[index])
-                    .font(.system(size: 14, weight: .light))
-                    .foregroundColor(.white)
+                    .font(.system(size: 16, weight: .light))
+                    .foregroundColor(ink)
 
                 Spacer()
 
                 Text(formatTime(time))
-                    .font(.system(size: 14, weight: .bold, design: .monospaced))
-                    .foregroundColor(.white)
+                    .font(.system(size: 16, weight: .bold, design: .monospaced))
+                    .foregroundColor(accentRose)
             }
         }
     }
@@ -168,7 +293,7 @@ struct SettingsView: View {
     private var timePickerSheet: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color(red: 0.98, green: 0.94, blue: 0.93).ignoresSafeArea()
 
                 VStack {
                     DatePicker(
@@ -178,7 +303,7 @@ struct SettingsView: View {
                     )
                     .datePickerStyle(.wheel)
                     .labelsHidden()
-                    .colorScheme(.dark)
+                    .colorScheme(.light)
 
                     Spacer()
                 }
@@ -191,15 +316,15 @@ struct SettingsView: View {
                     Button(action: { showTimePicker = false }) {
                         Image(systemName: "xmark")
                             .font(.system(size: 16, weight: .light))
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(subInk)
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(action: confirmTimePick) {
-                        Text("SET")
-                            .font(.system(size: 12, weight: .bold))
+                        Text("設定")
+                            .font(.system(size: 14, weight: .bold))
                             .tracking(2)
-                            .foregroundColor(.white)
+                            .foregroundColor(accentRose)
                     }
                 }
             }
@@ -209,127 +334,176 @@ struct SettingsView: View {
 
     private var pickerTitle: String {
         switch editingSlot {
-        case .single: return "SELECT TIME"
+        case .single: return "時間を選択"
         case .premium(let i): return premiumSlotLabels[i].uppercased()
         }
+    }
+
+    // MARK: - Display Settings
+    
+    private var displaySection: some View {
+        VStack(alignment: .leading, spacing: 32) {
+            sectionTitle("表示設定")
+
+            VStack(spacing: 24) {
+                HStack {
+                    ZStack(alignment: .leading) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("テキストの縦書き表示")
+                                .font(.system(size: 16, weight: .light))
+                                .foregroundColor(ink)
+                            Text("名言を縦書きレイアウトで表示します")
+                                .font(.system(size: 12, weight: .light))
+                                .foregroundColor(subInk)
+                        }
+                    }
+                    Spacer()
+                    Toggle("", isOn: $userSettings.isVerticalTextMode)
+                        .labelsHidden()
+                        .tint(accentRose)
+                }
+            }
+        }
+        .padding(24)
+        .background(cardFill)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 
     // MARK: - Premium Section
 
     private var premiumSection: some View {
         VStack(alignment: .leading, spacing: 32) {
-            Text("ACCESS")
-                .font(.system(size: 10, weight: .black))
-                .tracking(4)
-                .foregroundColor(.white.opacity(0.3))
+            sectionTitle("プラン")
 
             if userSettings.isPremiumUser {
                 HStack {
-                    Text("Premium Status")
-                        .font(.system(size: 14, weight: .light))
-                        .foregroundColor(.white)
+                    Text("ステータス")
+                        .font(.system(size: 16, weight: .light))
+                        .foregroundColor(ink)
                     Spacer()
-                    Text("ACTIVE")
-                        .font(.system(size: 10, weight: .black, design: .monospaced))
+                    Text("有効 (PREMIUM)")
+                        .font(.system(size: 12, weight: .black, design: .monospaced))
                         .tracking(2)
-                        .foregroundColor(.black)
+                        .foregroundColor(.white)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
-                        .background(Color.white)
+                        .background(accentRose)
+                        .clipShape(Capsule())
                 }
             } else {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Unlock unlimited archive viewing.")
-                        .font(.system(size: 14, weight: .light))
-                        .foregroundColor(.white.opacity(0.6))
+                    Text("過去の名言を無制限に閲覧できます。")
+                        .font(.system(size: 16, weight: .light))
+                        .foregroundColor(subInk)
 
-                    Button(action: {}) {
-                        Text("UPGRADE TO PREMIUM")
-                            .font(.system(size: 11, weight: .black))
+                    Button(action: {
+                        showPremiumWall = true
+                    }) {
+                        Text("プレミアムにアップグレード")
+                            .font(.system(size: 13, weight: .black))
                             .tracking(2)
-                            .foregroundColor(.black)
+                            .foregroundColor(.white)
                             .padding(.horizontal, 24)
                             .padding(.vertical, 14)
-                            .background(Color.white)
+                            .background(accentRose)
+                            .clipShape(Capsule())
                     }
                 }
             }
         }
+        .padding(24)
+        .background(cardFill)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 
     // MARK: - About / System
 
     private var aboutSection: some View {
         VStack(alignment: .leading, spacing: 32) {
-            Text("SYSTEM")
-                .font(.system(size: 10, weight: .black))
-                .tracking(4)
-                .foregroundColor(.white.opacity(0.3))
+            sectionTitle("システム")
 
             VStack(spacing: 24) {
                 HStack {
-                    Text("Version")
-                        .font(.system(size: 14, weight: .light))
-                        .foregroundColor(.white)
+                    Text("バージョン")
+                        .font(.system(size: 16, weight: .light))
+                        .foregroundColor(ink)
                     Spacer()
                     Text("1.0.0")
-                        .font(.system(size: 14, weight: .medium, design: .monospaced))
-                        .foregroundColor(.white.opacity(0.5))
+                        .font(.system(size: 16, weight: .medium, design: .monospaced))
+                        .foregroundColor(subInk)
                 }
 
-                NavigationLink(destination: Text("Privacy Policy Details...")) {
+                Button(action: { openURL(privacyURL) }) {
                     HStack {
-                        Text("Privacy Policy")
-                            .font(.system(size: 14, weight: .light))
-                            .foregroundColor(.white)
+                        Text("プライバシーポリシー")
+                            .font(.system(size: 16, weight: .light))
+                            .foregroundColor(ink)
                         Spacer()
+                        Image(systemName: "arrow.up.right")
+                            .font(.system(size: 12, weight: .light))
+                            .foregroundColor(subInk)
                     }
                 }
 
-                NavigationLink(destination: Text("Terms of Service Details...")) {
+                Button(action: { openURL(termsURL) }) {
                     HStack {
-                        Text("Terms of Service")
-                            .font(.system(size: 14, weight: .light))
-                            .foregroundColor(.white)
+                        Text("利用規約")
+                            .font(.system(size: 16, weight: .light))
+                            .foregroundColor(ink)
                         Spacer()
+                        Image(systemName: "arrow.up.right")
+                            .font(.system(size: 12, weight: .light))
+                            .foregroundColor(subInk)
                     }
                 }
             }
         }
+        .padding(24)
+        .background(cardFill)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 
     #if DEBUG
     private var debugSection: some View {
         VStack(alignment: .leading, spacing: 32) {
-            Text("🛠️ DEBUG MODE")
-                .font(.system(size: 10, weight: .black))
+            Text("🛠️ デバッグモード")
+                .font(.system(size: 12, weight: .black))
                 .tracking(4)
-                .foregroundColor(.yellow.opacity(0.8))
+                .foregroundColor(accentRose)
 
             VStack(spacing: 24) {
                 HStack {
-                    Text("Premium Mode (Pilot)")
-                        .font(.system(size: 14, weight: .light))
-                        .foregroundColor(.white)
+                    Text("プレミアムモード (テスト)")
+                        .font(.system(size: 16, weight: .light))
+                        .foregroundColor(ink)
                     Spacer()
                     Toggle("", isOn: $userSettings.isPremiumUser)
                         .labelsHidden()
-                        .tint(.yellow)
+                        .tint(accentRose)
                 }
 
                 if userSettings.isPremiumUser {
                     HStack {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.yellow)
-                        Text("All premium features unlocked")
-                            .font(.system(size: 12, weight: .light))
-                            .foregroundColor(.yellow.opacity(0.7))
+                            .foregroundColor(accentRose)
+                        Text("すべてのプレミアム機能が解放されています")
+                            .font(.system(size: 14, weight: .light))
+                            .foregroundColor(subInk)
                     }
                 }
             }
         }
+        .padding(24)
+        .background(cardFill)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
     #endif
+
+    private func sectionTitle(_ title: String) -> some View {
+        Text(title)
+            .font(.system(size: 13, weight: .bold))
+            .foregroundColor(subInk)
+    }
 
     // MARK: - Actions
 

@@ -1,18 +1,5 @@
 //
-//  AppIntent.swift
-//  com.antigravity.QuoteApp
-//
-//  Created by 林真幸 on 2026/02/26.
+// Widget app intents are intentionally disabled in the rebuilt widget extension.
 //
 
-import WidgetKit
-import AppIntents
-
-struct ConfigurationAppIntent: WidgetConfigurationIntent {
-    static var title: LocalizedStringResource { "Configuration" }
-    static var description: IntentDescription { "This is an example widget." }
-
-    // An example configurable parameter.
-    @Parameter(title: "Favorite Emoji", default: "😃")
-    var favoriteEmoji: String
-}
+import Foundation

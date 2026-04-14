@@ -1,0 +1,2 @@
+app_identifier("com.antigravity.QuoteApp")
+# Username is omitted to prompt interactively or use cached credentials

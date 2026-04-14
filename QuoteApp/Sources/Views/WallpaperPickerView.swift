@@ -11,27 +11,37 @@ struct WallpaperPickerView: View {
         GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
     ]
+    private let accentRose = Color(red: 0.86, green: 0.55, blue: 0.60)
+    private let ink = Color(red: 0.31, green: 0.24, blue: 0.24)
     
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.99, green: 0.95, blue: 0.93),
+                        Color(red: 0.98, green: 0.91, blue: 0.90),
+                        Color(red: 0.95, green: 0.94, blue: 0.98)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 32) {
                         
                         // ヘッダーテキスト
                         VStack(spacing: 8) {
-                            Text("WALLPAPER")
-                                .font(.system(size: 12, weight: .black, design: .monospaced))
-                                .tracking(6)
-                                .foregroundColor(.white.opacity(0.8))
+                            Text("背景をえらぶ")
+                                .font(.system(size: 22, weight: .bold))
+                                .foregroundColor(ink)
                             
                             Text("日々のインスピレーションを引き出す\n背景として使用する壁紙を選択してください。")
-                                .font(.system(size: 13, weight: .light))
+                                .font(.system(size: 13, weight: .medium))
                                 .lineSpacing(6)
                                 .multilineTextAlignment(.center)
-                                .foregroundColor(.white.opacity(0.5))
+                                .foregroundColor(ink.opacity(0.62))
                         }
                         .padding(.top, 24)
                         
@@ -68,9 +78,9 @@ struct WallpaperPickerView: View {
                                                     Spacer()
                                                     Image(systemName: "checkmark")
                                                         .font(.system(size: 14, weight: .black))
-                                                        .foregroundColor(.black)
+                                                        .foregroundColor(.white)
                                                         .frame(width: 32, height: 32)
-                                                        .background(Color.white)
+                                                        .background(accentRose)
                                                         .clipShape(Circle())
                                                         .shadow(color: .black.opacity(0.3), radius: 5, x: 0, y: 3)
                                                         .padding(16)
@@ -96,15 +106,15 @@ struct WallpaperPickerView: View {
                     }) {
                         Image(systemName: "xmark")
                             .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.white.opacity(0.8))
+                            .foregroundColor(ink)
                             .padding(8)
-                            .background(.ultraThinMaterial)
+                            .background(Color.white.opacity(0.7))
                             .clipShape(Circle())
                     }
                 }
                 
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("APPLY") {
+                    Button("適用") {
                         if !tempSelected.isEmpty {
                             userSettings.selectedBackgrounds = tempSelected
                             // Analytics: 壁紙変更
@@ -117,18 +127,17 @@ struct WallpaperPickerView: View {
                         }
                         dismiss()
                     }
-                    .font(.system(size: 12, weight: .bold, design: .monospaced))
-                    .tracking(2)
-                    .foregroundColor(tempSelected.isEmpty ? .white.opacity(0.2) : .black)
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(tempSelected.isEmpty ? ink.opacity(0.24) : .white)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
-                    .background(tempSelected.isEmpty ? Color.white.opacity(0.1) : Color.white)
+                    .background(tempSelected.isEmpty ? Color.white.opacity(0.35) : accentRose)
                     .clipShape(Capsule())
                     .disabled(tempSelected.isEmpty)
                 }
             }
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(.light)
         .onAppear {
             tempSelected = userSettings.selectedBackgrounds
         }

@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 #if canImport(FirebaseAnalytics)
 import FirebaseAnalytics
@@ -298,6 +299,15 @@ final class AnalyticsService {
     func logWallpaperChange(wallpaperName: String, isPremium: Bool) {
         log("wallpaper_change", params: [
             "wallpaper_name": wallpaperName,
+            "is_premium": isPremium ? "true" : "false"
+        ])
+    }
+
+    /// 名言メモ保存
+    func logFavoriteNoteSave(quoteId: String, noteLength: Int, isPremium: Bool) {
+        log("quote_favorite_note_save", params: [
+            "quote_id": quoteId,
+            "note_length": noteLength,
             "is_premium": isPremium ? "true" : "false"
         ])
     }

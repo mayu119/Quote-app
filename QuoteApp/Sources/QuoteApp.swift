@@ -2,23 +2,43 @@ import SwiftUI
 import SwiftData
 import WidgetKit
 import UIKit
+import UserNotifications
+import RevenueCat
 
 #if canImport(FirebaseCore)
 import FirebaseCore
 #endif
 
 class AppDelegate: NSObject, UIApplicationDelegate {
+    private func clearBadgeAndDeliveredNotifications(_ application: UIApplication) {
+        let center = UNUserNotificationCenter.current()
+        center.removeAllDeliveredNotifications()
+
+        // iOS 16+ は通知センター経由でバッジを明示的に 0 に戻す
+        if #available(iOS 16.0, *) {
+            center.setBadgeCount(0)
+        } else {
+            application.applicationIconBadgeNumber = 0
+        }
+    }
+
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         #if canImport(FirebaseCore)
         FirebaseApp.configure()
         print("✅ Firebase initialized.")
         #endif
+        clearBadgeAndDeliveredNotifications(application)
         return true
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
         AnalyticsService.shared.logAppBackground()
+    }
+
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        // アクティブ化のたびに、残っているバッジと配信済み通知を消す
+        clearBadgeAndDeliveredNotifications(application)
     }
 }
 
@@ -63,6 +83,17 @@ struct QuoteApp: App {
 
     @MainActor
     private func initializeApp() async {
+        userSettings.seedWidgetFallbackIfNeeded()
+        WidgetCenter.shared.reloadAllTimelines()
+
+        // RevenueCat 初期化
+        RevenueCatManager.shared.configure(apiKey: Config.revenueCatAPIKey)
+        await RevenueCatManager.shared.checkSubscriptionStatus()
+        await RevenueCatManager.shared.fetchOfferings()
+
+        // RevenueCat のプレミアム状態を UserSettings に同期
+        userSettings.updatePremiumStatus(isPremium: RevenueCatManager.shared.isPremiumUser)
+
         // Analytics: セッション開始
         AnalyticsService.shared.logSessionStart(isPremium: userSettings.isPremiumUser)
 
@@ -70,16 +101,6 @@ struct QuoteApp: App {
         if userSettings.isFirstLaunch {
             let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
             AnalyticsService.shared.logFirstOpen(appVersion: appVersion)
-        }
-
-        // 通知権限リクエスト
-        do {
-            let granted = try await NotificationService.shared.requestAuthorization()
-            if granted { print("✅ 通知権限が許可されました") }
-            AnalyticsService.shared.logNotificationPermission(granted: granted)
-        } catch {
-            print("⚠️ 通知権限リクエスト失敗: \(error)")
-            AnalyticsService.shared.logNotificationPermission(granted: false)
         }
     }
 }

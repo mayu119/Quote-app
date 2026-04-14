@@ -223,11 +223,13 @@ final class ImageGenerator {
             .foregroundColor: UIColor.white.withAlphaComponent(0.8)
         ]
 
-        let authorText = "— \(quote.author.uppercased())"
-        authorText.draw(
-            at: CGPoint(x: padding, y: authorY),
-            withAttributes: authorAttributes
-        )
+        if quote.hasVisibleAuthorAttribution {
+            let authorText = "— \(quote.displayAuthor)"
+            authorText.draw(
+                at: CGPoint(x: padding, y: authorY),
+                withAttributes: authorAttributes
+            )
+        }
     }
 
     /// 名言テキストを描画（正方形用）
@@ -278,11 +280,13 @@ final class ImageGenerator {
             .foregroundColor: UIColor.white.withAlphaComponent(0.8)
         ]
 
-        let authorText = "— \(quote.author.uppercased())"
-        authorText.draw(
-            at: CGPoint(x: padding, y: authorY),
-            withAttributes: authorAttributes
-        )
+        if quote.hasVisibleAuthorAttribution {
+            let authorText = "— \(quote.displayAuthor)"
+            authorText.draw(
+                at: CGPoint(x: padding, y: authorY),
+                withAttributes: authorAttributes
+            )
+        }
     }
 
     /// ロゴ透かしを描画

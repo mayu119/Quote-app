@@ -2,88 +2,109 @@ import ActivityKit
 import WidgetKit
 import SwiftUI
 
-// MARK: - Live Activity UI
-
 @available(iOS 16.1, *)
 struct com_antigravity_QuoteAppLiveActivity: Widget {
-    
-    // アプリと統一感のあるアクセントゴールド
-    let accentGold = Color(red: 0.85, green: 0.75, blue: 0.45)
-    
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: QuoteLiveActivityAttributes.self) { context in
-            // MARK: - Lock Screen & Banner UI
             ZStack {
-                // 背景 (Obsidian風)
-                Color.black.opacity(0.8)
-                
-                VStack(spacing: 6) {
-                    HStack {
-                        Text(context.state.categoryJa)
-                            .font(.system(size: 10, weight: .bold, design: .monospaced))
-                            .tracking(2)
-                            .foregroundColor(accentGold)
-                        Spacer()
-                    }
-                    
+                LinearGradient(
+                    colors: [Color(hex: "FBF6F1"), Color(hex: "F0E5DB")],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+
+                VStack(alignment: .leading, spacing: 14) {
+                    Text(context.state.categoryJa)
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(Color(hex: "8E94B8"))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Color.white.opacity(0.78))
+                        .clipShape(Capsule())
+
                     Text(context.state.punchline)
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.leading)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    HStack {
-                        Spacer()
-                        Text("— \(context.state.author)")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.white.opacity(0.6))
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(Color(hex: "2F2730"))
+                        .lineSpacing(4)
+
+                    HStack(spacing: 8) {
+                        Capsule()
+                            .fill(Color(hex: "D7AE68"))
+                            .frame(width: 18, height: 3)
+                        Text(context.state.author)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(Color(hex: "776B78"))
                     }
                 }
-                .padding()
+                .padding(18)
             }
-            .activityBackgroundTint(Color.black.opacity(0.8))
-            .activitySystemActionForegroundColor(Color.white)
-            
+            .activityBackgroundTint(Color(hex: "FBF6F1"))
+            .activitySystemActionForegroundColor(Color(hex: "2F2730"))
         } dynamicIsland: { context in
-            // MARK: - Dynamic Island UI
             DynamicIsland {
-                // Expanded
                 DynamicIslandExpandedRegion(.leading) {
                     Text(context.state.categoryJa)
                         .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(accentGold)
+                        .foregroundStyle(Color(hex: "8E94B8"))
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Image(systemName: "quote.closing")
-                        .foregroundColor(.white.opacity(0.4))
+                    Circle()
+                        .fill(Color(hex: "E59B9D"))
+                        .frame(width: 24, height: 24)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(context.state.punchline)
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.white)
-                            .multilineTextAlignment(.leading)
-                        
-                        Text("— \(context.state.author)")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundStyle(.white)
+                            .lineLimit(3)
+                        Text(context.state.author)
                             .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.white.opacity(0.6))
-                            .frame(maxWidth: .infinity, alignment: .trailing)
+                            .foregroundStyle(.white.opacity(0.72))
                     }
-                    .padding(.top, 4)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
             } compactLeading: {
-                Image(systemName: "quote.opening")
-                    .foregroundColor(accentGold)
+                Circle()
+                    .fill(Color(hex: "E59B9D"))
+                    .frame(width: 18, height: 18)
             } compactTrailing: {
-                Text(context.state.author.prefix(5))
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.white)
+                Text("言葉")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(.white)
             } minimal: {
-                Image(systemName: "quote.closing")
-                    .foregroundColor(accentGold)
+                Image(systemName: "quote.bubble.fill")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(.white)
             }
-            .widgetURL(URL(string: "quoteapp://open"))
-            .keylineTint(accentGold)
+            .keylineTint(Color(hex: "E59B9D"))
         }
+    }
+}
+
+private extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3:
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6:
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8:
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (255, 255, 255, 255)
+        }
+
+        self.init(
+            .sRGB,
+            red: Double(r) / 255,
+            green: Double(g) / 255,
+            blue: Double(b) / 255,
+            opacity: Double(a) / 255
+        )
     }
 }

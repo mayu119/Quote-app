@@ -1,0 +1,2 @@
+app_identifier("com.antigravity.QuoteApp") # The bundle identifier of your app
+apple_id(ENV["APPLE_ID"]) # Your Apple email address

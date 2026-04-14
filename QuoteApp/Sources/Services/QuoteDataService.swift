@@ -1,9 +1,19 @@
 import Foundation
 import SwiftData
+import UIKit
 
 /// 名言データ管理サービス
 @MainActor
 final class QuoteDataService: ObservableObject {
+    struct WeeklyFavoriteSummary {
+        let favoriteCount: Int
+        let topCategory: QuoteMediumCategory?
+    }
+
+    struct FavoriteRecommendation {
+        let quote: Quote
+        let sourceCategory: QuoteMediumCategory?
+    }
 
     // MARK: - Properties
 
@@ -11,8 +21,8 @@ final class QuoteDataService: ObservableObject {
     private let duplicatePreventionDays: Int = 30
 
     /// JSONデータを更新したらこの値をインクリメントする
-    /// v11: 著者1002人達成・2017件
-    private static let currentDataVersion: Int = 11
+    /// v23: プレミアム深掘り文を引用ごとの洞察重視に再編集
+    private static let currentDataVersion: Int = 23
     private static let dataVersionKey = "quotesDataVersion"
 
     @Published var quotes: [Quote] = []
@@ -52,9 +62,23 @@ final class QuoteDataService: ObservableObject {
                     return (q.id, d)
                 }
             )
+            let favoriteNoteMap = Dictionary(uniqueKeysWithValues:
+                existingQuotes.compactMap { quote -> (String, String)? in
+                    guard let note = quote.favoriteNote else { return nil }
+                    return (quote.id, note)
+                }
+            )
+            let favoritedAtMap = Dictionary(uniqueKeysWithValues:
+                existingQuotes.compactMap { q -> (String, Date)? in
+                    guard let d = q.favoritedAt else { return nil }
+                    return (q.id, d)
+                }
+            )
             for q in existingQuotes { modelContext.delete(q) }
             for q in validQuotes {
                 if favoritedIds.contains(q.id) { q.isFavorited = true }
+                if let note = favoriteNoteMap[q.id] { q.favoriteNote = note }
+                if let d = favoritedAtMap[q.id] { q.favoritedAt = d }
                 if let d = lastShownMap[q.id]   { q.lastShownDate = d }
                 modelContext.insert(q)
             }
@@ -73,6 +97,9 @@ final class QuoteDataService: ObservableObject {
         try modelContext.save()
         UserDefaults.standard.set(Self.currentDataVersion, forKey: Self.dataVersionKey)
         self.quotes = try modelContext.fetch(descriptor)
+        
+        // ウィジェット用のデータプールを共有AppGroupディレクトリに書き出し
+        refreshWidgetPools()
     }
 
     /// JSONパースをバックグラウンドスレッドで実行（メインスレッドブロック防止）
@@ -114,11 +141,13 @@ final class QuoteDataService: ObservableObject {
         isPremium: Bool,
         mediumCategory: QuoteMediumCategory? = nil,
         largeCategory: QuoteLargeCategory? = nil,
+        spiritualBundle: SpiritualBundle? = nil,
         preferredCategories: [String] = [],
         affinityScores: [String: Int] = [:]
     ) async throws -> [Quote] {
 
         let descriptor = FetchDescriptor<Quote>()
+        let effectiveLimit = limit > 0 ? limit : Int.max
 
         var pool = try modelContext.fetch(descriptor)
         
@@ -133,6 +162,17 @@ final class QuoteDataService: ObservableObject {
             if pool.isEmpty { pool = try modelContext.fetch(FetchDescriptor<Quote>()) }
         }
 
+        if let spiritualBundle, mediumCategory == nil, largeCategory == nil {
+            let preferredSet = Set(spiritualBundle.preferredCategories)
+            let prioritized = pool.filter { preferredSet.contains($0.category) }
+            if prioritized.count >= min(5, effectiveLimit) {
+                pool = prioritized
+            } else if !prioritized.isEmpty {
+                let remaining = pool.filter { !preferredSet.contains($0.category) }
+                pool = prioritized + remaining
+            }
+        }
+
         // 中カテゴリ指定で件数が少ない場合は全体プールにフォールバック
         if mediumCategory != nil && pool.count < 5 {
             pool = try modelContext.fetch(FetchDescriptor<Quote>())
@@ -142,22 +182,22 @@ final class QuoteDataService: ObservableObject {
         // preferredCategories には大カテゴリ/中カテゴリ両方の rawValue が混在し得る
         if mediumCategory == nil && largeCategory == nil && !preferredCategories.isEmpty {
             let preferred = Set(preferredCategories)
-            var preferredPool = pool.filter { q in
+            let preferredPool = pool.filter { q in
                 preferred.contains(q.category.rawValue) ||
                 preferred.contains(q.category.largeCategory.rawValue)
             }.shuffled()
-            var otherPool = pool.filter { q in
+            let otherPool = pool.filter { q in
                 !preferred.contains(q.category.rawValue) &&
                 !preferred.contains(q.category.largeCategory.rawValue)
             }.shuffled()
 
-            let preferredCount = Int(Double(limit) * 0.7)
+            let preferredCount = Int(Double(effectiveLimit) * 0.7)
             var balanced: [Quote] = []
             balanced.append(contentsOf: preferredPool.prefix(preferredCount))
-            balanced.append(contentsOf: otherPool.prefix(limit - balanced.count))
-            if balanced.count < limit {
+            balanced.append(contentsOf: otherPool.prefix(effectiveLimit - balanced.count))
+            if balanced.count < effectiveLimit {
                 let used = Set(balanced.map { $0.id })
-                balanced.append(contentsOf: pool.filter { !used.contains($0.id) }.shuffled().prefix(limit - balanced.count))
+                balanced.append(contentsOf: pool.filter { !used.contains($0.id) }.shuffled().prefix(effectiveLimit - balanced.count))
             }
             pool = balanced
         }
@@ -177,8 +217,14 @@ final class QuoteDataService: ObservableObject {
         let calendar = Calendar.current
         let today = Date()
 
+        if limit <= 0 {
+            for q in pool { q.lastShownDate = today }
+            try modelContext.save()
+            return pool
+        }
+
         if isPremium {
-            let selected = Array(pool.prefix(limit > 0 ? limit : 50))
+            let selected = Array(pool.prefix(limit))
             for q in selected { q.lastShownDate = today }
             try modelContext.save()
             return selected
@@ -206,7 +252,10 @@ final class QuoteDataService: ObservableObject {
     func toggleFavorite(quote: Quote, isPremium: Bool) throws {
         if quote.isFavorited {
             quote.isFavorited = false
+            quote.favoriteNote = nil
+            quote.favoritedAt = nil
             try modelContext.save()
+            refreshWidgetPools()
             return
         }
         if !isPremium {
@@ -216,15 +265,82 @@ final class QuoteDataService: ObservableObject {
             }
         }
         quote.isFavorited = true
+        quote.favoritedAt = Date()
+        try modelContext.save()
+        refreshWidgetPools()
+    }
+
+    func updateFavoriteNote(for quote: Quote, note: String, isPremium: Bool) throws {
+        guard quote.isFavorited else { return }
+
+        let trimmed = note.trimmingCharacters(in: .whitespacesAndNewlines)
+        quote.favoriteNote = trimmed.isEmpty ? nil : trimmed
         try modelContext.save()
     }
 
     func getFavoriteQuotes() throws -> [Quote] {
         let descriptor = FetchDescriptor<Quote>(
             predicate: #Predicate { $0.isFavorited == true },
-            sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
+            sortBy: [SortDescriptor(\.favoritedAt, order: .reverse), SortDescriptor(\.createdAt, order: .reverse)]
         )
         return try modelContext.fetch(descriptor)
+    }
+
+    func getWeeklyFavoriteSummary(referenceDate: Date = Date()) throws -> WeeklyFavoriteSummary {
+        let favorites = try getFavoriteQuotes()
+        let calendar = Calendar.current
+        let weekAgo = calendar.date(byAdding: .day, value: -6, to: referenceDate) ?? referenceDate
+
+        let weeklyFavorites = favorites.filter { quote in
+            guard let favoritedAt = quote.favoritedAt else { return false }
+            return favoritedAt >= calendar.startOfDay(for: weekAgo)
+        }
+
+        let topCategory = Dictionary(grouping: weeklyFavorites, by: \.category)
+            .max { lhs, rhs in
+                if lhs.value.count == rhs.value.count {
+                    return lhs.key.rawValue > rhs.key.rawValue
+                }
+                return lhs.value.count < rhs.value.count
+            }?
+            .key
+
+        return WeeklyFavoriteSummary(
+            favoriteCount: weeklyFavorites.count,
+            topCategory: topCategory
+        )
+    }
+
+    func getFavoriteRecommendation(excluding excludedQuoteID: String? = nil) throws -> FavoriteRecommendation? {
+        let favorites = try getFavoriteQuotes()
+        guard !favorites.isEmpty else { return nil }
+
+        let sortedFavorites = favorites.sorted { lhs, rhs in
+            let lhsScore = favoriteSignalScore(for: lhs)
+            let rhsScore = favoriteSignalScore(for: rhs)
+            if lhsScore == rhsScore {
+                return (lhs.favoritedAt ?? .distantPast) > (rhs.favoritedAt ?? .distantPast)
+            }
+            return lhsScore > rhsScore
+        }
+
+        guard let seed = sortedFavorites.first else { return nil }
+
+        let allQuotes = try modelContext.fetch(FetchDescriptor<Quote>())
+        let recommendation = allQuotes.first { candidate in
+            candidate.id != excludedQuoteID &&
+            candidate.id != seed.id &&
+            candidate.category == seed.category
+        } ?? allQuotes.first { candidate in
+            candidate.id != excludedQuoteID && candidate.id != seed.id
+        }
+
+        guard let recommendation else { return nil }
+
+        return FavoriteRecommendation(
+            quote: recommendation,
+            sourceCategory: seed.category
+        )
     }
 
     /// 中カテゴリで絞り込み
@@ -262,12 +378,96 @@ final class QuoteDataService: ObservableObject {
         }
         return groups.keys.sorted(by: >).flatMap { groups[$0]!.shuffled() }
     }
+
+    private func favoriteSignalScore(for quote: Quote) -> Int {
+        var score = 0
+        if let favoritedAt = quote.favoritedAt {
+            let daysAgo = Calendar.current.dateComponents([.day], from: favoritedAt, to: Date()).day ?? 0
+            score += max(0, 14 - daysAgo)
+        }
+        if !(quote.favoriteNote?.isEmpty ?? true) {
+            score += 10
+        }
+        return score
+    }
+    
+    // MARK: - Widget Export
+    
+    /// iOS 17 App Intent: 長押しで選べるウィジェット表示のために各カテゴリのプールを書き出す
+    func refreshWidgetPools() {
+        let appGroupID = "group.com.antigravity.QuoteApp"
+        guard let sharedURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) else { return }
+        
+        // 画像はDataとして保持するとJSONが巨大になるので、ファイルパスまたは標準BackgroundNameだけ渡す
+        // そしてWidget側で画像を読ませるため、よく使われる背景画像のJPEGをAppGroupディレクトリに書き出しておく
+        for bgName in BackgroundService.backgrounds.prefix(10) {
+            let bgURL = sharedURL.appendingPathComponent("\(bgName).jpg")
+            if !FileManager.default.fileExists(atPath: bgURL.path),
+               let image = UIImage(named: bgName),
+               let data = image.jpegData(compressionQuality: 0.5) {
+                try? data.write(to: bgURL)
+            }
+        }
+        
+        func toDict(_ q: Quote) -> [String: String] {
+            return [
+                "punchline": q.punchline,
+                "author": q.author,
+                "category": q.category.displayText,
+                "category_ja": q.category.displayTitleJa,
+                "background_name": q.backgroundImage
+            ]
+        }
+        
+        var pools: [String: [[String: String]]] = [:]
+        
+        // 1. 全体ランダム (50件)
+        pools["random"] = self.quotes.shuffled().prefix(50).map { toDict($0) }
+        
+        // 2. お気に入り
+        let favs = self.quotes.filter { $0.isFavorited }
+        pools["favorites"] = favs.shuffled().prefix(50).map { toDict($0) }
+        
+        // 3. 大カテゴリごとのプール
+        let selfGrowth = self.quotes.filter { $0.category.largeCategory == .selfGrowth }
+        pools["self_growth"] = selfGrowth.shuffled().prefix(30).map { toDict($0) }
+
+        let relationships = self.quotes.filter { $0.category.largeCategory == .relationships }
+        pools["relationships"] = relationships.shuffled().prefix(30).map { toDict($0) }
+
+        let reset = self.quotes.filter { $0.category.largeCategory == .reset }
+        pools["reset"] = reset.shuffled().prefix(30).map { toDict($0) }
+
+        // 使われているすべての背景画像を抽出してAppGroupディレクトリに保存
+        var usedBackgrounds: Set<String> = []
+        for pool in pools.values {
+            for dict in pool {
+                if let bg = dict["background_name"] {
+                    usedBackgrounds.insert(bg)
+                }
+            }
+        }
+        for bgName in usedBackgrounds {
+            let bgURL = sharedURL.appendingPathComponent("\(bgName).jpg")
+            if !FileManager.default.fileExists(atPath: bgURL.path),
+               let image = UIImage(named: bgName),
+               let data = image.jpegData(compressionQuality: 0.5) {
+                try? data.write(to: bgURL)
+            }
+        }
+
+        // ファイルに書き出し
+        let jsonURL = sharedURL.appendingPathComponent("widget_pools.json")
+        if let data = try? JSONSerialization.data(withJSONObject: pools) {
+            try? data.write(to: jsonURL)
+        }
+    }
 }
 
 // MARK: - Errors
 
 enum QuoteError: LocalizedError {
-    case jsonFileNotFound, noValidQuotes, emptyQuoteText, favoriteLimitReached
+    case jsonFileNotFound, noValidQuotes, emptyQuoteText, favoriteLimitReached, favoriteNoteRequiresPremium
 
     var errorDescription: String? {
         switch self {
@@ -275,6 +475,7 @@ enum QuoteError: LocalizedError {
         case .noValidQuotes:      return "有効な名言データがありません。"
         case .emptyQuoteText:     return "名言のテキストが空です。"
         case .favoriteLimitReached: return "無料ユーザーはお気に入りを10個まで保存できます。\nプレミアムプランで無制限に保存しましょう。"
+        case .favoriteNoteRequiresPremium: return "名言メモはプレミアム機能です。アップグレードすると保存した言葉に自分の文脈を残せます。"
         }
     }
 }

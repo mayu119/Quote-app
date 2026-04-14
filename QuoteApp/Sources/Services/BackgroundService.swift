@@ -46,13 +46,42 @@ final class BackgroundService: ObservableObject {
         return Self.backgrounds[currentBackgroundIndex]
     }
 
-    static func getDailyBackgroundIndex() -> Int {
-        let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1
-        return dayOfYear % backgrounds.count
+    // MARK: - Daily Background (連続しないランダム)
+
+    private static let dailyBgDateKey = "dailyBackgroundDate"
+    private static let dailyBgNameKey = "dailyBackgroundName"
+
+    /// 無料ユーザー用: 1日1枚の背景をランダムに選択（前日と被らない）
+    static func getDailyBackground() -> String {
+        let defaults = UserDefaults.standard
+        let todayStr = dateString(for: Date())
+
+        // 今日の保存値があればそのまま返す
+        if let savedDate = defaults.string(forKey: dailyBgDateKey),
+           savedDate == todayStr,
+           let savedBg = defaults.string(forKey: dailyBgNameKey) {
+            return savedBg
+        }
+
+        // 前日の背景を取得して除外リストに
+        let previousBg = defaults.string(forKey: dailyBgNameKey)
+        var pool = backgrounds
+        if let prev = previousBg {
+            pool = pool.filter { $0 != prev }
+        }
+
+        let newBg = pool.randomElement() ?? backgrounds[0]
+
+        // 保存
+        defaults.set(todayStr, forKey: dailyBgDateKey)
+        defaults.set(newBg, forKey: dailyBgNameKey)
+
+        return newBg
     }
 
-    static func getDailyBackground() -> String {
-        return backgrounds[getDailyBackgroundIndex()]
+    private static func dateString(for date: Date) -> String {
+        let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"; f.timeZone = .current
+        return f.string(from: date)
     }
 
     func nextBackground() {

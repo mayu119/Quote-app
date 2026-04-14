@@ -19,40 +19,63 @@ struct CategoryPickerView: View {
 
     @State private var appear = false
 
-    private let accentGold = Color(red: 0.85, green: 0.65, blue: 0.2)
+    private let pageBackground = Color(hex: "F1E9E3")
+    private let sheetBackground = Color(hex: "FFFCF8")
+    private let primaryText = Color(hex: "2F2730")
+    private let secondaryText = Color(hex: "7D7280")
+    private let accentRose = Color(hex: "EAA3A1")
+    private let accentLavender = Color(hex: "8D90A2")
+    private let accentSage = Color(hex: "9EB59B")
+    private let accentSky = Color(hex: "9FC8D8")
+    private let borderColor = Color(hex: "E8DDD6")
     private let columns = [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)]
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            LinearGradient(
+                colors: [pageBackground, Color(hex: "F7F1EB"), Color(hex: "EFE5DE")],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                header
-                    .zIndex(10)
+                Spacer(minLength: 12)
 
-                ScrollView(showsIndicators: false) {
-                    LazyVStack(alignment: .leading, spacing: 56) {
-                        // 全カテゴリ（ランダム）
-                        allRandomCard
-                            .padding(.horizontal, 24)
-                            .padding(.top, 32)
-                            .opacity(appear ? 1 : 0)
-                            .offset(y: appear ? 0 : 20)
-                            .animation(.easeOut(duration: 0.6).delay(0.1), value: appear)
+                VStack(spacing: 0) {
+                    header
+                        .zIndex(10)
 
-                        // 大カテゴリごとのセクション
-                        ForEach(Array(QuoteLargeCategory.allCases.enumerated()), id: \.element) { index, large in
-                            largeCategorySection(large: large)
+                    ScrollView(showsIndicators: false) {
+                        LazyVStack(alignment: .leading, spacing: 44) {
+                            allRandomCard
+                                .padding(.horizontal, 20)
+                                .padding(.top, 24)
                                 .opacity(appear ? 1 : 0)
-                                .offset(y: appear ? 0 : 30)
-                                .animation(.easeOut(duration: 0.7).delay(Double(index) * 0.1 + 0.2), value: appear)
+                                .offset(y: appear ? 0 : 20)
+                                .animation(.easeOut(duration: 0.6).delay(0.1), value: appear)
+
+                            ForEach(Array(QuoteLargeCategory.allCases.enumerated()), id: \.element) { index, large in
+                                largeCategorySection(large: large)
+                                    .opacity(appear ? 1 : 0)
+                                    .offset(y: appear ? 0 : 30)
+                                    .animation(.easeOut(duration: 0.7).delay(Double(index) * 0.1 + 0.2), value: appear)
+                            }
                         }
+                        .padding(.bottom, 72)
                     }
-                    .padding(.bottom, 80)
                 }
+                .background(sheetBackground)
+                .clipShape(RoundedRectangle(cornerRadius: 34, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 34, style: .continuous)
+                        .stroke(Color.white.opacity(0.9), lineWidth: 1)
+                )
+                .shadow(color: Color(hex: "CDBEB6").opacity(0.35), radius: 28, x: 0, y: 12)
+                .padding(.horizontal, 10)
+                .padding(.bottom, 10)
             }
         }
-        .preferredColorScheme(.dark)
         .onAppear {
             withAnimation {
                 appear = true
@@ -69,47 +92,35 @@ struct CategoryPickerView: View {
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     dismiss()
                 }) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 10, weight: .black))
-                        Text("CLOSE")
-                            .font(.system(size: 10, weight: .black, design: .monospaced))
-                            .tracking(3)
-                    }
-                    .foregroundColor(.white.opacity(0.4))
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
-                    .background(.ultraThinMaterial)
-                    .clipShape(Capsule())
-                    .overlay(Capsule().stroke(Color.white.opacity(0.1), lineWidth: 1))
+                    Text("キャンセル")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(primaryText)
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 11)
+                        .background(Color.white.opacity(0.9))
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(borderColor, lineWidth: 1))
                 }
 
                 Spacer()
-
-                VStack(spacing: 4) {
-                    Text("SECTOR")
-                        .font(.system(size: 12, weight: .black, design: .monospaced))
-                        .tracking(10)
-                        .foregroundColor(accentGold)
-                        .shadow(color: accentGold.opacity(0.3), radius: 8)
-                    
-                    Rectangle()
-                        .fill(accentGold)
-                        .frame(width: 24, height: 1)
-                        .opacity(0.3)
-                }
-
-                Spacer()
-                
-                // バランス用
-                Color.clear.frame(width: 70, height: 40)
+                Color.clear.frame(width: 84, height: 40)
             }
-            .padding(.horizontal, 24)
-            .padding(.vertical, 20)
-            .background(.ultraThinMaterial)
-            
-            Divider().background(Color.white.opacity(0.1))
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("カテゴリー")
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(primaryText)
+
+                Text("今の気分に合わせて、読みたい言葉を選べます。")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(secondaryText)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, 18)
         }
+        .padding(.horizontal, 20)
+        .padding(.top, 18)
+        .padding(.bottom, 18)
     }
 
     // MARK: - 全カテゴリ（ランダム）
@@ -123,43 +134,42 @@ struct CategoryPickerView: View {
         }) {
             HStack(spacing: 16) {
                 ZStack {
-                    Circle()
-                        .fill(isSelected ? .black : accentGold.opacity(0.1))
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .fill(isSelected ? accentLavender : Color(hex: "EEE7E2"))
                         .frame(width: 44, height: 44)
                     Image(systemName: "shuffle")
-                        .font(.system(size: 18, weight: .light))
-                        .foregroundColor(isSelected ? .white : accentGold)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(isSelected ? .white : primaryText.opacity(0.8))
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("全カテゴリ")
-                        .font(.custom("HiraginoSans-W8", size: 18))
-                    Text("UNIVERSE / ALL")
-                        .font(.system(size: 9, weight: .black, design: .monospaced))
-                        .tracking(3)
-                        .opacity(isSelected ? 0.7 : 0.4)
+                    Text("独自のミックスを作る")
+                        .font(.system(size: 18, weight: .bold))
+                    Text("その日の気分に合わせて幅広く表示")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(isSelected ? Color.white.opacity(0.78) : secondaryText)
                 }
                 
                 Spacer()
                 
                 if isSelected {
                     Image(systemName: "checkmark")
-                        .font(.system(size: 14, weight: .black))
-                        .foregroundColor(.black)
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(accentLavender)
                         .padding(8)
                         .background(Circle().fill(Color.white))
                 }
             }
-            .foregroundColor(isSelected ? .black : .white)
-            .padding(.horizontal, 24)
-            .padding(.vertical, 24)
-            .background(isSelected ? Color.white : Color.white.opacity(0.03))
-            .cornerRadius(2)
+            .foregroundColor(isSelected ? .white : primaryText)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 18)
+            .background(isSelected ? accentLavender : Color(hex: "F6EFEB"))
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 2)
-                    .stroke(isSelected ? Color.white : Color.white.opacity(0.1), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(isSelected ? accentLavender.opacity(0.2) : borderColor, lineWidth: 1)
             )
-            .shadow(color: isSelected ? .white.opacity(0.2) : .clear, radius: 20, x: 0, y: 10)
+            .shadow(color: isSelected ? accentLavender.opacity(0.22) : .clear, radius: 16, x: 0, y: 8)
         }
         .buttonStyle(.plain)
     }
@@ -172,7 +182,6 @@ struct CategoryPickerView: View {
         let isLocked = !userSettings.isPremiumUser
 
         return VStack(alignment: .leading, spacing: 24) {
-            // セクションヘッダー（タップで大カテゴリ丸ごと選択）
             Button(action: {
                 if isLocked {
                     UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
@@ -187,50 +196,42 @@ struct CategoryPickerView: View {
                 }
             }) {
                 HStack(alignment: .firstTextBaseline, spacing: 12) {
-                    Text(large.displayName)
-                        .font(.custom("HiraginoSans-W8", size: 28))
-                        .foregroundColor(.white)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(large.displayName)
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(primaryText)
 
-                    Text(large.displayEn)
-                        .font(.system(size: 10, weight: .black, design: .monospaced))
-                        .tracking(6)
-                        .foregroundColor(accentGold.opacity(0.6))
+                        Text(sectionSubtitle(for: large))
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(secondaryText)
+                    }
 
                     Spacer()
 
                     if isLargeSelected {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 18))
-                            .foregroundColor(accentGold)
-                            .shadow(color: accentGold.opacity(0.5), radius: 6)
+                            .foregroundColor(accentRose)
                     } else if isLocked {
                         Image(systemName: "lock.fill")
                             .font(.system(size: 12))
-                            .foregroundColor(.white.opacity(0.25))
+                            .foregroundColor(secondaryText.opacity(0.7))
                     } else {
-                        Text("ALL")
-                            .font(.system(size: 9, weight: .black, design: .monospaced))
-                            .tracking(2)
-                            .foregroundColor(accentGold.opacity(0.7))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 2)
-                                    .stroke(accentGold.opacity(0.35), lineWidth: 1)
-                            )
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(secondaryText.opacity(0.8))
                     }
                 }
             }
             .buttonStyle(.plain)
-            .padding(.horizontal, 24)
+            .padding(.horizontal, 20)
 
-            // カードグリッド
             LazyVGrid(columns: columns, spacing: 16) {
                 ForEach(mediums, id: \.self) { medium in
                     mediumCategoryCard(medium: medium)
                 }
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, 20)
         }
     }
 
@@ -256,87 +257,98 @@ struct CategoryPickerView: View {
             }
         }) {
             ZStack(alignment: .bottomLeading) {
-                // 背景
-                RoundedRectangle(cornerRadius: 2)
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(Color.white.opacity(0.94))
+
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [cardColorTop(for: medium), cardColorBottom(for: medium)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(height: 118)
+                    .frame(maxHeight: .infinity, alignment: .top)
+
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .fill(cardGradient(for: medium))
-                
-                // 質感
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(LinearGradient(
-                        colors: [.black.opacity(0.0), .black.opacity(0.7)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    ))
+                    .frame(height: 118)
+                    .frame(maxHeight: .infinity, alignment: .top)
+                    .opacity(0.65)
 
-                // アイコン
                 Image(systemName: symbolName(for: medium))
-                    .font(.system(size: 36, weight: .ultraLight))
-                    .foregroundColor(isSelected ? accentGold.opacity(0.6) : .white.opacity(0.12))
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                    .offset(y: -15)
+                    .font(.system(size: 34, weight: .regular))
+                    .foregroundColor(iconColor(for: medium))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .padding(.top, 22)
+                    .padding(.trailing, 18)
 
-                // 選択時・バッジ
+                Circle()
+                    .fill(Color.white.opacity(0.45))
+                    .frame(width: 56, height: 56)
+                    .blur(radius: 10)
+                    .offset(x: 10, y: 8)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+
                 VStack {
                     HStack {
                         if isSelected {
                             Image(systemName: "circle.fill")
                                 .font(.system(size: 8))
-                                .foregroundColor(accentGold)
-                                .shadow(color: accentGold, radius: 4)
+                                .foregroundColor(accentRose)
                         }
                         
                         Spacer()
                         
                         if isFreeToday {
                             Text("FREE")
-                                .font(.system(size: 8, weight: .black, design: .monospaced))
-                                .tracking(1)
-                                .foregroundColor(.black)
+                                .font(.system(size: 8, weight: .bold, design: .rounded))
+                                .foregroundColor(primaryText)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 3)
-                                .background(accentGold)
-                                .cornerRadius(1)
+                                .background(Color.white.opacity(0.92))
+                                .clipShape(Capsule())
                         } else if isLocked {
                             Image(systemName: "lock.fill")
                                 .font(.system(size: 12))
-                                .foregroundColor(.white.opacity(0.3))
+                                .foregroundColor(secondaryText.opacity(0.65))
                         }
                     }
                     Spacer()
                 }
                 .padding(14)
 
-                // カテゴリ名
                 VStack(alignment: .leading, spacing: 4) {
                     Text(medium.displayTitleJa)
-                        .font(.custom("HiraginoSans-W8", size: 15))
-                        .foregroundColor(.white)
-                        .lineLimit(1)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(primaryText)
+                        .lineLimit(2)
                     
-                    Text(medium.displayText.uppercased())
-                        .font(.system(size: 8, weight: .black, design: .monospaced))
-                        .tracking(1)
-                        .foregroundColor(.white.opacity(0.5))
-                        .lineLimit(1)
+                    Text(cardCaption(for: medium))
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(secondaryText)
+                        .lineLimit(2)
                 }
                 .padding(14)
+                .padding(.top, 124)
 
-                // 選択中: ボーダーとグロウ
                 if isSelected {
-                    RoundedRectangle(cornerRadius: 2)
-                        .stroke(accentGold, lineWidth: 2)
-                        .shadow(color: accentGold.opacity(0.5), radius: 10)
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .stroke(accentRose, lineWidth: 2)
+                        .shadow(color: accentRose.opacity(0.3), radius: 12)
                 } else {
-                    RoundedRectangle(cornerRadius: 2)
-                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .stroke(borderColor, lineWidth: 1)
                 }
                 
-                // ロック時の暗幕
                 if isLocked {
-                    Color.black.opacity(0.4)
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .fill(Color.white.opacity(0.42))
                 }
             }
-            .frame(height: 140)
+            .frame(height: 210)
+            .shadow(color: Color(hex: "D8C8BF").opacity(0.18), radius: 16, x: 0, y: 10)
         }
         .buttonStyle(.plain)
         .scaleEffect(isSelected ? 0.96 : 1.0)
@@ -352,20 +364,25 @@ struct CategoryPickerView: View {
 
     private func cardColors(for medium: QuoteMediumCategory) -> (Color, Color) {
         switch medium.largeCategory {
-        case .legends:
+        case .selfGrowth:
             switch medium {
-            case .politiciansLeaders: return (Color(hex: "241E12"), Color(hex: "0D0A07"))
-            case .philosophers:       return (Color(hex: "121224"), Color(hex: "07070D"))
-            case .entrepreneurs:      return (Color(hex: "121824"), Color(hex: "07090D"))
-            case .athletes:           return (Color(hex: "241212"), Color(hex: "0D0707"))
-            case .artists:            return (Color(hex: "1B1224"), Color(hex: "0A070D"))
-            case .influencers:        return (Color(hex: "122424"), Color(hex: "070D0D"))
-            default:                  return (Color(hex: "241E12"), Color(hex: "0D0A07"))
+            case .selfLove:      return (Color(hex: "F7D9D4"), Color(hex: "F1C6C9"))
+            case .positive:      return (Color(hex: "D8E8B6"), Color(hex: "BFD799"))
+            case .courage:       return (Color(hex: "D5CDEC"), Color(hex: "C2B7E5"))
+            case .innerStrength: return (Color(hex: "DCC8C1"), Color(hex: "D2B2A9"))
+            case .affirmation:   return (Color(hex: "CFE3EB"), Color(hex: "B8D4DE"))
+            default:             return (Color(hex: "F7D9D4"), Color(hex: "F1C6C9"))
             }
-        case .action:
-            return (Color(hex: "1A1A1A"), Color(hex: "050505"))
-        case .life:
-            return (Color(hex: "241218"), Color(hex: "0D070A"))
+        case .relationships:
+            switch medium {
+            case .loveCrush:     return (Color(hex: "F7C7D0"), Color(hex: "F2AEBE"))
+            case .familyLove:    return (Color(hex: "D9E3C8"), Color(hex: "C5D4AE"))
+            case .forMyChild:    return (Color(hex: "F3DCC6"), Color(hex: "EBCDB0"))
+            case .relationships: return (Color(hex: "C8DDE6"), Color(hex: "B1CBD6"))
+            default:             return (Color(hex: "F7C7D0"), Color(hex: "F2AEBE"))
+            }
+        case .reset:
+            return (Color(hex: "D6D1E8"), Color(hex: "BFB8DA"))
         }
     }
 
@@ -373,22 +390,82 @@ struct CategoryPickerView: View {
 
     private func symbolName(for medium: QuoteMediumCategory) -> String {
         switch medium {
-        case .politiciansLeaders:  return "person.badge.key.fill"
-        case .philosophers:        return "scroll.fill"
-        case .entrepreneurs:       return "briefcase.fill"
-        case .athletes:            return "figure.run"
-        case .artists:             return "paintpalette.fill"
-        case .influencers:         return "play.rectangle.fill"
-        case .selfDiscipline:      return "dumbbell.fill"
-        case .awakening:           return "bolt.fill"
-        case .mindset:             return "eye.fill"
-        case .battle:              return "scope"
-        case .morning:             return "sunrise.fill"
-        case .loveRelationships:   return "heart.fill"
-        case .gratitudeHappiness:  return "sun.max.fill"
-        case .adversity:           return "cloud.bolt.fill"
-        case .timeMortality:       return "hourglass"
-        case .selfAcceptance:      return "person.fill.checkmark"
+        case .selfLove:      return "heart.circle.fill"
+        case .positive:      return "sun.max.fill"
+        case .courage:       return "sparkles"
+        case .innerStrength: return "mountain.2.fill"
+        case .loveCrush:     return "heart.fill"
+        case .familyLove:    return "house.fill"
+        case .forMyChild:    return "figure.and.child.holdinghands"
+        case .relationships: return "person.2.fill"
+        case .wantToQuit:    return "moon.stars.fill"
+        case .affirmation:   return "quote.bubble.fill"
+        }
+    }
+
+    private func sectionSubtitle(for large: QuoteLargeCategory) -> String {
+        switch large {
+        case .selfGrowth:
+            return "自分を整えて、自信をやさしく育てる言葉"
+        case .relationships:
+            return "恋愛や家族、人とのつながりに寄り添う言葉"
+        case .reset:
+            return "疲れた心をゆっくり立て直すための言葉"
+        }
+    }
+
+    private func cardCaption(for medium: QuoteMediumCategory) -> String {
+        switch medium {
+        case .selfLove: return "そのままの自分を受け入れる"
+        case .positive: return "気分を明るく整える"
+        case .courage: return "一歩を踏み出したい時に"
+        case .innerStrength: return "しなやかな芯を育てる"
+        case .loveCrush: return "恋の始まりに寄り添う"
+        case .familyLove: return "家族への想いをあたためる"
+        case .forMyChild: return "大切な人へ向けるやさしさ"
+        case .relationships: return "人間関係の距離感を整える"
+        case .wantToQuit: return "疲れた日に心を立て直す"
+        case .affirmation: return "一人称の言葉で自分を整える"
+        }
+    }
+
+    private func cardColorTop(for medium: QuoteMediumCategory) -> Color {
+        switch medium {
+        case .selfLove: return Color(hex: "FFF5F2")
+        case .positive: return Color(hex: "F6F9EA")
+        case .courage: return Color(hex: "F4F0FC")
+        case .innerStrength: return Color(hex: "F7F0EC")
+        case .loveCrush: return Color(hex: "FFF1F4")
+        case .familyLove: return Color(hex: "F4F7EE")
+        case .forMyChild: return Color(hex: "FCF4EC")
+        case .relationships: return Color(hex: "F2F8FA")
+        case .wantToQuit: return Color(hex: "F3F0FA")
+        case .affirmation: return Color(hex: "F1F9FB")
+        }
+    }
+
+    private func cardColorBottom(for medium: QuoteMediumCategory) -> Color {
+        switch medium {
+        case .selfLove: return Color(hex: "F8D9D6")
+        case .positive: return Color(hex: "D8E8B6")
+        case .courage: return Color(hex: "D8CFF0")
+        case .innerStrength: return Color(hex: "DDC8C0")
+        case .loveCrush: return Color(hex: "F6C7D2")
+        case .familyLove: return Color(hex: "D7E2C3")
+        case .forMyChild: return Color(hex: "F1DDC8")
+        case .relationships: return Color(hex: "CFE3EA")
+        case .wantToQuit: return Color(hex: "D8D2EA")
+        case .affirmation: return Color(hex: "CAE4EB")
+        }
+    }
+
+    private func iconColor(for medium: QuoteMediumCategory) -> Color {
+        switch medium {
+        case .selfLove, .loveCrush: return accentRose
+        case .positive, .familyLove: return accentSage
+        case .courage, .wantToQuit: return accentLavender
+        case .innerStrength, .forMyChild: return Color(hex: "C78F83")
+        case .relationships, .affirmation: return accentSky
         }
     }
 }

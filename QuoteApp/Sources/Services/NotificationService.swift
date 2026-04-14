@@ -1,7 +1,25 @@
 import Foundation
-import UserNotifications
 import ActivityKit
 import UIKit
+import UserNotifications
+
+// MARK: - Live Activity Attributes (shared with Widget Extension)
+@available(iOS 16.1, *)
+public struct QuoteLiveActivityAttributes: ActivityAttributes {
+    public struct ContentState: Codable, Hashable {
+        public var punchline: String
+        public var author: String
+        public var categoryJa: String
+
+        public init(punchline: String, author: String, categoryJa: String) {
+            self.punchline = punchline
+            self.author = author
+            self.categoryJa = categoryJa
+        }
+    }
+    public init() {}
+}
+
 
 /// 通知用の名言データ（リッチ通知用）
 struct NotificationQuote: Codable {
@@ -22,7 +40,7 @@ struct NotificationQuote: Codable {
     init(from quote: Quote) {
         self.quoteJa = quote.quoteJa
         self.punchline = quote.punchline
-        self.author = quote.author
+        self.author = quote.displayAuthor
         self.authorDescription = quote.authorDescription
         self.categoryJa = quote.category.displayTitleJa
     }
@@ -63,40 +81,40 @@ final class NotificationService: ObservableObject {
 
     static let curatedQuotes: [NotificationQuote] = [
         NotificationQuote(
-            quoteJa: "ハングリーであれ。愚かであれ。",
-            punchline: "ハングリーであれ。愚かであれ。",
-            author: "Steve Jobs",
-            authorDescription: "Apple共同創業者"
+            quoteJa: "私はそのままで、愛される価値がある。",
+            punchline: "私はそのままで、愛される価値がある。",
+            author: "オリジナル",
+            authorDescription: "アプリオリジナル"
         ),
         NotificationQuote(
-            quoteJa: "成功とは、失敗から失敗へと情熱を失わずに進むことだ。",
-            punchline: "失敗から失敗へ、情熱を失わずに。",
-            author: "Winston Churchill",
-            authorDescription: "元英国首相"
+            quoteJa: "明日はまた新しい一日。\nそして、奇跡は起こると私は信じている。",
+            punchline: "明日はまた新しい一日。",
+            author: "オードリー・ヘプバーン",
+            authorDescription: "女優・人道活動家"
         ),
         NotificationQuote(
-            quoteJa: "今から20年後、やったことよりもやらなかったことを後悔するだろう。",
-            punchline: "やらなかったことを後悔する。",
-            author: "Mark Twain",
-            authorDescription: "アメリカの小説家"
+            quoteJa: "相手が低く出ても、\n私たちは高くあろう。",
+            punchline: "相手に合わせて、自分まで低くならない。",
+            author: "ミシェル・オバマ",
+            authorDescription: "弁護士・元アメリカ大統領夫人"
         ),
         NotificationQuote(
-            quoteJa: "想像力は知識よりも重要だ。知識には限界がある。だが想像力は世界を包み込む。",
-            punchline: "想像力は知識よりも重要だ。",
-            author: "Albert Einstein",
-            authorDescription: "理論物理学者"
+            quoteJa: "家族は、この世界でいちばん大切なもの。",
+            punchline: "家族は、世界でいちばん大切なもの。",
+            author: "プリンセス・ダイアナ",
+            authorDescription: "イギリス王室 ダイアナ元皇太子妃"
         ),
         NotificationQuote(
-            quoteJa: "為せば成る、為さねば成らぬ何事も。成らぬは人の為さぬなりけり。",
-            punchline: "為せば成る。",
-            author: "上杉鷹山",
-            authorDescription: "米沢藩主"
+            quoteJa: "人を裁いていたら、\n愛する時間がなくなってしまう。",
+            punchline: "裁く前に、理解する余白を持つ。",
+            author: "マザー・テレサ",
+            authorDescription: "修道女・カトリック聖人"
         ),
         NotificationQuote(
-            quoteJa: "人生とは自分を見つけることではない。人生とは自分を創ることだ。",
-            punchline: "人生とは自分を創ることだ。",
-            author: "George Bernard Shaw",
-            authorDescription: "劇作家・ノーベル文学賞"
+            quoteJa: "私は今日、\nやさしさと強さを両方持っていていい。",
+            punchline: "私は、やさしさと強さを両方持っていい。",
+            author: "オリジナル",
+            authorDescription: "アプリオリジナル"
         ),
     ]
 
@@ -123,7 +141,7 @@ final class NotificationService: ObservableObject {
 
     func requestAuthorization() async throws -> Bool {
         let center = UNUserNotificationCenter.current()
-        let options: UNAuthorizationOptions = [.alert, .sound, .badge]
+        let options: UNAuthorizationOptions = [.alert, .sound]
         let granted = try await center.requestAuthorization(options: options)
         print(granted ? "✅ 通知権限が許可されました" : "⚠️ 通知権限が拒否されました")
         return granted
@@ -229,7 +247,7 @@ final class NotificationService: ObservableObject {
         content.body = quote.quoteJa.isEmpty ? quote.punchline : quote.quoteJa
 
         content.sound = .default
-        content.badge = 1
+        // バッジは使わない。通知が来るたびにアイコンへ「1」が残るのを防ぐ。
         content.categoryIdentifier = "DAILY_QUOTE"
         
         // 通知のグルーピング (引続き有効)
@@ -250,8 +268,8 @@ final class NotificationService: ObservableObject {
         UNUserNotificationCenter.current().removePendingNotificationRequests(
             withIdentifiers: ID.allQuoteIDs
         )
+        print("🗑 すべての通知スケジュールをキャンセルしました")
     }
-
     func cancelDailyQuoteNotification() { cancelAllQuoteNotifications() }
 
     // MARK: - Trial Reminders
@@ -328,7 +346,7 @@ final class NotificationService: ObservableObject {
             let state = QuoteLiveActivityAttributes.ContentState(
                 punchline: resolved.punchline,
                 author: resolved.author,
-                categoryJa: resolved.categoryJa.isEmpty ? "DAILY QUOTE" : resolved.categoryJa
+                categoryJa: resolved.categoryJa.isEmpty ? "今日の言葉" : resolved.categoryJa
             )
             
             Task {
@@ -353,6 +371,18 @@ final class NotificationService: ObservableObject {
                     } catch {
                         print("⚠️ Live Activity 開始失敗: \(error.localizedDescription)")
                     }
+                }
+            }
+        }
+    }
+    
+    /// 既存のLive Activity（ダイナミックロック画面）を終了する
+    func cancelDynamicLockScreenActivity() {
+        if #available(iOS 16.1, *) {
+            Task {
+                for activity in Activity<QuoteLiveActivityAttributes>.activities {
+                    await activity.end(nil, dismissalPolicy: .immediate)
+                    print("🗑 Live Activity を終了しました")
                 }
             }
         }

@@ -1,365 +1,851 @@
 import SwiftUI
-import StoreKit
+import RevenueCat
+import UIKit
 
-/// プレミアムプラン購入画面
+/// 女性向けの柔らかいプレミアム画面
 struct PremiumView: View {
     // MARK: - Environment
 
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var purchaseManager = PurchaseManager.shared
+    @Environment(\.openURL) private var openURL
+    @StateObject private var rcManager = RevenueCatManager.shared
     @EnvironmentObject private var userSettings: UserSettings
+    
+    /// 外部から終了処理を注入したい場合に使用
+    var onDismiss: (() -> Void)? = nil
+
+    // MARK: - Legal URLs
+
+    /// Apple 標準 EULA（利用規約）
+    private let termsURL = URL(string: "https://mayu119.github.io/Quote-app/terms.html")!
+    /// プライバシーポリシー
+    private let privacyURL = URL(string: "https://mayu119.github.io/Quote-app/privacy.html")!
 
     // MARK: - State
 
-    @State private var selectedProduct: Product?
+    @State private var selectedPackage: Package?
     @State private var showAlert = false
     @State private var alertMessage = ""
+    @State private var shouldDismissAfterAlert = false
     @State private var paywallOpenTime = Date()
+    @State private var appear = false
+    @State private var heroPulse = false
+    @State private var planType: PlanType = .yearly
 
-    let accentGold = Color(red: 0.85, green: 0.65, blue: 0.2)
+    enum PlanType {
+        case yearly, monthly
+    }
+
+    // MARK: - Design Tokens
+
+    private let bgDeep = Color(red: 0.99, green: 0.95, blue: 0.93)
+    private let panelBg = Color.white.opacity(0.86)
+    private let accentGold = Color(red: 0.86, green: 0.55, blue: 0.60)
+    private let accentPeach = Color(red: 0.96, green: 0.80, blue: 0.68)
+    private let textPrimary = Color(red: 0.30, green: 0.23, blue: 0.23)
+    private let textSub = Color(red: 0.50, green: 0.42, blue: 0.40)
 
     // MARK: - Body
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                // 背景
-                LinearGradient(
-                    colors: [
-                        Color.black,
-                        Color(red: 0.1, green: 0.1, blue: 0.15)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
+        ZStack {
+            // 背景レイヤー
+            LinearGradient(
+                colors: [bgDeep, Color(red: 0.98, green: 0.91, blue: 0.90), Color(red: 0.95, green: 0.93, blue: 0.98)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+
+            // スクロールコンテンツ
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(spacing: 0) {
+                    // 上部ヒーローグラフィック＆権威バッジ
+                    heroSection
+
+                    // メインコピー
+                    mainCopySection
+                        .padding(.top, 24)
+                        .padding(.horizontal, 24)
+
+                    // ベネフィット（アンロックリスト）
+                    benefitListSection
+                        .padding(.top, 40)
+                        .padding(.horizontal, 24)
+
+                    // レビューカルーセル
+                    reviewCarouselSection
+                        .padding(.top, 40)
+
+                    // 機能比較
+                    comparisonSection
+                        .padding(.top, 40)
+                        .padding(.horizontal, 24)
+
+                    checkoutSection
+                        .padding(.top, 40)
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, max(safeAreaBottom, 16) + 32)
+                }
+            }
+            .ignoresSafeArea(edges: .top)
+        }
+        .preferredColorScheme(.light)
+        .task {
+            await rcManager.refreshPackagesIfNeeded()
+            updateSelectedPackage(for: .yearly)
+        }
+        .onAppear {
+            paywallOpenTime = Date()
+            withAnimation(.easeOut(duration: 0.8)) { appear = true }
+            withAnimation(.easeInOut(duration: 4.0).repeatForever(autoreverses: true)) {
+                heroPulse = true
+            }
+        }
+        .alert("購入状況", isPresented: $showAlert) {
+            Button("OK", role: .cancel) {
+                if shouldDismissAfterAlert {
+                    performDismiss()
+                }
+            }
+        } message: {
+            Text(alertMessage)
+        }
+    }
+
+    // MARK: - Hero Artwork
+
+    private var heroSection: some View {
+        ZStack {
+            // ボヤッとした光の玉（動画の代わりになる美しい背景）
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [accentPeach, accentGold.opacity(0.9), Color.clear],
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: 200
+                    )
                 )
-                .ignoresSafeArea()
+                .frame(width: 380, height: 380)
+                .blur(radius: 60)
+                .scaleEffect(heroPulse ? 1.05 : 0.95)
+                .opacity(appear ? 0.8 : 0)
+                .offset(y: -40)
+            
+            // 下部に黒のグラデーションマスクをかけて本文に繋げる
+            VStack {
+                Spacer()
+                LinearGradient(colors: [Color.clear, Color(red: 0.99, green: 0.95, blue: 0.93)], startPoint: .top, endPoint: .bottom)
+                    .frame(height: 160)
+            }
 
-                ScrollView {
-                    VStack(spacing: 32) {
-                        // ヘッダー
-                        headerSection
+            // 月桂冠風のバッジ群 (中央下寄り)
+            VStack {
+                Spacer()
+                HStack(spacing: 24) {
+                    badgeView(icon: "heart.fill", text: "深く知る")
+                }
+                .padding(.bottom, 20)
+            }
+        }
+        .frame(height: 380)
+    }
 
-                        // 特典
-                        benefitsSection
+    private func badgeView(icon: String, subIcon: Bool = false, text: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "leaf.fill")
+                .rotationEffect(.degrees(-45))
+                .foregroundColor(.white.opacity(0.4))
+                .font(.system(size: 14))
 
-                        // プラン選択
-                        plansSection
-
-                        // 購入ボタン
-                        purchaseButton
-
-                        // 復元・利用規約
-                        footerSection
+            VStack(spacing: 4) {
+                if subIcon {
+                    HStack(spacing: 2) {
+                        Text(text.prefix(3))
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
+                        Image(systemName: icon)
+                            .font(.system(size: 13))
+                            .foregroundColor(accentGold)
                     }
-                    .padding()
+                } else {
+                    Image(systemName: icon)
+                        .font(.system(size: 18))
+                        .foregroundColor(accentGold)
                 }
+                Text(subIcon ? "Apple Store" : text)
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(textSub)
             }
-            .navigationTitle("プレミアム")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("閉じる") {
-                        // Analytics: ペイウォール閉じる
-                        let duration = Int(Date().timeIntervalSince(paywallOpenTime))
-                        AnalyticsService.shared.logPaywallDismiss(
-                            trigger: "manual",
-                            timeOnPaywallSec: duration,
-                            planViewed: selectedProduct?.id
-                        )
-                        dismiss()
-                    }
-                    .foregroundColor(.white)
-                }
-            }
-            .preferredColorScheme(.dark)
-            .task {
-                await purchaseManager.loadProducts()
-                if let firstProduct = purchaseManager.products.first {
-                    selectedProduct = firstProduct
-                }
-            }
-            .alert("通知", isPresented: $showAlert) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(alertMessage)
-            }
+
+            Image(systemName: "leaf.fill")
+                .rotationEffect(.degrees(45))
+                .foregroundColor(.white.opacity(0.4))
+                .font(.system(size: 14))
         }
     }
 
-    // MARK: - Sections
+    // MARK: - Main Copy
 
-    private var headerSection: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "crown.fill")
-                .font(.system(size: 80))
-                .foregroundColor(accentGold)
-                .shadow(color: accentGold.opacity(0.5), radius: 20)
-
-            Text("プレミアムで\n全ての名言を解放")
-                .font(.system(size: 32, weight: .bold))
-                .foregroundColor(.white)
-                .multilineTextAlignment(.center)
-
-            Text("広告なし、無制限で名言を楽しむ")
-                .font(.subheadline)
-                .foregroundColor(.gray)
-        }
-        .padding(.top, 40)
+    private var mainCopySection: some View {
+        Text("響いた言葉をただ流さず、\nあなたの文脈として\n静かに残せるように")
+            .font(.system(size: 24, weight: .bold))
+            .foregroundColor(textPrimary)
+            .multilineTextAlignment(.center)
+            .lineSpacing(6)
+            .opacity(appear ? 1 : 0)
+            .offset(y: appear ? 0 : 20)
     }
 
-    private var benefitsSection: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            BenefitRow(
-                icon: "infinity",
-                title: "過去の名言も無制限閲覧",
-                description: "いつでも好きな名言を見返せる"
-            )
+    // MARK: - Benefit List
 
-            BenefitRow(
-                icon: "sparkles",
-                title: "プレミアム限定名言",
-                description: "無料ユーザーには見られない特別な名言"
-            )
-
-            BenefitRow(
-                icon: "photo.fill",
-                title: "フル背景画像",
-                description: "シネマティックな高品質背景"
-            )
-
-            BenefitRow(
-                icon: "bell.fill",
-                title: "広告なし",
-                description: "集中を妨げる広告は一切なし"
-            )
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color.white.opacity(0.05))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(accentGold.opacity(0.3), lineWidth: 1)
-                )
-        )
-    }
-
-    private var plansSection: some View {
-        VStack(spacing: 16) {
-            Text("プランを選択")
-                .font(.headline)
-                .foregroundColor(.white)
+    private var benefitListSection: some View {
+        VStack(spacing: 24) {
+            Text("すべての機能をアンロックする")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(textPrimary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            ForEach(purchaseManager.products, id: \.id) { product in
-                PlanCard(
-                    product: product,
-                    isSelected: selectedProduct?.id == product.id,
-                    accentGold: accentGold
-                )
-                .onTapGesture {
-                    selectedProduct = product
-                    // Analytics: プラン選択
-                    AnalyticsService.shared.logPaywallPlanSelect(
-                        planType: product.id.contains("yearly") ? "yearly" : "monthly",
-                        price: product.displayPrice
-                    )
-                }
+            VStack(spacing: 32) {
+                benefitRow(icon: "book.pages.fill", title: "深く知るを全文開放", desc: "実在の言葉でも創作の言葉でも、その意味や余韻を最後まで受け取れます。")
+                benefitRow(icon: "star.fill", title: "言葉の棚を無制限に育てる", desc: "心に残った一節を好きなだけ残して、あなただけの世界観を少しずつ編めます。")
+                benefitRow(icon: "square.grid.2x2", title: "全カテゴリを自由に巡る", desc: "自己肯定、恋愛、家族、対人関係まで、その日の気分に近い言葉を自分で選べます。")
+                benefitRow(icon: "bell.badge", title: "通知を3回まで設定", desc: "朝・昼・夜の好きな時間に、気持ちを整える言葉を受け取れます。")
+                benefitRow(icon: "photo.on.rectangle", title: "背景と空気感を整える", desc: "やわらかな光や静かな景色を選んで、少しスピリチュアルな余韻まで自分好みにできます。")
             }
         }
+        .opacity(appear ? 1 : 0)
     }
 
-    private var purchaseButton: some View {
-        Button(action: {
-            Task {
-                await purchaseProduct()
+    private func benefitRow(icon: String, title: String, desc: String) -> some View {
+        HStack(alignment: .top, spacing: 16) {
+            Image(systemName: icon)
+                .font(.system(size: 20, weight: .light))
+                .foregroundColor(textSub)
+                .frame(width: 28, alignment: .center)
+                .padding(.top, 2)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(title)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(textPrimary)
+                Text(desc)
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundColor(textSub)
+                    .lineSpacing(4)
             }
-        }) {
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // MARK: - Review Carousel
+
+    private var reviewCarouselSection: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 16) {
+                Spacer().frame(width: 8)
+                reviewCard(title: "言葉を残す意味が出た", rating: 5, user: "会社員・30代", text: "その日に響いた一節を棚に置いていく感覚があって、ただの保存で終わらないです。")
+                reviewCard(title: "創作の言葉も違和感なく入る", rating: 5, user: "デザイナー・20代", text: "偉人の言葉だけじゃなく、今の気分に合う言葉として受け取れるのが好きでした。")
+                reviewCard(title: "少し儀式っぽく続けられる", rating: 5, user: "フリーランス・20代", text: "見た目と余白が静かで、朝にひらくと呼吸が戻る感じがあります。")
+                Spacer().frame(width: 8)
+            }
+        }
+        .opacity(appear ? 1 : 0)
+    }
+
+    private func reviewCard(title: String, rating: Int, user: String, text: String) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
             HStack {
-                if purchaseManager.isLoading {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .black))
-                } else {
-                    Text("プレミアムを始める")
-                        .font(.headline)
+                Text(title)
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(textPrimary)
+                Spacer()
+                Text(user)
+                    .font(.system(size: 10))
+                    .foregroundColor(textSub)
+            }
+
+            HStack(spacing: 2) {
+                ForEach(0..<rating, id: \.self) { _ in
+                    Image(systemName: "star.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(accentGold)
                 }
             }
-            .foregroundColor(.black)
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(accentGold)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+
+            Text(text)
+                .font(.system(size: 13))
+                .foregroundColor(textSub)
+                .lineSpacing(4)
         }
-        .disabled(selectedProduct == nil || purchaseManager.isLoading)
+        .padding(16)
+        .frame(width: 280, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(panelBg)
+        )
     }
 
-    private var footerSection: some View {
-        VStack(spacing: 16) {
-            // 購入を復元
+    // MARK: - Comparison Section
+
+    private var comparisonSection: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("無料版との比較")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(textPrimary)
+
+                Text("何が変わるのかを、ここで一気に確認できます。")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(textSub)
+            }
+
+            VStack(spacing: 0) {
+                HStack {
+                    Text("機能")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(textSub)
+                    Spacer()
+                    Text("無料")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(textSub)
+                        .frame(width: 78, alignment: .center)
+                    Text("PRO")
+                        .font(.system(size: 12, weight: .black))
+                        .foregroundColor(accentGold)
+                        .frame(width: 78, alignment: .center)
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 16)
+                .padding(.bottom, 10)
+
+                VStack(spacing: 0) {
+                    compRow(title: "名言の通常スクロール", freeValue: "無制限", proValue: "無制限")
+                    compRow(title: "お気に入り保存", freeValue: "10件まで", proValue: "無制限")
+                    compRow(title: "日替わり無料ジャンル", freeValue: "1つ解放", proValue: "全カテゴリ")
+                    compRow(title: "アーカイブ表示", freeValue: "不可", proValue: "使える")
+                    compRow(title: "通知回数", freeValue: "1回 / 日", proValue: "3回 / 日")
+                    compRow(title: "Live Activity", freeValue: "不可", proValue: "使える")
+                    compRow(title: "壁紙カスタム", freeValue: "固定", proValue: "変更可")
+                }
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(panelBg)
+            )
+        }
+        .opacity(appear ? 1 : 0)
+    }
+
+    private func compRow(title: String, freeValue: String, proValue: String) -> some View {
+        HStack {
+            Text(title)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(textPrimary)
+            Spacer()
+            Text(freeValue)
+                .font(.system(size: 13, weight: .bold))
+                .foregroundColor(textSub)
+                .frame(width: 78, alignment: .center)
+
+            Text(proValue)
+                .font(.system(size: 13, weight: .black))
+                .foregroundColor(accentGold)
+                .frame(width: 78, alignment: .center)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 16)
+                .background(
+                    Rectangle()
+                        .fill(Color.white.opacity(0.45))
+                        .frame(height: 1)
+                    , alignment: .bottom
+        )
+    }
+
+    // MARK: - Checkout Section
+
+    private var checkoutSection: some View {
+        VStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("プランを選択")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(textPrimary)
+
+                Text("年額、月額の順で選べます。支払い前にいつでも見比べられます。")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(textSub)
+            }
+
+            VStack(spacing: 10) {
+                planOptionCard(type: .yearly)
+                planOptionCard(type: .monthly)
+            }
+
+            // 続けるボタン（決済実行）
             Button(action: {
-                Task {
-                    await purchaseManager.restorePurchases()
-                    let success = userSettings.isPremiumUser
-                    AnalyticsService.shared.logPurchaseRestore(success: success)
-                    alertMessage = "購入を復元しました"
-                    showAlert = true
+                if !rcManager.isLoading {
+                    Task { await purchaseSelectedPackage() }
                 }
             }) {
-                Text("購入を復元")
-                    .font(.subheadline)
-                    .foregroundColor(accentGold)
+                HStack {
+                    if rcManager.isLoading {
+                        ProgressView().tint(.white)
+                    } else if selectedPackage == nil {
+                        Text("プランを取得中...")
+                            .font(.system(size: 16, weight: .bold))
+                    } else {
+                        Text(callToActionTitle)
+                            .font(.system(size: 16, weight: .bold))
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 48)
+                .background(accentGold)
+                .foregroundColor(.white)
+                .cornerRadius(12)
             }
+            // 不要なdisabledは外し、Actionの中でハンドリングする
+            .opacity(rcManager.isLoading ? 0.7 : 1.0)
 
-            // 利用規約・プライバシーポリシー
+            // 下部の補足テキスト＆リンク
+            VStack(spacing: 8) {
+                Text(checkoutSupportingText)
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(textSub)
+
             HStack(spacing: 16) {
-                Button("利用規約") {
-                    // 利用規約を開く
+                Button(action: {
+                    Task {
+                        do {
+                                try await rcManager.restorePurchases()
+                                let success = rcManager.isPremiumUser
+                                userSettings.updatePremiumStatus(isPremium: success)
+                                AnalyticsService.shared.logPurchaseRestore(success: success)
+                                await MainActor.run {
+                                    alertMessage = success ? "購入を復元しました" : "復元対象の購入が見つかりませんでした"
+                                    shouldDismissAfterAlert = success
+                                    showAlert = true
+                                }
+                            } catch {
+                                await MainActor.run {
+                                    alertMessage = "復元に失敗しました: \(error.localizedDescription)"
+                                    shouldDismissAfterAlert = false
+                                    showAlert = true
+                                }
+                            }
+                        }
+                    }) {
+                        Text("購入を復元")
+                    }
+                    Text("・")
+                    Button(action: { openURL(termsURL) }) { Text("利用規約") }
+                    Text("・")
+                    Button(action: { openURL(privacyURL) }) { Text("プライバシー") }
                 }
-                .font(.caption)
-                .foregroundColor(.gray)
-
-                Text("•")
-                    .foregroundColor(.gray)
-
-                Button("プライバシーポリシー") {
-                    // プライバシーポリシーを開く
-                }
-                .font(.caption)
-                .foregroundColor(.gray)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundColor(textSub.opacity(0.8))
             }
+            .padding(.top, 4)
 
-            // 注意事項
-            Text("サブスクリプションは自動更新されます。キャンセルは設定から可能です。")
-                .font(.caption2)
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-                .padding(.top, 8)
+            Button(action: dismissPaywallLater) {
+                Text("後で見る")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(textPrimary.opacity(0.86))
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 44)
+                    .background(Color.white.opacity(0.58))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .stroke(accentGold.opacity(0.18), lineWidth: 1)
+                    )
+                    .cornerRadius(12)
+            }
+            .padding(.top, 8)
         }
-        .padding(.bottom, 40)
+        .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 32, style: .continuous)
+                    .fill(panelBg.opacity(0.95))
+                    .shadow(color: accentGold.opacity(0.12), radius: 18, y: 10)
+        )
     }
 
-    // MARK: - Methods
+    private func planOptionCard(type: PlanType) -> some View {
+        let isSelected = planType == type
+        let isYearly = type == .yearly
+        let package = package(for: type)
+        let introDiscount = package.flatMap(eligibleIntroductoryDiscount(for:))
 
-    private func purchaseProduct() async {
-        guard let product = selectedProduct else { return }
-        let planType = product.id.contains("yearly") ? "yearly" : "monthly"
+        return Button(action: {
+            withAnimation(.spring(response: 0.3)) {
+                selectPlan(type)
+            }
+        }) {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .top, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(spacing: 8) {
+                            Text(isYearly ? "プレミアム 年額" : "プレミアム 月額")
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundColor(isSelected ? .white : textPrimary)
 
-        // Analytics: 購入開始
+                            if isYearly {
+                                Text("おすすめ")
+                                    .font(.system(size: 10, weight: .black))
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(accentPeach)
+                                    .clipShape(Capsule())
+                            }
+                        }
+
+                        Text(isYearly ? "12か月分をまとめて支払い" : "まずは気軽に始めたい方向け")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(isSelected ? Color.white.opacity(0.78) : textSub)
+                    }
+
+                    Spacer()
+
+                    Group {
+                        if let package {
+                            VStack(alignment: .trailing, spacing: 4) {
+                                if isYearly,
+                                   let introDiscount,
+                                   introDiscount.paymentMode == .freeTrial,
+                                   let introPeriodText = localizedPeriodText(for: introDiscount) {
+                                        Text("\(introPeriodText)無料")
+                                            .font(.system(size: 20, weight: .black, design: .rounded))
+                                    Text("その後 \(package.localizedPriceString) / 年")
+                                        .font(.system(size: 11, weight: .bold))
+                                        .foregroundColor(isSelected ? Color.white.opacity(0.78) : textSub)
+                                } else {
+                                    Text(package.localizedPriceString)
+                                        .font(.system(size: 22, weight: .black, design: .rounded))
+                                    Text(isYearly ? " / 年" : " / 月")
+                                        .font(.system(size: 11, weight: .bold))
+                                        .foregroundColor(isSelected ? Color.white.opacity(0.78) : textSub)
+                                }
+                            }
+                            .foregroundColor(isSelected ? .white : textPrimary)
+                        } else {
+                            ProgressView()
+                                .tint(isSelected ? .white : textPrimary)
+                        }
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(planSupportingText(for: type))
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(isSelected ? Color.white.opacity(0.92) : textPrimary.opacity(0.88))
+
+                    if let footnote = planFootnote(for: type) {
+                        Text(footnote)
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(isSelected ? Color.white.opacity(0.72) : textSub.opacity(0.9))
+                    }
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(isSelected ? accentGold : Color.white.opacity(0.55))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(
+                        isSelected ? accentGold.opacity(0.95) : Color.white.opacity(0.45),
+                        lineWidth: isSelected ? 1.6 : 1
+                    )
+            )
+        }
+    }
+
+    private func selectPlan(_ type: PlanType) {
+        planType = type
+        updateSelectedPackage(for: type)
+
+        if let pkg = selectedPackage {
+            AnalyticsService.shared.logPaywallPlanSelect(
+                planType: type == .yearly ? "yearly" : "monthly",
+                price: pkg.localizedPriceString
+            )
+        }
+    }
+
+    private func dismissPaywallLater() {
+        let duration = Int(Date().timeIntervalSince(paywallOpenTime))
+        AnalyticsService.shared.logPaywallDismiss(
+            trigger: "later",
+            timeOnPaywallSec: duration,
+            planViewed: selectedPackage?.storeProduct.productIdentifier
+        )
+        performDismiss()
+    }
+
+    private func performDismiss() {
+        if let onDismiss {
+            onDismiss()
+        } else {
+            dismiss()
+        }
+    }
+
+    private func package(for type: PlanType) -> Package? {
+        switch type {
+        case .yearly:
+            rcManager.yearlyPackage
+        case .monthly:
+            rcManager.monthlyPackage
+        }
+    }
+
+    private func planSupportingText(for type: PlanType) -> String {
+        switch type {
+        case .yearly:
+            if let introText = introOfferHeadline(for: type) {
+                return introText
+            }
+            return yearlySavingsText ?? "長く使うなら年額プランがいちばんお得"
+        case .monthly:
+            return "いつでも解約可能。短期で試したい場合はこちら"
+        }
+    }
+
+    private func planFootnote(for type: PlanType) -> String? {
+        switch type {
+        case .yearly:
+            if let trialFootnote = introOfferFootnote(for: type) {
+                return trialFootnote
+            }
+            return yearlyMonthlyEquivalentText
+        case .monthly:
+            return "請求は毎月更新されます"
+        }
+    }
+
+    private var callToActionTitle: String {
+        if let introText = introOfferCTA(for: planType) {
+            return introText
+        }
+
+        return "続ける"
+    }
+
+    private var checkoutSupportingText: String {
+        if let selectedPackage,
+           let discount = eligibleIntroductoryDiscount(for: selectedPackage),
+           discount.paymentMode == .freeTrial,
+           let durationText = localizedPeriodText(for: discount) {
+            return "\(durationText)の無料期間終了後、\(selectedPackage.localizedPriceString)で自動更新されます"
+        }
+
+        return planType == .yearly ? "1年分を一括でお支払いします" : "いつでもキャンセル可能"
+    }
+
+    private var yearlySavingsText: String? {
+        guard
+            let monthly = rcManager.monthlyPackage,
+            let yearly = rcManager.yearlyPackage
+        else {
+            return nil
+        }
+
+        let savings = monthlyPriceValue(monthly) * 12 - priceValue(yearly)
+        guard savings > 0 else { return nil }
+        return "月額プラン12か月分より\(formatCurrency(savings))お得"
+    }
+
+    private var yearlyMonthlyEquivalentText: String? {
+        guard let yearly = rcManager.yearlyPackage else { return nil }
+        let monthlyEquivalent = priceValue(yearly) / 12
+        guard monthlyEquivalent > 0 else { return nil }
+        return "約\(formatCurrency(monthlyEquivalent))/月"
+    }
+
+    private func priceValue(_ package: Package) -> Double {
+        NSDecimalNumber(decimal: package.storeProduct.price).doubleValue
+    }
+
+    private func monthlyPriceValue(_ package: Package) -> Double {
+        priceValue(package)
+    }
+
+    private func formatCurrency(_ amount: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.locale = Locale(identifier: "ja_JP")
+        formatter.maximumFractionDigits = 0
+        formatter.minimumFractionDigits = 0
+        return formatter.string(from: NSNumber(value: amount)) ?? "¥\(Int(amount))"
+    }
+
+    private func introOfferHeadline(for type: PlanType) -> String? {
+        guard let package = package(for: type),
+              let discount = eligibleIntroductoryDiscount(for: package) else {
+            return nil
+        }
+
+        guard let durationText = localizedPeriodText(for: discount) else {
+            return package.storeProduct.localizedIntroductoryPriceString
+        }
+
+        switch discount.paymentMode {
+        case .freeTrial:
+            return "今日からすぐにフル機能を使えます"
+        case .payAsYouGo, .payUpFront:
+            return "\(discount.localizedPriceString)で\(durationText)"
+        @unknown default:
+            return package.storeProduct.localizedIntroductoryPriceString
+        }
+    }
+
+    private func introOfferFootnote(for type: PlanType) -> String? {
+        guard let package = package(for: type),
+              eligibleIntroductoryDiscount(for: package) != nil else {
+            return nil
+        }
+
+        return "無料期間終了後は\(package.localizedPriceString) / \(type == .yearly ? "年" : "月")"
+    }
+
+    private func introOfferCTA(for type: PlanType) -> String? {
+        guard let package = package(for: type),
+              let discount = eligibleIntroductoryDiscount(for: package),
+              discount.paymentMode == .freeTrial,
+              let durationText = localizedPeriodText(for: discount) else {
+            return nil
+        }
+
+        return "\(durationText)無料で始める"
+    }
+
+    private func eligibleIntroductoryDiscount(for package: Package) -> StoreProductDiscount? {
+        guard let discount = package.storeProduct.introductoryDiscount else {
+            return nil
+        }
+
+        if let status = rcManager.introEligibilityStatus(for: package) {
+            switch status {
+            case .ineligible, .noIntroOfferExists:
+                return nil
+            case .eligible, .unknown:
+                break
+            @unknown default:
+                break
+            }
+        }
+
+        return discount
+    }
+
+    private func localizedPeriodText(for discount: StoreProductDiscount) -> String? {
+        let period = discount.subscriptionPeriod
+        let totalValue = period.value * max(discount.numberOfPeriods, 1)
+        guard totalValue > 0 else { return nil }
+
+        switch period.unit {
+        case .day:
+            return "\(totalValue)日"
+        case .week:
+            return "\(totalValue)週間"
+        case .month:
+            return "\(totalValue)か月"
+        case .year:
+            return "\(totalValue)年"
+        @unknown default:
+            return nil
+        }
+    }
+    
+    // 安全領域の下部（X系デバイスのホームインジケータ分）
+    private var safeAreaBottom: CGFloat {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            return windowScene.windows.first?.safeAreaInsets.bottom ?? 0
+        }
+        return 0
+    }
+
+    // MARK: - Logic
+
+    private func updateSelectedPackage(for type: PlanType) {
+        switch type {
+        case .yearly:
+            selectedPackage = rcManager.yearlyPackage
+        case .monthly:
+            selectedPackage = rcManager.monthlyPackage
+        }
+    }
+
+    @MainActor
+    private func purchaseSelectedPackage() async {
+        print("🛒 PremiumView: purchaseSelectedPackage() 開始")
+        
+        if selectedPackage == nil {
+            print("🛒 selectedPackage が nil → refreshPackagesIfNeeded")
+            await rcManager.refreshPackagesIfNeeded()
+            updateSelectedPackage(for: planType)
+        }
+
+        guard let package = selectedPackage else {
+            print("❌ selectedPackage が取得できず")
+            alertMessage = "購入プランを読み込めませんでした。通信状況を確認して再度お試しください。"
+            shouldDismissAfterAlert = false
+            showAlert = true
+            return
+        }
+        
+        let typeStr = package.storeProduct.productIdentifier.contains("yearly") ? "yearly" : "monthly"
+        print("🛒 購入パッケージ: \(package.storeProduct.productIdentifier) (\(package.localizedPriceString))")
+        
         AnalyticsService.shared.logPurchaseInitiate(
-            planType: planType,
-            price: product.displayPrice,
+            planType: typeStr,
+            price: package.localizedPriceString,
             trigger: "paywall"
         )
-
+        
         do {
-            let success = try await purchaseManager.purchase(product)
+            print("🛒 rcManager.purchaseWithCancelStatus() 呼び出し中...")
+            let (success, isCancelled) = try await rcManager.purchaseWithCancelStatus(package: package)
+            print("🛒 結果: success=\(success), isCancelled=\(isCancelled)")
+            
             if success {
-                // Analytics: 購入成功
+                // Apple決済成功 → プレミアム付与
+                userSettings.updatePremiumStatus(isPremium: true)
                 AnalyticsService.shared.logPurchaseSuccess(
-                    planType: planType,
-                    price: product.displayPrice,
+                    planType: typeStr,
+                    price: package.localizedPriceString,
                     trigger: "paywall",
                     totalQuotesViewed: 0,
                     totalFavorites: 0
                 )
-
+                print("✅ PremiumView: 購入成功アラート表示")
                 alertMessage = "プレミアムプランを購入しました！"
+                shouldDismissAfterAlert = true
                 showAlert = true
-
-                // 少し待ってから画面を閉じる
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
-                dismiss()
+            } else if isCancelled {
+                // ユーザーが自分でキャンセル → 何も表示しない
+                print("🛒 PremiumView: ユーザーキャンセル → UI変更なし")
+            } else {
+                // success=false, isCancelled=false（通常ありえないが念のため）
+                print("⚠️ PremiumView: 予期しない状態 success=false, isCancelled=false")
             }
         } catch {
-            // Analytics: 購入失敗
+            // ネットワークエラーなど、決済自体が失敗した場合のみ
+            print("❌ PremiumView catch: \(error)")
             AnalyticsService.shared.logPurchaseFail(
-                planType: planType,
+                planType: typeStr,
                 errorMessage: error.localizedDescription
             )
             alertMessage = "購入に失敗しました: \(error.localizedDescription)"
+            shouldDismissAfterAlert = false
             showAlert = true
         }
+        print("🛒 PremiumView: purchaseSelectedPackage() 終了")
     }
-}
-
-// MARK: - Benefit Row
-
-struct BenefitRow: View {
-    let icon: String
-    let title: String
-    let description: String
-
-    let accentGold = Color(red: 0.85, green: 0.65, blue: 0.2)
-
-    var body: some View {
-        HStack(alignment: .top, spacing: 16) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundColor(accentGold)
-                .frame(width: 32)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.headline)
-                    .foregroundColor(.white)
-
-                Text(description)
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-            }
-        }
-    }
-}
-
-// MARK: - Plan Card
-
-struct PlanCard: View {
-    let product: Product
-    let isSelected: Bool
-    let accentGold: Color
-
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(product.displayName)
-                    .font(.headline)
-                    .foregroundColor(.white)
-
-                Text(product.description)
-                    .font(.caption)
-                    .foregroundColor(.gray)
-            }
-
-            Spacer()
-
-            VStack(alignment: .trailing, spacing: 4) {
-                Text(product.displayPrice)
-                    .font(.title3)
-                    .fontWeight(.bold)
-                    .foregroundColor(isSelected ? accentGold : .white)
-
-                if product.id.contains("yearly") {
-                    Text("約¥242/月")
-                        .font(.caption2)
-                        .foregroundColor(.green)
-                }
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.white.opacity(isSelected ? 0.15 : 0.05))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(isSelected ? accentGold : Color.white.opacity(0.2), lineWidth: isSelected ? 2 : 1)
-                )
-        )
-    }
-}
-
-// MARK: - Preview
-
-#Preview {
-    PremiumView()
-        .environmentObject(UserSettings())
 }
