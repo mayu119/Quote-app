@@ -1,0 +1,30 @@
+import SwiftUI
+
+/// Words For Me の共通デザイントークン。
+/// 旧値対応: PremiumView の `bgDeep/panelBg/textPrimary/textSub/accentGold` をここへ集約。
+enum WFM {
+    enum ColorToken {
+        static let pageBase = Color("WFM/PageBase")
+        static let sheetBase = Color("WFM/SheetBase")
+        static let textPrimary = Color("WFM/TextPrimary")
+        static let textSub = Color("WFM/TextSub")
+        static let accentRose = Color("WFM/AccentRose")
+        static let accentGold = Color("WFM/AccentGold")
+
+        // メインの引用画面は没入感を優先する意図的な固定ダーク。Asset の自動反転対象外。
+        static let nightVeil = Color.black.opacity(0.72)
+        static let nightScrim = Color.black.opacity(0.42)
+    }
+
+    enum Radius { static let s: CGFloat = 12; static let m: CGFloat = 18; static let l: CGFloat = 26; static let xl: CGFloat = 34 }
+    enum Space { static let xxs: CGFloat = 4; static let xs: CGFloat = 8; static let s: CGFloat = 12; static let m: CGFloat = 16; static let l: CGFloat = 24; static let xl: CGFloat = 32 }
+    enum Typography {
+        static func title() -> Font { .system(.title2, weight: .bold) }
+        static func body() -> Font { .system(.body) }
+        static func caption() -> Font { .system(.caption, weight: .medium) }
+    }
+    enum Motion {
+        static let quick = Animation.spring(response: 0.34, dampingFraction: 0.82)
+        static let smooth = Animation.spring(response: 0.48, dampingFraction: 0.9)
+    }
+}

@@ -119,6 +119,13 @@ final class AnalyticsService {
         ])
     }
 
+    func logPrescriptionView() {
+        log("prescription_view", params: [
+            "days_since_install": daysSinceInstall,
+            "session_number": sessionCount
+        ])
+    }
+
     /// 通知権限結果
     func logNotificationPermission(granted: Bool) {
         log("notification_permission", params: [
@@ -385,6 +392,25 @@ final class AnalyticsService {
         ])
     }
 
+    /// トライアルから継続課金への転換（同一ユーザーで一度だけ送る）
+    func logTrialConvert(planType: String) {
+        log("trial_convert", params: [
+            "plan_type": planType,
+            "days_since_install": daysSinceInstall
+        ])
+    }
+
+    func logRetention(day: Int) {
+        log("retention_checkpoint", params: ["day": day])
+    }
+
+    func logNightWordView() { log("night_word_view") }
+    func logNightNoteSave(quoteId: String) { log("night_note_save", params: ["quote_id": quoteId]) }
+    func logInsightSuggestionShown(quoteId: String) { log("insight_suggestion_shown", params: ["quote_id": quoteId]) }
+    func logInsightSuggestionOpen(quoteId: String) { log("insight_suggestion_open", params: ["quote_id": quoteId]) }
+    func logStreakBroken(days: Int) { log("streak_broken", params: ["days": days]) }
+    func logStreakRestore(days: Int) { log("streak_restore", params: ["days": days]) }
+
     /// トライアルリマインダー表示
     func logTrialReminderShown(daysRemaining: Int) {
         log("trial_reminder_shown", params: [
@@ -434,6 +460,10 @@ final class AnalyticsService {
         log("notification_open", params: [
             "notification_type": notificationType
         ])
+    }
+
+    func logNotificationExperiment(mode: String, event: String) {
+        log("notification_copy_experiment", params: ["mode": mode, "event": event])
     }
 
     // ============================================================

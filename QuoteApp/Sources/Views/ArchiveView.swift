@@ -58,7 +58,7 @@ struct ArchiveView: View {
                 }
             }
             .fullScreenCover(isPresented: $showPremiumView) {
-                PremiumView()
+                PremiumView(context: .archive)
             }
         }
     }
@@ -157,5 +157,397 @@ struct MinimalArchiveCard: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy.MM.dd"
         return formatter.string(from: date)
+    }
+}
+
+struct CalendarShelfView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var userSettings: UserSettings
+
+    @State private var favoriteQuotes: [Quote] = []
+    @State private var selectedMonth = Date()
+    @State private var selectedDate: Date?
+    @State private var isLoading = true
+
+    private let accentRose = Color(red: 0.86, green: 0.55, blue: 0.60)
+    private let accentPeach = Color(red: 0.95, green: 0.78, blue: 0.67)
+    private let ink = Color(red: 0.31, green: 0.24, blue: 0.24)
+    private let mutedInk = Color(red: 0.49, green: 0.42, blue: 0.46)
+
+    private let calendar = Calendar.current
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 7)
+    private let weekdaySymbols = ["日", "月", "火", "水", "木", "金", "土"]
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.99, green: 0.95, blue: 0.93),
+                        Color(red: 0.98, green: 0.92, blue: 0.91),
+                        Color(red: 0.95, green: 0.94, blue: 0.98)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
+
+                if isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: accentRose))
+                        .scaleEffect(1.15)
+                } else {
+                    ScrollView(showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: 20) {
+                            if let todayWordSelection = userSettings.todayWordSelection {
+                                todayWordCard(todayWordSelection)
+                            }
+
+                            monthHeader
+                            weekdayHeader
+                            monthGrid
+
+                            if favoriteQuotes.isEmpty {
+                                emptyState
+                            } else {
+                                selectedDaySection
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 18)
+                        .padding(.bottom, 30)
+                    }
+                }
+            }
+            .navigationTitle("言葉のカレンダー")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color(red: 0.98, green: 0.94, blue: 0.93), for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.light, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("閉じる") {
+                        dismiss()
+                    }
+                    .font(.system(size: 15, weight: .semibold))
+                }
+            }
+            .task {
+                loadFavorites()
+            }
+        }
+    }
+
+    private var monthHeader: some View {
+        HStack {
+            Button(action: { shiftMonth(by: -1) }) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(ink)
+                    .frame(width: 36, height: 36)
+                    .background(Color.white.opacity(0.86))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+
+            Spacer()
+
+            VStack(spacing: 4) {
+                Text(monthTitle(selectedMonth))
+                    .font(.system(size: 23, weight: .bold))
+                    .foregroundColor(ink)
+
+                Text("その日に残した言葉が見える")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(mutedInk)
+            }
+
+            Spacer()
+
+            Button(action: { shiftMonth(by: 1) }) {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(ink)
+                    .frame(width: 36, height: 36)
+                    .background(Color.white.opacity(0.86))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private var weekdayHeader: some View {
+        LazyVGrid(columns: columns, spacing: 8) {
+            ForEach(weekdaySymbols, id: \.self) { symbol in
+                Text(symbol)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(mutedInk)
+                    .frame(maxWidth: .infinity)
+            }
+        }
+        .padding(.top, 6)
+    }
+
+    private var monthGrid: some View {
+        let days = daysForMonthGrid(selectedMonth)
+
+        return LazyVGrid(columns: columns, spacing: 10) {
+            ForEach(days, id: \.self) { date in
+                if let date {
+                    dayCell(date)
+                } else {
+                    Color.clear
+                        .frame(height: 48)
+                }
+            }
+        }
+    }
+
+    private func dayCell(_ date: Date) -> some View {
+        let count = quotes(on: date).count
+        let isSelected = selectedDate.map { calendar.isDate($0, inSameDayAs: date) } ?? false
+        let isCurrentMonth = calendar.isDate(date, equalTo: selectedMonth, toGranularity: .month)
+
+        return Button(action: {
+            selectedDate = date
+        }) {
+            VStack(spacing: 6) {
+                Text("\(calendar.component(.day, from: date))")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(isSelected ? .white : (isCurrentMonth ? ink : mutedInk.opacity(0.45)))
+
+                Group {
+                    if count > 0 {
+                        HStack(spacing: 3) {
+                            ForEach(0..<min(count, 3), id: \.self) { _ in
+                                Circle()
+                                    .fill(isSelected ? Color.white.opacity(0.92) : accentRose)
+                                    .frame(width: 5, height: 5)
+                            }
+                        }
+                    } else {
+                        Circle()
+                            .fill(Color.clear)
+                            .frame(width: 5, height: 5)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 48)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(isSelected ? accentRose : Color.white.opacity(count > 0 ? 0.88 : 0.52))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(isSelected ? accentRose.opacity(0.25) : Color.white.opacity(0.7), lineWidth: 1)
+            )
+            .shadow(color: accentRose.opacity(isSelected ? 0.18 : 0.06), radius: 10, x: 0, y: 6)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var selectedDaySection: some View {
+        let effectiveDate = selectedDate ?? latestFavoriteDate ?? Date()
+        let dayQuotes = quotes(on: effectiveDate)
+
+        return VStack(alignment: .leading, spacing: 14) {
+            Text(daySectionTitle(effectiveDate))
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(ink)
+
+            if dayQuotes.isEmpty {
+                Text("この日はまだ言葉を残していません。")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(mutedInk)
+                    .padding(.top, 2)
+            } else {
+                ForEach(dayQuotes, id: \.id) { quote in
+                    dayQuoteCard(quote)
+                }
+            }
+        }
+        .padding(.top, 8)
+    }
+
+    private var emptyState: some View {
+        VStack(alignment: .center, spacing: 12) {
+            Image(systemName: "calendar")
+                .font(.system(size: 30, weight: .light))
+                .foregroundColor(accentRose.opacity(0.55))
+
+            Text("まだ日付に残した言葉はありません")
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(ink)
+
+            Text("気になった言葉を棚に置いていくと、日付ごとに自分の流れが見えてきます。")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(mutedInk)
+                .multilineTextAlignment(.center)
+                .lineSpacing(4)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 40)
+    }
+
+    private func todayWordCard(_ selection: TodayWordSelection) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("TODAY'S WORD")
+                .font(.system(size: 10, weight: .black, design: .monospaced))
+                .tracking(2.4)
+                .foregroundColor(accentRose.opacity(0.82))
+
+            Text(selection.punchline)
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(ink)
+                .lineSpacing(4)
+
+            HStack(spacing: 10) {
+                Text("今日の私の言葉")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(mutedInk)
+
+                Text(selection.author)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(mutedInk.opacity(0.78))
+            }
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            LinearGradient(
+                colors: [Color.white.opacity(0.95), accentPeach.opacity(0.26)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(Color.white.opacity(0.72), lineWidth: 1)
+        )
+        .shadow(color: accentRose.opacity(0.12), radius: 16, x: 0, y: 10)
+    }
+
+    private func dayQuoteCard(_ quote: Quote) -> some View {
+        let isTodayWord = userSettings.todayWordSelection?.quoteID == quote.id
+
+        return VStack(alignment: .leading, spacing: 12) {
+            if isTodayWord {
+                Text("今日の私の言葉")
+                    .font(.system(size: 10, weight: .black, design: .monospaced))
+                    .tracking(2.2)
+                    .foregroundColor(accentRose.opacity(0.88))
+            }
+
+            Text(quote.quoteJa)
+                .font(.custom("HiraginoSans-W6", size: 17))
+                .foregroundColor(ink)
+                .lineSpacing(7)
+
+            if let note = quote.favoriteNote, !note.isEmpty {
+                Text(note)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(mutedInk)
+                    .lineSpacing(4)
+            }
+
+            if quote.hasVisibleAuthorAttribution {
+                HStack(spacing: 10) {
+                    Rectangle()
+                        .fill(accentRose.opacity(0.5))
+                        .frame(width: 18, height: 1)
+                    Text(quote.displayAuthor)
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(mutedInk)
+                }
+            }
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.white.opacity(0.86))
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(Color.white.opacity(0.72), lineWidth: 1)
+        )
+        .shadow(color: accentRose.opacity(0.08), radius: 12, x: 0, y: 8)
+    }
+
+    private func loadFavorites() {
+        isLoading = true
+        do {
+            let descriptor = FetchDescriptor<Quote>(
+                predicate: #Predicate { $0.isFavorited == true },
+                sortBy: [SortDescriptor(\.favoritedAt, order: .reverse)]
+            )
+            favoriteQuotes = try modelContext.fetch(descriptor)
+            if selectedDate == nil {
+                selectedDate = latestFavoriteDate
+            }
+            if let selectedDate {
+                selectedMonth = selectedDate
+            }
+        } catch {
+            favoriteQuotes = []
+        }
+        isLoading = false
+    }
+
+    private var latestFavoriteDate: Date? {
+        favoriteQuotes.compactMap(\.favoritedAt).max()
+    }
+
+    private func quotes(on date: Date) -> [Quote] {
+        favoriteQuotes.filter { quote in
+            guard let favoritedAt = quote.favoritedAt else { return false }
+            return calendar.isDate(favoritedAt, inSameDayAs: date)
+        }
+    }
+
+    private func shiftMonth(by value: Int) {
+        selectedMonth = calendar.date(byAdding: .month, value: value, to: selectedMonth) ?? selectedMonth
+    }
+
+    private func monthTitle(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ja_JP")
+        formatter.dateFormat = "yyyy年M月"
+        return formatter.string(from: date)
+    }
+
+    private func daySectionTitle(_ date: Date) -> String {
+        if calendar.isDateInToday(date) {
+            return "今日の棚"
+        }
+
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ja_JP")
+        formatter.dateFormat = "M月d日"
+        return "\(formatter.string(from: date)) に残した言葉"
+    }
+
+    private func daysForMonthGrid(_ date: Date) -> [Date?] {
+        guard let monthInterval = calendar.dateInterval(of: .month, for: date),
+              let firstWeekInterval = calendar.dateInterval(of: .weekOfMonth, for: monthInterval.start),
+              let lastDay = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: monthInterval.start),
+              let lastWeekInterval = calendar.dateInterval(of: .weekOfMonth, for: lastDay) else {
+            return []
+        }
+
+        var days: [Date?] = []
+        var current = firstWeekInterval.start
+
+        while current < lastWeekInterval.end {
+            if calendar.isDate(current, equalTo: date, toGranularity: .month) {
+                days.append(current)
+            } else {
+                days.append(nil)
+            }
+            current = calendar.date(byAdding: .day, value: 1, to: current) ?? current
+        }
+
+        return days
     }
 }

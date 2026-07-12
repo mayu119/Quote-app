@@ -619,3 +619,13 @@ struct DailyRitualState: Codable, Equatable {
         SpiritualBundle(rawValue: bundleRawValue)
     }
 }
+
+struct TodayWordSelection: Codable, Equatable {
+    let quoteID: String
+    let quoteText: String
+    let punchline: String
+    let author: String
+    let categoryJa: String
+    let backgroundName: String
+    let dateString: String
+}

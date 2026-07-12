@@ -278,8 +278,8 @@ struct TodayQuoteView: View {
                     .scaleEffect(appear ? 1.05 : 1.0)
                     .animation(.linear(duration: 20).repeatForever(autoreverses: true), value: appear)
             } else {
-                // フォールバック: majestic_peak
-                Image("majestic_peak")
+                // フォールバック: blush_garden
+                Image("blush_garden")
                     .resizable()
                     .scaledToFill()
                     .ignoresSafeArea()

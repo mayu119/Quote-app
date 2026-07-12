@@ -2,6 +2,10 @@ import SwiftUI
 import RevenueCat
 import UIKit
 
+enum PaywallContext: String {
+    case onboarding, favoriteLimit, archive, wallpaper, categoryLock, insight, weeklyShelf, general
+}
+
 /// 女性向けの柔らかいプレミアム画面
 struct PremiumView: View {
     // MARK: - Environment
@@ -12,6 +16,7 @@ struct PremiumView: View {
     @EnvironmentObject private var userSettings: UserSettings
     
     /// 外部から終了処理を注入したい場合に使用
+    var context: PaywallContext = .general
     var onDismiss: (() -> Void)? = nil
 
     // MARK: - Legal URLs
@@ -72,10 +77,6 @@ struct PremiumView: View {
                     benefitListSection
                         .padding(.top, 40)
                         .padding(.horizontal, 24)
-
-                    // レビューカルーセル
-                    reviewCarouselSection
-                        .padding(.top, 40)
 
                     // 機能比較
                     comparisonSection
@@ -189,7 +190,9 @@ struct PremiumView: View {
     // MARK: - Main Copy
 
     private var mainCopySection: some View {
-        Text("響いた言葉をただ流さず、\nあなたの文脈として\n静かに残せるように")
+        Text(context == .onboarding
+             ? "処方箋が決まった記念に、\n7日間、すべての言葉と棚を\n受け取れます"
+             : "響いた言葉をただ流さず、\nあなたの文脈として\n静かに残せるように")
             .font(.system(size: 24, weight: .bold))
             .foregroundColor(textPrimary)
             .multilineTextAlignment(.center)
@@ -207,15 +210,37 @@ struct PremiumView: View {
                 .foregroundColor(textPrimary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            VStack(spacing: 32) {
-                benefitRow(icon: "book.pages.fill", title: "深く知るを全文開放", desc: "実在の言葉でも創作の言葉でも、その意味や余韻を最後まで受け取れます。")
-                benefitRow(icon: "star.fill", title: "言葉の棚を無制限に育てる", desc: "心に残った一節を好きなだけ残して、あなただけの世界観を少しずつ編めます。")
-                benefitRow(icon: "square.grid.2x2", title: "全カテゴリを自由に巡る", desc: "自己肯定、恋愛、家族、対人関係まで、その日の気分に近い言葉を自分で選べます。")
-                benefitRow(icon: "bell.badge", title: "通知を3回まで設定", desc: "朝・昼・夜の好きな時間に、気持ちを整える言葉を受け取れます。")
-                benefitRow(icon: "photo.on.rectangle", title: "背景と空気感を整える", desc: "やわらかな光や静かな景色を選んで、少しスピリチュアルな余韻まで自分好みにできます。")
+            VStack(spacing: 28) {
+                ForEach(contextualBenefits, id: \.title) { benefit in
+                    benefitRow(icon: benefit.icon, title: benefit.title, desc: benefit.description)
+                }
             }
         }
         .opacity(appear ? 1 : 0)
+    }
+
+    private struct Benefit {
+        let icon: String
+        let title: String
+        let description: String
+    }
+
+    private var contextualBenefits: [Benefit] {
+        let shelf = Benefit(icon: "star.fill", title: "言葉の棚を無制限に育てる", description: "心に残った一節を好きなだけ残して、あなただけの世界観を少しずつ編めます。")
+        let archive = Benefit(icon: "calendar", title: "過ぎた言葉をさかのぼる", description: "あの日に受け取った言葉と、そのときの自分を静かに見返せます。")
+        let category = Benefit(icon: "square.grid.2x2", title: "全カテゴリを自由に巡る", description: "自己肯定、恋愛、家族、対人関係まで、その日の気分に近い言葉を自分で選べます。")
+        let wallpaper = Benefit(icon: "photo.on.rectangle", title: "背景と空気感を自分好みに", description: "やわらかな光や静かな景色を選んで、言葉を受け取る余白を整えられます。")
+        let insight = Benefit(icon: "book.pages.fill", title: "言葉の余韻を最後まで受け取る", description: "実在の言葉でも創作の言葉でも、その意味や背景を最後まで読めます。")
+        let leading: Benefit
+        switch context {
+        case .favoriteLimit: leading = shelf
+        case .archive: leading = archive
+        case .wallpaper: leading = wallpaper
+        case .categoryLock, .onboarding: leading = category
+        case .insight: leading = insight
+        case .weeklyShelf, .general: leading = shelf
+        }
+        return [leading] + [shelf, archive, category, wallpaper, insight].filter { $0.title != leading.title }.prefix(3)
     }
 
     private func benefitRow(icon: String, title: String, desc: String) -> some View {
@@ -237,54 +262,6 @@ struct PremiumView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    // MARK: - Review Carousel
-
-    private var reviewCarouselSection: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 16) {
-                Spacer().frame(width: 8)
-                reviewCard(title: "言葉を残す意味が出た", rating: 5, user: "会社員・30代", text: "その日に響いた一節を棚に置いていく感覚があって、ただの保存で終わらないです。")
-                reviewCard(title: "創作の言葉も違和感なく入る", rating: 5, user: "デザイナー・20代", text: "偉人の言葉だけじゃなく、今の気分に合う言葉として受け取れるのが好きでした。")
-                reviewCard(title: "少し儀式っぽく続けられる", rating: 5, user: "フリーランス・20代", text: "見た目と余白が静かで、朝にひらくと呼吸が戻る感じがあります。")
-                Spacer().frame(width: 8)
-            }
-        }
-        .opacity(appear ? 1 : 0)
-    }
-
-    private func reviewCard(title: String, rating: Int, user: String, text: String) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(title)
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(textPrimary)
-                Spacer()
-                Text(user)
-                    .font(.system(size: 10))
-                    .foregroundColor(textSub)
-            }
-
-            HStack(spacing: 2) {
-                ForEach(0..<rating, id: \.self) { _ in
-                    Image(systemName: "star.fill")
-                        .font(.system(size: 12))
-                        .foregroundColor(accentGold)
-                }
-            }
-
-            Text(text)
-                .font(.system(size: 13))
-                .foregroundColor(textSub)
-                .lineSpacing(4)
-        }
-        .padding(16)
-        .frame(width: 280, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(panelBg)
-        )
     }
 
     // MARK: - Comparison Section
@@ -408,6 +385,10 @@ struct PremiumView: View {
             }
             // 不要なdisabledは外し、Actionの中でハンドリングする
             .opacity(rcManager.isLoading ? 0.7 : 1.0)
+            .accessibilityLabel(selectedPackage == nil ? "購入プランを取得中" : callToActionTitle)
+            .accessibilityHint("選択中のプランの購入を開始します")
+
+            reassuranceSection
 
             // 下部の補足テキスト＆リンク
             VStack(spacing: 8) {
@@ -463,6 +444,7 @@ struct PremiumView: View {
                     .cornerRadius(12)
             }
             .padding(.top, 8)
+            .accessibilityLabel("今は購入しない")
         }
         .padding(16)
             .background(
@@ -470,6 +452,27 @@ struct PremiumView: View {
                     .fill(panelBg.opacity(0.95))
                     .shadow(color: accentGold.opacity(0.12), radius: 18, y: 10)
         )
+    }
+
+    /// 購入前の不安を減らす、事実に基づく案内。
+    private var reassuranceSection: some View {
+        VStack(alignment: .leading, spacing: WFM.Space.xs) {
+            reassuranceRow("いつでも解約できます。手順も簡単です")
+            reassuranceRow("解約しても、棚に置いた言葉は消えません")
+            if let selectedPackage,
+               let discount = eligibleIntroductoryDiscount(for: selectedPackage),
+               discount.paymentMode == .freeTrial {
+                reassuranceRow("無料期間中に料金はかかりません")
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, WFM.Space.xs)
+    }
+
+    private func reassuranceRow(_ text: String) -> some View {
+        Label(text, systemImage: "checkmark")
+            .font(WFM.Typography.caption())
+            .foregroundColor(textSub)
     }
 
     private func planOptionCard(type: PlanType) -> some View {
@@ -642,7 +645,9 @@ struct PremiumView: View {
            let discount = eligibleIntroductoryDiscount(for: selectedPackage),
            discount.paymentMode == .freeTrial,
            let durationText = localizedPeriodText(for: discount) {
-            return "\(durationText)の無料期間終了後、\(selectedPackage.localizedPriceString)で自動更新されます"
+            return context == .onboarding
+                ? "\(durationText)後に\(selectedPackage.localizedPriceString)で自動更新されます"
+                : "\(durationText)の無料期間終了後、\(selectedPackage.localizedPriceString)で自動更新されます"
         }
 
         return planType == .yearly ? "1年分を一括でお支払いします" : "いつでもキャンセル可能"
@@ -697,7 +702,7 @@ struct PremiumView: View {
 
         switch discount.paymentMode {
         case .freeTrial:
-            return "今日からすぐにフル機能を使えます"
+            return context == .onboarding ? "処方箋が決まった記念に" : "今日からすぐにフル機能を使えます"
         case .payAsYouGo, .payUpFront:
             return "\(discount.localizedPriceString)で\(durationText)"
         @unknown default:
@@ -722,7 +727,7 @@ struct PremiumView: View {
             return nil
         }
 
-        return "\(durationText)無料で始める"
+        return context == .onboarding ? "7日間、受け取ってみる" : "\(durationText)無料で始める"
     }
 
     private func eligibleIntroductoryDiscount(for package: Package) -> StoreProductDiscount? {
@@ -801,12 +806,13 @@ struct PremiumView: View {
         }
         
         let typeStr = package.storeProduct.productIdentifier.contains("yearly") ? "yearly" : "monthly"
+        let startsWithGiftPeriod = eligibleIntroductoryDiscount(for: package)?.paymentMode == .freeTrial
         print("🛒 購入パッケージ: \(package.storeProduct.productIdentifier) (\(package.localizedPriceString))")
         
         AnalyticsService.shared.logPurchaseInitiate(
             planType: typeStr,
             price: package.localizedPriceString,
-            trigger: "paywall"
+            trigger: context.rawValue
         )
         
         do {
@@ -820,10 +826,13 @@ struct PremiumView: View {
                 AnalyticsService.shared.logPurchaseSuccess(
                     planType: typeStr,
                     price: package.localizedPriceString,
-                    trigger: "paywall",
+                    trigger: context.rawValue,
                     totalQuotesViewed: 0,
                     totalFavorites: 0
                 )
+                if startsWithGiftPeriod {
+                    AnalyticsService.shared.logTrialStart(planType: typeStr)
+                }
                 print("✅ PremiumView: 購入成功アラート表示")
                 alertMessage = "プレミアムプランを購入しました！"
                 shouldDismissAfterAlert = true

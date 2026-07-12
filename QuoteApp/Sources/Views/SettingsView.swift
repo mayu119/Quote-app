@@ -466,7 +466,7 @@ struct SettingsView: View {
     #if DEBUG
     private var debugSection: some View {
         VStack(alignment: .leading, spacing: 32) {
-            Text("🛠️ デバッグモード")
+            Label("デバッグモード", systemImage: "wrench.and.screwdriver")
                 .font(.system(size: 12, weight: .black))
                 .tracking(4)
                 .foregroundColor(accentRose)

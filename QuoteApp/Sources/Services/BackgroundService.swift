@@ -32,7 +32,7 @@ final class BackgroundService: ObservableObject {
               let data = try? Data(contentsOf: url),
               let config = try? JSONDecoder().decode(BackgroundConfig.self, from: data) else {
             print("⚠️ Failed to load backgrounds.json, using default backgrounds")
-            return ["majestic_peak"]
+            return ["blush_garden"]
         }
         return config.backgrounds
     }()
@@ -51,26 +51,29 @@ final class BackgroundService: ObservableObject {
     private static let dailyBgDateKey = "dailyBackgroundDate"
     private static let dailyBgNameKey = "dailyBackgroundName"
 
-    /// 無料ユーザー用: 1日1枚の背景をランダムに選択（前日と被らない）
-    static func getDailyBackground() -> String {
+    /// 無料ユーザー用: 候補背景から1日1枚をランダムに選択（前日と被らない）
+    static func getDailyBackground(from candidateBackgrounds: [String] = []) -> String {
         let defaults = UserDefaults.standard
         let todayStr = dateString(for: Date())
+        let poolSource = candidateBackgrounds.filter { backgrounds.contains($0) }
+        let availableBackgrounds = poolSource.isEmpty ? backgrounds : poolSource
 
         // 今日の保存値があればそのまま返す
         if let savedDate = defaults.string(forKey: dailyBgDateKey),
            savedDate == todayStr,
-           let savedBg = defaults.string(forKey: dailyBgNameKey) {
+           let savedBg = defaults.string(forKey: dailyBgNameKey),
+           availableBackgrounds.contains(savedBg) {
             return savedBg
         }
 
         // 前日の背景を取得して除外リストに
         let previousBg = defaults.string(forKey: dailyBgNameKey)
-        var pool = backgrounds
-        if let prev = previousBg {
+        var pool = availableBackgrounds
+        if let prev = previousBg, availableBackgrounds.contains(prev) {
             pool = pool.filter { $0 != prev }
         }
 
-        let newBg = pool.randomElement() ?? backgrounds[0]
+        let newBg = pool.randomElement() ?? availableBackgrounds[0]
 
         // 保存
         defaults.set(todayStr, forKey: dailyBgDateKey)

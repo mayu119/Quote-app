@@ -13,6 +13,8 @@ struct FavoritesView: View {
     
     // ストーリーモード起動フラグ
     @State private var isStoryMode = false
+    @State private var showWeeklyShelf = false
+    @State private var showMonthlyReport = false
 
     private let accentRose = Color(red: 0.86, green: 0.55, blue: 0.60)
     private let accentPeach = Color(red: 0.95, green: 0.78, blue: 0.67)
@@ -131,6 +133,18 @@ struct FavoritesView: View {
                         }
                     }
                 }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("月次") { showMonthlyReport = true }
+                        .font(.system(size: 12, weight: .bold))
+                }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if weeklySummary.favoriteCount > 0 {
+                        Button("今週") { showWeeklyShelf = true }
+                            .font(.system(size: 12, weight: .bold))
+                    }
+                }
             }
             .task { loadFavorites() }
             .fullScreenCover(item: $selectedQuote) { quote in
@@ -140,6 +154,12 @@ struct FavoritesView: View {
             .fullScreenCover(isPresented: $isStoryMode) {
                 FavoritesStoryView(quotes: favoriteQuotes)
                     .environmentObject(userSettings)
+            }
+            .sheet(isPresented: $showWeeklyShelf) {
+                WeeklyShelfView().environmentObject(userSettings)
+            }
+            .sheet(isPresented: $showMonthlyReport) {
+                MonthlyReportView().environmentObject(userSettings)
             }
         }
     }
@@ -346,7 +366,7 @@ struct FavoritesStoryView: View {
                     // 無課金ユーザー: その日の固定背景のみ（さまざまな壁紙を見れるのはプレミアムの特権）
                     // 課金ユーザー: 設定で選んだ壁紙があればそれからランダム、なければ保存時の背景
                     let imageName = !userSettings.isPremiumUser
-                        ? BackgroundService.getDailyBackground()
+                        ? BackgroundService.getDailyBackground(from: userSettings.selectedBackgrounds)
                         : (userSettings.selectedBackgrounds.isEmpty ? quote.backgroundImage : userSettings.selectedBackgrounds.randomElement()!)
 
                     Image(imageName)
@@ -652,7 +672,7 @@ struct MinimalQuoteDetailView: View {
             )
         }
         .fullScreenCover(isPresented: $showPremiumView) {
-            PremiumView()
+            PremiumView(context: .favoriteLimit)
                 .environmentObject(userSettings)
         }
         .preferredColorScheme(.light)

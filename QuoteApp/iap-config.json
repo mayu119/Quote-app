@@ -1,0 +1,19 @@
+{
+  "bundle_id": "com.antigravity.QuoteApp",
+  "in_app_purchases": [
+    {
+      "product_id": "com.quoteapp.gift.omamori",
+      "name": "言葉のお守り",
+      "type": "NON_CONSUMABLE",
+      "review_note": "A one-time gift card containing one selected quote, a sender note, and a special background. The recipient can open and save it without any payment prompt.",
+      "family_sharable": false,
+      "localizations": [
+        {
+          "locale": "ja",
+          "name": "言葉のお守り",
+          "description": "選んだ言葉とひとことを、大切な人へ贈る一回限りのお守りカードです。"
+        }
+      ]
+    }
+  ]
+}

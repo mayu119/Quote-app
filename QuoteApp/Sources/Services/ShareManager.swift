@@ -270,7 +270,7 @@ struct QuoteShareSnapshotView: View {
                     .foregroundColor(.white.opacity(0.85))
                     .shadow(color: .black.opacity(0.5), radius: 15, x: 0, y: 5)
 
-                Text("KOTODAMA EDIT")
+                Text("Words For Me  •  App Storeで続きも読む")
                     .font(.system(size: 16, weight: .semibold, design: .monospaced))
                     .tracking(6)
                     .foregroundColor(.white.opacity(0.48))
@@ -422,7 +422,7 @@ struct ShelfShareSnapshotView: View {
                         .tracking(8)
                         .foregroundColor(primaryText.opacity(0.92))
 
-                    Text("KOTODAMA EDIT")
+                Text("Words For Me")
                         .font(.system(size: 14, weight: .bold, design: .monospaced))
                         .tracking(5)
                         .foregroundColor(accentLavender)

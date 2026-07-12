@@ -69,6 +69,7 @@ final class NotificationService: ObservableObject {
         static let trialReminder5d = "trial_reminder_5d"
         static let trialReminder3d = "trial_reminder_3d"
         static let trialReminder1d = "trial_reminder_1d"
+        static let weeklyShelf = "weekly_shelf_notification"
         static var allPremiumSlots: [String] { (0..<3).map { premiumSlot($0) } }
         static var allTrialReminders: [String] { [trialReminder5d, trialReminder3d, trialReminder1d] }
         static var allQuoteIDs: [String] { [dailyQuote] + allPremiumSlots }
@@ -76,6 +77,24 @@ final class NotificationService: ObservableObject {
 
     private static let premiumTimeLabels = ["朝の一言", "昼の名言", "夜の言葉"]
     private static let savedQuotesKey = "notification_saved_quotes"
+    private static let notificationModeKey = "notification_copy_mode"
+
+    enum NotificationCopyMode: String {
+        case full
+        case tease
+    }
+
+    /// 同一端末では常に同じ群。Remote Config導入前の安全なローカル50%割当。
+    private var notificationCopyMode: NotificationCopyMode {
+        if let stored = UserDefaults.standard.string(forKey: Self.notificationModeKey),
+           let mode = NotificationCopyMode(rawValue: stored) {
+            return mode
+        }
+        let seed = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+        let mode: NotificationCopyMode = seed.unicodeScalars.reduce(0) { $0 + Int($1.value) } % 2 == 0 ? .full : .tease
+        UserDefaults.standard.set(mode.rawValue, forKey: Self.notificationModeKey)
+        return mode
+    }
 
     // MARK: - 厳選フォールバック名言（釣り場理論の代わり）
 
@@ -243,8 +262,16 @@ final class NotificationService: ObservableObject {
             content.subtitle = quote.author
         }
         
-        // 本文に名言全体
-        content.body = quote.quoteJa.isEmpty ? quote.punchline : quote.quoteJa
+        let mode = notificationCopyMode
+        if mode == .tease {
+            content.body = timeLabel.contains("夜")
+                ? "今日のあなたに、置いていきたい言葉があります。"
+                : "今朝の一枚を選びました。(quote.author)さんの言葉です。"
+        } else {
+            content.body = quote.quoteJa.isEmpty ? quote.punchline : quote.quoteJa
+        }
+        content.userInfo["copy_mode"] = mode.rawValue
+        AnalyticsService.shared.logNotificationExperiment(mode: mode.rawValue, event: "scheduled")
 
         content.sound = .default
         // バッジは使わない。通知が来るたびにアイコンへ「1」が残るのを防ぐ。
@@ -272,46 +299,26 @@ final class NotificationService: ObservableObject {
     }
     func cancelDailyQuoteNotification() { cancelAllQuoteNotifications() }
 
-    // MARK: - Trial Reminders
-
-    func scheduleTrialReminders(trialEndDate: Date) async throws {
-        let center = UNUserNotificationCenter.current()
-        let calendar = Calendar.current
-        cancelTrialReminders()
-
-        let reminders: [(String, Int, String, String)] = [
-            (ID.trialReminder5d, 5, "無料トライアル終了まで残り5日",
-             "プレミアム体験を続けませんか？今なら全機能が使い放題です。"),
-            (ID.trialReminder3d, 3, "トライアル終了まで残り3日",
-             "お気に入りの名言が、もうすぐ見られなくなります。"),
-            (ID.trialReminder1d, 1, "トライアルは明日終了します",
-             "最後のチャンスです。今日中にプレミアムプランを選びましょう。"),
-        ]
-
-        for (identifier, daysBefore, title, body) in reminders {
-            guard let reminderDate = calendar.date(
-                byAdding: .day, value: -daysBefore, to: trialEndDate
-            ), reminderDate > Date() else { continue }
-
-            let content = UNMutableNotificationContent()
-            content.title = title
-            content.body = body
-            content.sound = .default
-            content.categoryIdentifier = "TRIAL_REMINDER"
-
-            var dc = calendar.dateComponents([.year, .month, .day], from: reminderDate)
-            dc.calendar = Calendar.current
-            dc.timeZone = TimeZone.current
-            dc.hour = 9; dc.minute = 0
-
-            let trigger = UNCalendarNotificationTrigger(dateMatching: dc, repeats: false)
-            let request = UNNotificationRequest(
-                identifier: identifier, content: content, trigger: trigger
-            )
-            try await center.add(request)
-        }
+    func scheduleWeeklyShelfNotification() async throws {
+        let content = UNMutableNotificationContent()
+        content.title = "今週のあなたの棚が整いました"
+        content.body = "今週、心に残った言葉を静かに見返せます。"
+        content.sound = .default
+        var components = DateComponents()
+        components.calendar = .current
+        components.weekday = 1 // Sunday
+        components.hour = 21
+        let request = UNNotificationRequest(
+            identifier: ID.weeklyShelf,
+            content: content,
+            trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+        )
+        try await UNUserNotificationCenter.current().add(request)
     }
 
+    // MARK: - Trial Reminders
+
+    /// トライアル終了前リマインダーは出さない方針。旧ビルドで予約済みの分の掃除用に残す
     func cancelTrialReminders() {
         UNUserNotificationCenter.current().removePendingNotificationRequests(
             withIdentifiers: ID.allTrialReminders

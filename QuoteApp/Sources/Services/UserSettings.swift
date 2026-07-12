@@ -90,6 +90,16 @@ final class UserSettings: ObservableObject {
         didSet { defaults.set(lastCheckInDate, forKey: Keys.lastCheckInDate) }
     }
 
+    /// 週1回だけ使える休息日の利用週（ストリークを責めないための救済）
+    @Published var restDayWeekKey: String {
+        didSet { defaults.set(restDayWeekKey, forKey: Keys.restDayWeekKey) }
+    }
+
+    /// 切れた直前の連続日数。失われた記録として保持し、翌日の救済案内に使う。
+    @Published var lastBrokenStreakDays: Int {
+        didSet { defaults.set(lastBrokenStreakDays, forKey: Keys.lastBrokenStreakDays) }
+    }
+
     // MARK: - 閲覧回数制限
 
     /// 「すべて」表示時のスワイプカウント（上限10回/日）
@@ -148,6 +158,17 @@ final class UserSettings: ObservableObject {
                 defaults.set(data, forKey: Keys.dailyRitualState)
             } else {
                 defaults.removeObject(forKey: Keys.dailyRitualState)
+            }
+        }
+    }
+
+    @Published var todayWordSelection: TodayWordSelection? {
+        didSet {
+            if let todayWordSelection,
+               let data = try? JSONEncoder().encode(todayWordSelection) {
+                defaults.set(data, forKey: Keys.todayWordSelection)
+            } else {
+                defaults.removeObject(forKey: Keys.todayWordSelection)
             }
         }
     }
@@ -218,6 +239,8 @@ final class UserSettings: ObservableObject {
         self.longestStreakDays = max(currentStreak, defaults.integer(forKey: Keys.longestStreakDays))
         self.lastEngagementDate = defaults.string(forKey: Keys.lastEngagementDate) ?? ""
         self.lastCheckInDate = defaults.string(forKey: Keys.lastCheckInDate) ?? ""
+        self.restDayWeekKey = defaults.string(forKey: Keys.restDayWeekKey) ?? ""
+        self.lastBrokenStreakDays = defaults.integer(forKey: Keys.lastBrokenStreakDays)
 
         self.preferredCategories = defaults.stringArray(forKey: Keys.preferredCategories) ?? []
 
@@ -233,6 +256,13 @@ final class UserSettings: ObservableObject {
             self.dailyRitualState = state
         } else {
             self.dailyRitualState = nil
+        }
+
+        if let data = defaults.data(forKey: Keys.todayWordSelection),
+           let selection = try? JSONDecoder().decode(TodayWordSelection.self, from: data) {
+            self.todayWordSelection = selection
+        } else {
+            self.todayWordSelection = nil
         }
 
         let todayStr = UserSettings.dateString(for: Date())
@@ -252,7 +282,10 @@ final class UserSettings: ObservableObject {
 
         self.selectedBackgroundIndex = defaults.integer(forKey: Keys.selectedBackgroundIndex)
         let savedBgs = defaults.stringArray(forKey: Keys.selectedBackgrounds) ?? []
-        self.selectedBackgrounds = savedBgs.isEmpty ? Array(BackgroundService.backgrounds.prefix(5)) : savedBgs
+        let validSavedBackgrounds = savedBgs.filter { BackgroundService.backgrounds.contains($0) }
+        self.selectedBackgrounds = validSavedBackgrounds.isEmpty
+            ? Array(BackgroundService.backgrounds.prefix(5))
+            : validSavedBackgrounds
 
         self.showDateHeader = defaults.object(forKey: Keys.showDateHeader) == nil
             ? true : defaults.bool(forKey: Keys.showDateHeader)
@@ -284,16 +317,38 @@ final class UserSettings: ObservableObject {
         let calendar = Calendar.current
         let previousDate = Self.date(from: lastEngagementDate)
 
-        if let previousDate,
-           let yesterday = calendar.date(byAdding: .day, value: -1, to: today),
-           calendar.isDate(previousDate, inSameDayAs: yesterday) {
+        let elapsedDays = previousDate.map {
+            calendar.dateComponents([.day], from: calendar.startOfDay(for: $0), to: calendar.startOfDay(for: today)).day ?? 0
+        } ?? 0
+        let weekKey = Self.weekKey(for: today)
+
+        if elapsedDays == 1 {
             currentStreakDays += 1
+        } else if elapsedDays == 2, restDayWeekKey != weekKey {
+            // 週1回の休息日は、空白を「失敗」にしない。
+            currentStreakDays += 1
+            restDayWeekKey = weekKey
         } else {
+            if !lastEngagementDate.isEmpty, currentStreakDays > 1 {
+                lastBrokenStreakDays = currentStreakDays
+                AnalyticsService.shared.logStreakBroken(days: currentStreakDays)
+            }
             currentStreakDays = 1
         }
 
         longestStreakDays = max(longestStreakDays, currentStreakDays)
         lastEngagementDate = todayStr
+    }
+
+    /// 途切れた翌日にだけ提供する救済。過去の最長記録はこの操作をしなくても残る。
+    @discardableResult
+    func restoreBrokenStreakIfAvailable(isPremium: Bool) -> Bool {
+        guard isPremium, lastBrokenStreakDays > 0 else { return false }
+        currentStreakDays = max(currentStreakDays, lastBrokenStreakDays + 1)
+        longestStreakDays = max(longestStreakDays, currentStreakDays)
+        AnalyticsService.shared.logStreakRestore(days: lastBrokenStreakDays)
+        lastBrokenStreakDays = 0
+        return true
     }
 
     func shouldPresentDailyCheckIn(on date: Date = Date()) -> Bool {
@@ -318,6 +373,29 @@ final class UserSettings: ObservableObject {
         guard let dailyRitualState else { return }
         if dailyRitualState.dateString != Self.dateString(for: date) {
             self.dailyRitualState = nil
+        }
+    }
+
+    func saveTodayWord(_ quote: Quote, backgroundName: String, on date: Date = Date()) {
+        todayWordSelection = TodayWordSelection(
+            quoteID: quote.id,
+            quoteText: quote.quoteJa,
+            punchline: quote.punchline,
+            author: quote.displayAuthor,
+            categoryJa: quote.category.displayTitleJa,
+            backgroundName: backgroundName,
+            dateString: Self.dateString(for: date)
+        )
+    }
+
+    func clearTodayWord() {
+        todayWordSelection = nil
+    }
+
+    func clearExpiredTodayWordIfNeeded(on date: Date = Date()) {
+        guard let todayWordSelection else { return }
+        if todayWordSelection.dateString != Self.dateString(for: date) {
+            self.todayWordSelection = nil
         }
     }
 
@@ -367,7 +445,7 @@ final class UserSettings: ObservableObject {
         guard let sharedUD = Self.sharedDefaults else { return }
         var data: [String: Any] = [
             "punchline":   quote.punchline,
-            "author":      quote.author,
+            "author":      quote.displayAuthor,
             "category":    quote.category.displayText,
             "category_ja": quote.category.displayTitleJa,
             "id":          quote.id
@@ -382,6 +460,33 @@ final class UserSettings: ObservableObject {
         sharedUD.synchronize()
     }
 
+    func writeTodayWordToWidget(_ selection: TodayWordSelection) {
+        guard let sharedUD = Self.sharedDefaults else { return }
+        var data: [String: Any] = [
+            "punchline": selection.punchline,
+            "author": selection.author,
+            "category": "TODAY'S WORD",
+            "category_ja": "今日の私の言葉",
+            "id": selection.quoteID
+        ]
+
+        if let image = UIImage(named: selection.backgroundName),
+           let imageData = image.jpegData(compressionQuality: 0.5) {
+            data["background_image_data"] = imageData
+        }
+
+        sharedUD.set(data, forKey: "widget_today_quote")
+        sharedUD.synchronize()
+    }
+
+    func syncWidgetQuote(defaultQuote quote: Quote, backgroundName: String) {
+        if let todayWordSelection {
+            writeTodayWordToWidget(todayWordSelection)
+        } else {
+            writeQuoteToWidget(quote, backgroundName: backgroundName)
+        }
+    }
+
     // MARK: - Premium Notification (P-32)
 
     func updatePremiumNotificationTime(at index: Int, to date: Date) {
@@ -391,9 +496,15 @@ final class UserSettings: ObservableObject {
 
     // MARK: - Private
 
-    private static func dateString(for date: Date) -> String {
+    static func dateString(for date: Date) -> String {
         let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"; f.timeZone = .current
         return f.string(from: date)
+    }
+
+    private static func weekKey(for date: Date) -> String {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
+        return "\(components.yearForWeekOfYear ?? 0)-\(components.weekOfYear ?? 0)"
     }
 
     private static func date(from string: String) -> Date? {
@@ -417,6 +528,8 @@ final class UserSettings: ObservableObject {
         static let longestStreakDays        = "longestStreakDays"
         static let lastEngagementDate       = "lastEngagementDate"
         static let lastCheckInDate          = "lastCheckInDate"
+        static let restDayWeekKey           = "restDayWeekKey"
+        static let lastBrokenStreakDays     = "lastBrokenStreakDays"
         static let hasSeenInteractionGuide  = "hasSeenInteractionGuide"
         static let dailySwipeCount              = "dailySwipeCount"
         static let dailyFreeCategorySwipeCount   = "dailyFreeCategorySwipeCount"
@@ -431,5 +544,6 @@ final class UserSettings: ObservableObject {
         static let trialEndDate                 = "trialEndDate"
         static let isVerticalTextMode           = "isVerticalTextMode"
         static let dailyRitualState             = "dailyRitualState"
+        static let todayWordSelection           = "todayWordSelection"
     }
 }

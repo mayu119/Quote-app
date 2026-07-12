@@ -10,6 +10,24 @@ final class QuoteDataService: ObservableObject {
         let topCategory: QuoteMediumCategory?
     }
 
+    struct WeeklyShelfSummary {
+        let quotes: [Quote]
+        let topCategory: QuoteMediumCategory?
+
+        var favoriteCount: Int { quotes.count }
+        var featuredQuote: Quote? {
+            quotes.max { ($0.favoritedAt ?? .distantPast) < ($1.favoritedAt ?? .distantPast) }
+        }
+    }
+
+    struct MonthlyShelfSummary {
+        let quotes: [Quote]
+        let topCategory: QuoteMediumCategory?
+        let month: Date
+        var favoriteCount: Int { quotes.count }
+        var bestQuotes: [Quote] { Array(quotes.prefix(3)) }
+    }
+
     struct FavoriteRecommendation {
         let quote: Quote
         let sourceCategory: QuoteMediumCategory?
@@ -21,8 +39,9 @@ final class QuoteDataService: ObservableObject {
     private let duplicatePreventionDays: Int = 30
 
     /// JSONデータを更新したらこの値をインクリメントする
-    /// v23: プレミアム深掘り文を引用ごとの洞察重視に再編集
-    private static let currentDataVersion: Int = 23
+    /// v29: 300件化(全カテゴリ30件)。Original+107件、カテゴリ再配置13件、重複・不適合7件削除、解説文の使い回し解消
+    /// v28: 削除済み引用をお気に入り棚に残す移行を追加
+    private static let currentDataVersion: Int = 29
     private static let dataVersionKey = "quotesDataVersion"
 
     @Published var quotes: [Quote] = []
@@ -55,6 +74,12 @@ final class QuoteDataService: ObservableObject {
 
         } else if savedVersion < Self.currentDataVersion {
             // バージョンアップ: お気に入りIDを保護してフルリフレッシュ
+            let validIDs = Set(validQuotes.map(\.id))
+            // 配信カタログから削除された言葉でも、既に棚へ置いた記録はユーザーのものとして残す。
+            // 次の通常配信には混ぜず、Favorites / Archive からだけ見返せる。
+            let orphanedFavorites = existingQuotes.filter {
+                $0.isFavorited && !validIDs.contains($0.id)
+            }
             let favoritedIds = Set(existingQuotes.filter { $0.isFavorited }.map { $0.id })
             let lastShownMap = Dictionary(uniqueKeysWithValues:
                 existingQuotes.compactMap { q -> (String, Date)? in
@@ -74,7 +99,9 @@ final class QuoteDataService: ObservableObject {
                     return (q.id, d)
                 }
             )
-            for q in existingQuotes { modelContext.delete(q) }
+            for q in existingQuotes where !orphanedFavorites.contains(where: { $0.id == q.id }) {
+                modelContext.delete(q)
+            }
             for q in validQuotes {
                 if favoritedIds.contains(q.id) { q.isFavorited = true }
                 if let note = favoriteNoteMap[q.id] { q.favoriteNote = note }
@@ -150,6 +177,13 @@ final class QuoteDataService: ObservableObject {
         let effectiveLimit = limit > 0 ? limit : Int.max
 
         var pool = try modelContext.fetch(descriptor)
+
+        // 月替わりOriginalパック: 60件を20件ずつローテーションする。
+        // 保存済みの言葉はSwiftDataに残り、ここで「通常配信」から外れるだけ。
+        if mediumCategory == nil, largeCategory == nil {
+            let activeOriginalIDs = monthlyOriginalPackIDs(from: pool, on: Date())
+            pool = pool.filter { $0.author != "Original" || activeOriginalIDs.contains($0.id) }
+        }
         
         if let cat = mediumCategory {
             pool = pool.filter { $0.category == cat }
@@ -287,6 +321,11 @@ final class QuoteDataService: ObservableObject {
     }
 
     func getWeeklyFavoriteSummary(referenceDate: Date = Date()) throws -> WeeklyFavoriteSummary {
+        let summary = try getWeeklyShelfSummary(referenceDate: referenceDate)
+        return WeeklyFavoriteSummary(favoriteCount: summary.favoriteCount, topCategory: summary.topCategory)
+    }
+
+    func getWeeklyShelfSummary(referenceDate: Date = Date()) throws -> WeeklyShelfSummary {
         let favorites = try getFavoriteQuotes()
         let calendar = Calendar.current
         let weekAgo = calendar.date(byAdding: .day, value: -6, to: referenceDate) ?? referenceDate
@@ -305,10 +344,21 @@ final class QuoteDataService: ObservableObject {
             }?
             .key
 
-        return WeeklyFavoriteSummary(
-            favoriteCount: weeklyFavorites.count,
-            topCategory: topCategory
-        )
+        return WeeklyShelfSummary(quotes: weeklyFavorites, topCategory: topCategory)
+    }
+
+    func getMonthlyShelfSummary(referenceDate: Date = Date()) throws -> MonthlyShelfSummary {
+        let calendar = Calendar.current
+        let currentMonth = calendar.dateInterval(of: .month, for: referenceDate) ?? DateInterval(start: referenceDate, duration: 0)
+        let previousMonthEnd = calendar.date(byAdding: .second, value: -1, to: currentMonth.start) ?? referenceDate
+        let previousMonth = calendar.dateInterval(of: .month, for: previousMonthEnd) ?? currentMonth
+        let quotes = try getFavoriteQuotes().filter {
+            guard let date = $0.favoritedAt else { return false }
+            return previousMonth.contains(date)
+        }
+        let topCategory = Dictionary(grouping: quotes, by: \.category)
+            .max { $0.value.count < $1.value.count }?.key
+        return MonthlyShelfSummary(quotes: quotes, topCategory: topCategory, month: previousMonth.start)
     }
 
     func getFavoriteRecommendation(excluding excludedQuoteID: String? = nil) throws -> FavoriteRecommendation? {
@@ -377,6 +427,22 @@ final class QuoteDataService: ObservableObject {
             groups[s, default: []].append(q)
         }
         return groups.keys.sorted(by: >).flatMap { groups[$0]!.shuffled() }
+    }
+
+    private func monthlyOriginalPackIDs(from quotes: [Quote], on date: Date) -> Set<String> {
+        let originals = quotes
+            .filter { $0.author == "Original" }
+            .map(\.id)
+            .sorted()
+        guard !originals.isEmpty else { return [] }
+        let packSize = 20
+        let packCount = max(1, Int(ceil(Double(originals.count) / Double(packSize))))
+        let components = Calendar.current.dateComponents([.year, .month], from: date)
+        let monthSeed = (components.year ?? 0) * 12 + (components.month ?? 0)
+        let packIndex = monthSeed % packCount
+        let start = packIndex * packSize
+        let end = min(start + packSize, originals.count)
+        return Set(originals[start..<end])
     }
 
     private func favoriteSignalScore(for quote: Quote) -> Int {

@@ -6,6 +6,7 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var userSettings: UserSettings
     @AppStorage("lastDailyRitualPresentedDate") private var lastDailyRitualPresentedDate = ""
+    @AppStorage("lastNightWordPresentedDate") private var lastNightWordPresentedDate = ""
 
     @State private var isLoading = true
     @State private var dailyQuotes: [Quote] = []
@@ -28,6 +29,7 @@ struct ContentView: View {
     @State private var interactionGuideCompletedCount: Int = 0
     @State private var showInteractionGuideCelebration = false
     @State private var interactionGuideCelebrationMessage: String = ""
+    @State private var showStreakRescue = false
     
     /// 日替わり無料カテゴリの1日上限
     private let dailyFreeLimitCategory = Config.freeUserCategorySwipeLimit
@@ -80,17 +82,26 @@ struct ContentView: View {
     // MARK: - Enums
 
     enum SheetType: Identifiable {
-        case settings, favorites, archive, wallpaperPicker, categoryPicker
+        case settings, favorites, archive, wallpaperPicker, categoryPicker, calendar
         var id: Int { hashValue }
     }
 
     /// フルスクリーンカバーを一本化して競合を排除
     enum CoverType: Identifiable {
-        case premiumWall
+        case premiumWall(PaywallContext)
         case onboarding
         case dailyCheckIn
         case dailyRitual
-        var id: Int { hashValue }
+        case nightWord(Quote)
+        var id: String {
+            switch self {
+            case .premiumWall(let context): return "premium_\\(context.rawValue)"
+            case .onboarding: return "onboarding"
+            case .dailyCheckIn: return "daily_check_in"
+            case .dailyRitual: return "daily_ritual"
+            case .nightWord(let quote): return "night_\\(quote.id)"
+            }
+        }
     }
 
     // MARK: - Body
@@ -159,6 +170,12 @@ struct ContentView: View {
                     .transition(.opacity.combined(with: .scale(scale: 0.95)))
                     .zIndex(140)
             }
+
+            if showStreakRescue {
+                streakRescueBanner
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .zIndex(150)
+            }
         }
         .task {
             await initializeCoreData()
@@ -177,8 +194,19 @@ struct ContentView: View {
                 FavoritesView(quoteDataService: QuoteDataService(modelContext: modelContext))
             case .archive:
                 ArchiveView()
+            case .calendar:
+                CalendarShelfView()
+                    .environmentObject(userSettings)
             case .wallpaperPicker:
-                WallpaperPickerView()
+                WallpaperPickerView(
+                    onPremiumRequired: {
+                        activeSheet = nil
+                        AnalyticsService.shared.logPaywallView(trigger: "wallpaper_lock")
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                            activeCover = .premiumWall(.wallpaper)
+                        }
+                    }
+                )
             case .categoryPicker:
                 CategoryPickerView(
                     selectedMediumCategory: $selectedMediumCategory,
@@ -189,7 +217,7 @@ struct ContentView: View {
                     onPremiumRequired: {
                         activeSheet = nil
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                            activeCover = .premiumWall
+                            activeCover = .premiumWall(.general)
                         }
                     }
                 )
@@ -199,8 +227,8 @@ struct ContentView: View {
         // 単一の fullScreenCover で premium / onboarding 両方を管理
         .fullScreenCover(item: $activeCover) { cover in
             switch cover {
-            case .premiumWall:
-                PremiumView()
+            case .premiumWall(let context):
+                PremiumView(context: context)
                     .environmentObject(userSettings)
             case .onboarding:
                 OnboardingView(onDismiss: {
@@ -229,7 +257,7 @@ struct ContentView: View {
                         userSettings.markDailyCheckInPresented()
                         activeCover = nil
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                            activeCover = .premiumWall
+                            activeCover = .premiumWall(.general)
                         }
                     }
                 )
@@ -246,7 +274,7 @@ struct ContentView: View {
                             markDailyRitualPresented()
                             activeCover = nil
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                                activeCover = .premiumWall
+                                activeCover = .premiumWall(.general)
                             }
                         },
                         onStart: { bundle in
@@ -258,6 +286,12 @@ struct ContentView: View {
                     )
                     .environmentObject(userSettings)
                 }
+            case .nightWord(let quote):
+                NightWordView(quote: quote) {
+                    lastNightWordPresentedDate = UserSettings.dateString(for: Date())
+                    activeCover = nil
+                }
+                .environmentObject(userSettings)
             }
         }
     }
@@ -344,7 +378,7 @@ struct ContentView: View {
         if userSettings.isPremiumUser {
             return userSettings.selectedBackgrounds.first ?? BackgroundService.backgrounds[0]
         }
-        return BackgroundService.getDailyBackground()
+        return BackgroundService.getDailyBackground(from: userSettings.selectedBackgrounds)
     }
     
     @ViewBuilder
@@ -372,19 +406,37 @@ struct ContentView: View {
             recommendedCategoryTitle: favoriteRecommendation?.sourceCategory?.displayTitleJa,
             activeSpiritualBundle: selectedSpiritualBundle,
             dailyRitualState: Config.enableSpiritualRitual ? userSettings.dailyRitualState : nil,
+            todayWordSelection: userSettings.todayWordSelection,
             onSettings:        { activeSheet = .settings },
             onFavorites:       { activeSheet = .favorites },
             onArchive:         { activeSheet = .archive },
+            onCalendar:        { activeSheet = .calendar },
             onCategorySelect:  { activeSheet = .categoryPicker },
             onSpiritualBundleSelect: {
                 guard Config.enableSpiritualRitual else { return }
                 activeCover = .dailyRitual
             },
             onWallpaperSelect: { activeSheet = .wallpaperPicker },
+            onToggleTodayWord: {
+                if userSettings.todayWordSelection?.quoteID == quote.id {
+                    userSettings.clearTodayWord()
+                    if let currentVisibleID = visibleQuoteId,
+                       let currentVisibleQuote = dailyQuotes.first(where: { $0.id == currentVisibleID }) {
+                        userSettings.writeQuoteToWidget(currentVisibleQuote, backgroundName: backgroundName)
+                        WidgetCenter.shared.reloadAllTimelines()
+                    }
+                } else {
+                    userSettings.saveTodayWord(quote, backgroundName: backgroundName)
+                    if let selection = userSettings.todayWordSelection {
+                        userSettings.writeTodayWordToWidget(selection)
+                        WidgetCenter.shared.reloadAllTimelines()
+                    }
+                }
+            },
             onPremium:         {
                 let trigger = isLockedPreview ? "free_preview_locked" : "home_toolbar"
                 AnalyticsService.shared.logPaywallView(trigger: trigger)
-                activeCover = .premiumWall
+                activeCover = .premiumWall(isLockedPreview ? .categoryLock : .general)
             },
             onTutorialVerticalSwipe: {
                 completeInteractionGuideStep(.verticalSwipe, message: "上下スワイプできました")
@@ -432,6 +484,7 @@ struct ContentView: View {
         let dataService = QuoteDataService(modelContext: modelContext)
         do {
             userSettings.refreshDailyEngagement()
+            userSettings.clearExpiredTodayWordIfNeeded()
             if Config.enableSpiritualRitual {
                 userSettings.clearExpiredDailyRitualIfNeeded()
             }
@@ -457,7 +510,7 @@ struct ContentView: View {
 
                 if let first = quotes.first {
                     let bgName = currentBackgroundName
-                    userSettings.writeQuoteToWidget(first, backgroundName: bgName)
+                    userSettings.syncWidgetQuote(defaultQuote: first, backgroundName: bgName)
                     WidgetCenter.shared.reloadAllTimelines()
                 }
 
@@ -469,10 +522,15 @@ struct ContentView: View {
                     withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) {
                         showInteractionGuide = true
                     }
+                } else if shouldPresentNightWord(), let nightQuote = nightQuote(from: quotes) {
+                    activeCover = .nightWord(nightQuote)
                 } else if Config.enableSpiritualRitual && shouldPresentDailyRitual() {
                     activeCover = .dailyRitual
                 } else if userSettings.shouldPresentDailyCheckIn() {
                     activeCover = .dailyCheckIn
+                }
+                if userSettings.lastBrokenStreakDays > 0 {
+                    showStreakRescue = true
                 }
 
                 if userSettings.isPremiumUser {
@@ -482,6 +540,9 @@ struct ContentView: View {
 
             // パーソナライズ通知スケジュール（お気に入りカテゴリ優先）
             await scheduleNotificationsWithQuotes(quotes)
+            if weeklyFavoriteSummary.favoriteCount > 0, userSettings.notificationEnabled {
+                try? await NotificationService.shared.scheduleWeeklyShelfNotification()
+            }
             
             // iOS 26 Dynamic Lock Screen / Live Activity更新 (プレミアム限定 & 設定ON時)
             if userSettings.isPremiumUser, userSettings.liveActivityEnabled, let todayQuote = quotes.first {
@@ -507,6 +568,42 @@ struct ContentView: View {
                 }
             }
         }
+    }
+
+    private func shouldPresentNightWord(on date: Date = Date()) -> Bool {
+        guard Calendar.current.component(.hour, from: date) >= 21 else { return false }
+        return lastNightWordPresentedDate != UserSettings.dateString(for: date)
+    }
+
+    private func nightQuote(from quotes: [Quote]) -> Quote? {
+        quotes.first { $0.category == .wantToQuit && $0.author == "Original" } ?? quotes.first
+    }
+
+    private var streakRescueBanner: some View {
+        VStack(spacing: WFM.Space.s) {
+            Text("昨日までの(userSettings.lastBrokenStreakDays)日は消えていません。")
+                .font(.headline)
+            Text("今日の言葉から、続きを受け取れます。")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Button(userSettings.isPremiumUser ? "続きにする" : "記録を続ける") {
+                if userSettings.isPremiumUser {
+                    if userSettings.restoreBrokenStreakIfAvailable(isPremium: true) {
+                        withAnimation(WFM.Motion.quick) { showStreakRescue = false }
+                    }
+                } else {
+                    AnalyticsService.shared.logPaywallView(trigger: "streak_rescue")
+                    activeCover = .premiumWall(.general)
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(WFM.ColorToken.accentRose)
+        }
+        .padding(WFM.Space.l)
+        .frame(maxWidth: .infinity)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: WFM.Radius.l, style: .continuous))
+        .padding(WFM.Space.m)
+        .frame(maxHeight: .infinity, alignment: .bottom)
     }
 
     private func switchCategory(medium: QuoteMediumCategory?, large: QuoteLargeCategory?) {
@@ -637,7 +734,7 @@ struct ContentView: View {
             try? await Task.sleep(nanoseconds: UInt64(Config.freeUserPreviewPaywallDelay * 1_000_000_000))
             guard !Task.isCancelled, visibleQuoteId == quoteId else { return }
             AnalyticsService.shared.logPaywallView(trigger: "free_preview_delay")
-            activeCover = .premiumWall
+            activeCover = .premiumWall(.categoryLock)
         }
     }
 
@@ -667,10 +764,8 @@ struct ContentView: View {
             )
         }
 
-        // トライアルリマインダー
-        if let trialEnd = userSettings.trialEndDate {
-            try? await NotificationService.shared.scheduleTrialReminders(trialEndDate: trialEnd)
-        }
+        // トライアル終了前リマインダーは出さない方針。旧ビルドで予約済みの分だけ掃除する
+        NotificationService.shared.cancelTrialReminders()
     }
 
     /// お気に入りカテゴリ優先で通知用名言を選出（Unknown除外・質フィルタ付き）

@@ -31,6 +31,8 @@ final class RevenueCatManager: ObservableObject {
     @Published private(set) var introEligibilityByProductID: [String: IntroEligibilityStatus] = [:]
 
     private var isConfigured = false
+    private let sawTrialKey = "analytics_saw_trial"
+    private let loggedTrialConvertKey = "analytics_logged_trial_convert"
 
     private init() {}
 
@@ -58,16 +60,19 @@ final class RevenueCatManager: ObservableObject {
 
             print(premium ? "✅ プレミアムユーザー" : "⚠️ 無料ユーザー")
 
-            // トライアル期間の検出 → リマインダー通知をスケジュール
+            // トライアル期間の検出（転換ログ用）。終了前リマインダーは出さない方針
             let entitlement = info.entitlements["premium"]
             if let ent = entitlement,
                ent.periodType == .trial,
                let expirationDate = ent.expirationDate {
-                // トライアル終了リマインダーをスケジュール
-                try? await NotificationService.shared.scheduleTrialReminders(
-                    trialEndDate: expirationDate
-                )
+                UserDefaults.standard.set(true, forKey: sawTrialKey)
                 print("📅 トライアル終了日: \(expirationDate)")
+            } else if premium,
+                      UserDefaults.standard.bool(forKey: sawTrialKey),
+                      !UserDefaults.standard.bool(forKey: loggedTrialConvertKey) {
+                let planType = entitlement?.productIdentifier.contains("yearly") == true ? "yearly" : "monthly"
+                AnalyticsService.shared.logTrialConvert(planType: planType)
+                UserDefaults.standard.set(true, forKey: loggedTrialConvertKey)
             }
         } catch {
             print("⚠️ サブスクリプション状態の確認に失敗: \(error)")

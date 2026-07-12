@@ -3,9 +3,10 @@ import SwiftUI
 struct WallpaperPickerView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var userSettings: UserSettings
-    
+
+    let onPremiumRequired: () -> Void
     @State private var tempSelected: [String] = []
-    
+
     // プレミアムな雰囲気を出すための2カラムレイアウト
     let columns = [
         GridItem(.flexible(), spacing: 16),
@@ -13,7 +14,12 @@ struct WallpaperPickerView: View {
     ]
     private let accentRose = Color(red: 0.86, green: 0.55, blue: 0.60)
     private let ink = Color(red: 0.31, green: 0.24, blue: 0.24)
-    
+    private let cardHeight: CGFloat = 232
+
+    private var availableBackgrounds: [String] {
+        BackgroundService.backgrounds.filter { UIImage(named: $0) != nil }
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -48,30 +54,37 @@ struct WallpaperPickerView: View {
 
                         // グリッド
                         LazyVGrid(columns: columns, spacing: 24) {
-                            ForEach(BackgroundService.backgrounds, id: \.self) { bg in
+                            ForEach(availableBackgrounds, id: \.self) { bg in
                                 let isSelected = tempSelected.contains(bg)
-                                let index = tempSelected.firstIndex(of: bg)
-                                
+
                                 Button(action: {
-                                    toggleSelection(for: bg)
+                                    if userSettings.isPremiumUser {
+                                        toggleSelection(for: bg)
+                                    } else {
+                                        onPremiumRequired()
+                                    }
                                 }) {
                                     ZStack {
                                         // 画像本体
                                         Image(bg)
                                             .resizable()
                                             .aspectRatio(contentMode: .fill)
-                                            .frame(height: 240) // 縦長の美しい比率
+                                            .frame(maxWidth: .infinity)
+                                            .frame(height: cardHeight)
                                             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                                             .scaleEffect(isSelected ? 0.95 : 1.0)
                                             .opacity(isSelected ? 1.0 : 0.6)
-                                        
+                                            .overlay(alignment: .topLeading) {
+                                                wallpaperLabel(for: bg, isSelected: isSelected)
+                                            }
+
                                         // 選択時のオーバーレイ
                                         if isSelected {
                                             RoundedRectangle(cornerRadius: 16, style: .continuous)
                                                 .strokeBorder(Color.white.opacity(0.8), lineWidth: 2)
-                                                .frame(height: 240)
+                                                .frame(height: cardHeight)
                                                 .scaleEffect(0.95)
-                                            
+
                                             VStack {
                                                 Spacer()
                                                 HStack {
@@ -88,6 +101,7 @@ struct WallpaperPickerView: View {
                                             }
                                         }
                                     }
+                                    .frame(maxWidth: .infinity)
                                     .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
                                 }
                                 .buttonStyle(.plain)
@@ -115,6 +129,11 @@ struct WallpaperPickerView: View {
                 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("適用") {
+                        guard userSettings.isPremiumUser else {
+                            onPremiumRequired()
+                            return
+                        }
+
                         if !tempSelected.isEmpty {
                             userSettings.selectedBackgrounds = tempSelected
                             // Analytics: 壁紙変更
@@ -150,5 +169,23 @@ struct WallpaperPickerView: View {
         impact.impactOccurred()
         
         tempSelected = [bg] // 単一選択にする
+    }
+
+    private func wallpaperLabel(for background: String, isSelected: Bool) -> some View {
+        Text(backgroundLabel(for: background))
+            .font(.system(size: 11, weight: .bold))
+            .foregroundColor(.white.opacity(0.94))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(Color.black.opacity(isSelected ? 0.36 : 0.24))
+            .clipShape(Capsule())
+            .padding(12)
+    }
+
+    private func backgroundLabel(for name: String) -> String {
+        name
+            .split(separator: "_")
+            .map { $0.capitalized }
+            .joined(separator: " ")
     }
 }

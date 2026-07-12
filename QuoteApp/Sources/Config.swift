@@ -21,24 +21,10 @@ enum Config {
     /// 年額サブスクリプションのProduct ID
     static let yearlyProductID = "com.quoteapp.premium.yearly.33"
 
-    // MARK: - Pricing
-
-    /// 月額価格（表示用）
-    static let monthlyPrice = "¥600"
-
-    /// 年額価格（表示用）
-    static let yearlyPrice = "¥4,800"
-
-    /// 年額の月換算価格（表示用）
-    static let yearlyPricePerMonth = "¥400"
-
-    /// 年額の割引率（表示用）
-    static let yearlyDiscountRate = "33%"
+    /// 言葉のお守り（買い切りギフト）
+    static let giftOmamoriProductID = "com.quoteapp.gift.omamori"
 
     // MARK: - Free User Limits
-
-    /// 無料ユーザーの1日あたりの名言閲覧制限（「すべて」表示時）
-    static let freeUserDailySwipeLimit = 50
 
     /// 無料ユーザーの日替わり無料カテゴリ閲覧制限
     static let freeUserCategorySwipeLimit = 10

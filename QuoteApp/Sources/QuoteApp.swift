@@ -96,6 +96,10 @@ struct QuoteApp: App {
 
         // Analytics: セッション開始
         AnalyticsService.shared.logSessionStart(isPremium: userSettings.isPremiumUser)
+        let installAge = AnalyticsService.shared.daysSinceInstall
+        if installAge == 1 || installAge == 7 {
+            AnalyticsService.shared.logRetention(day: installAge)
+        }
 
         // Analytics: 初回起動
         if userSettings.isFirstLaunch {

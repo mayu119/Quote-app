@@ -1,13 +1,73 @@
 default_platform(:ios)
 
+app_store_version = "1.1.2"
+app_build_number = "7"
+
 platform :ios do
   desc "Upload metadata and screenshots to App Store Connect"
   lane :update_metadata do
     deliver(
+      app_version: app_store_version,
       submit_for_review: false,
       skip_binary_upload: true,
       skip_screenshots: true,
       force: true
     )
+  end
+
+  desc "Upload metadata and screenshots to App Store Connect"
+  lane :update_store_assets do
+    deliver(
+      app_version: app_store_version,
+      submit_for_review: false,
+      skip_binary_upload: true,
+      skip_screenshots: false,
+      overwrite_screenshots: true,
+      force: true
+    )
+  end
+
+  desc "Archive and upload build to App Store Connect"
+  lane :upload_build do
+    build_app(
+      project: "QuoteApp.xcodeproj",
+      scheme: "QuoteApp",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "build/export",
+      output_name: "MyWords-#{app_store_version}-#{app_build_number}.ipa",
+      clean: true,
+      xcargs: "-allowProvisioningUpdates"
+    )
+
+    upload_to_app_store(
+      app_version: app_store_version,
+      ipa: lane_context[SharedValues::IPA_OUTPUT_PATH],
+      submit_for_review: false,
+      skip_binary_upload: false,
+      skip_metadata: true,
+      skip_screenshots: true,
+      force: true
+    )
+  end
+
+  desc "Upload the already exported IPA to App Store Connect"
+  lane :upload_existing_ipa do
+    ipa_path = "build/export/MyWords-#{app_store_version}-#{app_build_number}.ipa"
+    upload_to_app_store(
+      app_version: app_store_version,
+      ipa: ipa_path,
+      submit_for_review: false,
+      skip_binary_upload: false,
+      skip_metadata: true,
+      skip_screenshots: true,
+      force: true
+    )
+  end
+
+  desc "Upload build, then update metadata and screenshots for the new App Store version"
+  lane :prepare_review_candidate do
+    upload_build
+    update_store_assets
   end
 end

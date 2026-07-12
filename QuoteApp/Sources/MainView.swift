@@ -8,7 +8,7 @@ struct MainQuoteView: View {
     var isFocused: Bool = false
     var quoteIndex: Int = 1
     var totalQuotes: Int = 15
-    var backgroundName: String = "majestic_peak"
+    var backgroundName: String = "blush_garden"
     var isPremium: Bool = false
     var isLockedPreview: Bool = false
     var streakDays: Int = 1
@@ -18,13 +18,16 @@ struct MainQuoteView: View {
     var recommendedCategoryTitle: String?
     var activeSpiritualBundle: SpiritualBundle?
     var dailyRitualState: DailyRitualState?
+    var todayWordSelection: TodayWordSelection?
 
     var onSettings: () -> Void
     var onFavorites: () -> Void
     var onArchive: () -> Void
+    var onCalendar: () -> Void
     var onCategorySelect: () -> Void
     var onSpiritualBundleSelect: () -> Void
     var onWallpaperSelect: () -> Void
+    var onToggleTodayWord: () -> Void
     var onPremium: () -> Void
     var onTutorialVerticalSwipe: (() -> Void)? = nil
     var onTutorialSaveSwipe: (() -> Void)? = nil
@@ -69,6 +72,7 @@ struct MainQuoteView: View {
     @State private var showReflectionComposer = false
     @State private var reflectionNoteText = ""
     @State private var reflectionPrompt = "なぜこの言葉に心が動いた？"
+    @State private var showInsightSuggestion = false
     private let blush = Color(red: 0.90, green: 0.74, blue: 0.83)
     private let warmIvory = Color(red: 0.99, green: 0.94, blue: 0.95)
     private let softGold = Color(red: 0.90, green: 0.78, blue: 0.58)
@@ -303,6 +307,19 @@ struct MainQuoteView: View {
                 onPremium: presentPremiumFromInsight
             )
         }
+        .confirmationDialog(
+            "この言葉には、もう一段あります",
+            isPresented: $showInsightSuggestion,
+            titleVisibility: .visible
+        ) {
+            Button("解説を読む") {
+                AnalyticsService.shared.logInsightSuggestionOpen(quoteId: quote.id)
+                showQuoteInsight = true
+            }
+            Button("今はここまで", role: .cancel) {}
+        } message: {
+            Text("この言葉が生まれた背景と、もう少し深い余韻を読めます。")
+        }
         .onAppear {
             isLiked = quote.isFavorited
             if isFocused { startEntranceAnimations() }
@@ -507,15 +524,10 @@ struct MainQuoteView: View {
                         divider
                         toolbarButton(icon: "square.grid.2x2") { triggerHaptic(); onCategorySelect() }
                         divider
-                        toolbarButton(icon: "text.book.closed") { triggerHaptic(); onFavorites() }
                         divider
-                        toolbarButton(icon: "photo.stack") { triggerHaptic(); onWallpaperSelect() }
-                        if !isPremium {
-                            divider
-                            premiumToolbarButton
-                        }
+                        toolbarButton(icon: "calendar") { triggerHaptic(); onCalendar() }
                         divider
-                        toolbarButton(icon: "gearshape") { triggerHaptic(); onSettings() }
+                        moreToolbarMenu
                     }
                     .frame(width: proxy.size.width - 64, height: 60)
                     .padding(.horizontal, 10)
@@ -1006,13 +1018,79 @@ struct MainQuoteView: View {
         Rectangle().fill(Color.white.opacity(0.14)).frame(width: 1, height: 22)
     }
 
-    private func toolbarButton(icon: String, action: @escaping () -> Void) -> some View {
+    private func toolbarButton(icon: String, foreground: Color? = nil, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: icon)
                 .font(.system(size: 20, weight: .regular))
-                .foregroundColor(warmIvory.opacity(0.92))
+                .foregroundColor(foreground ?? warmIvory.opacity(0.92))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var moreToolbarMenu: some View {
+        Menu {
+            Button {
+                triggerHaptic()
+                onFavorites()
+            } label: {
+                Label("保存一覧", systemImage: "text.book.closed")
+            }
+
+            Button {
+                triggerHaptic()
+                onArchive()
+            } label: {
+                Label("アーカイブ", systemImage: "archivebox")
+            }
+
+            Button {
+                triggerHaptic()
+                onWallpaperSelect()
+            } label: {
+                Label("壁紙", systemImage: "photo.stack")
+            }
+
+            Button {
+                triggerHaptic()
+                onToggleTodayWord()
+            } label: {
+                Label(
+                    todayWordSelection?.quoteID == quote.id ? "今日の言葉を解除" : "今日の言葉にする",
+                    systemImage: todayWordSelection?.quoteID == quote.id ? "pin.slash" : "pin"
+                )
+            }
+
+            if Config.enableSpiritualRitual {
+                Button {
+                    triggerHaptic()
+                    onSpiritualBundleSelect()
+                } label: {
+                    Label("Ritual", systemImage: "sparkles")
+                }
+            }
+
+            Button {
+                triggerHaptic()
+                onSettings()
+            } label: {
+                Label("設定", systemImage: "gearshape")
+            }
+
+            if !isPremium {
+                Button {
+                    triggerHaptic()
+                    onPremium()
+                } label: {
+                    Label("Premium", systemImage: "crown.fill")
+                }
+            }
+        } label: {
+            Image(systemName: "ellipsis.circle")
+                .font(.system(size: 20, weight: .regular))
+                .foregroundColor(warmIvory.opacity(0.92))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .buttonStyle(.plain)
     }
@@ -1282,6 +1360,17 @@ struct MainQuoteView: View {
             isPremium: userSettings.isPremiumUser
         )
         closeReflection()
+        if shouldOfferInsight(for: quote.id) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                AnalyticsService.shared.logInsightSuggestionShown(quoteId: quote.id)
+                showInsightSuggestion = true
+            }
+        }
+    }
+
+    /// quote ID から常に同じ結果を作るため、同じ言葉で提案の有無は変わらない。
+    private func shouldOfferInsight(for quoteID: String) -> Bool {
+        quoteID.unicodeScalars.reduce(0) { ($0 &* 31 &+ Int($1.value)) & 0x7fff_ffff } % 3 == 0
     }
 
     private func closeReflection() {
