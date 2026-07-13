@@ -52,5 +52,6 @@ struct WeeklyShelfView: View {
             .task { summary = try? QuoteDataService(modelContext: modelContext).getWeeklyShelfSummary() }
             .fullScreenCover(isPresented: $showPaywall) { PremiumView(context: .weeklyShelf).environmentObject(userSettings) }
         }
+        .preferredColorScheme(.dark)
     }
 }

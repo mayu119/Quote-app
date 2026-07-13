@@ -1,0 +1,12 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["9W24U28U8Q.com.antigravity.QuoteApp"],
+        "components": [
+          { "/": "/Quote-app/gift/*", "comment": "Words For Me gift links" }
+        ]
+      }
+    ]
+  }
+}

@@ -9,18 +9,14 @@ struct ArchiveView: View {
     @State private var isLoading = true
     @State private var showPremiumView = false
 
-    private let accentRose = Color(red: 0.86, green: 0.55, blue: 0.60)
-    private let ink = Color(red: 0.31, green: 0.24, blue: 0.24)
-    
+    private let accentRose = WFM.ColorToken.nightRose
+    private let ink = WFM.ColorToken.nightTextPrimary
+
     var body: some View {
         NavigationStack {
             ZStack {
                 LinearGradient(
-                    colors: [
-                        Color(red: 0.99, green: 0.95, blue: 0.93),
-                        Color(red: 0.97, green: 0.92, blue: 0.90),
-                        Color(red: 0.95, green: 0.94, blue: 0.98)
-                    ],
+                    colors: [WFM.ColorToken.nightRaised, WFM.ColorToken.nightHigh, WFM.ColorToken.nightBase],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -49,9 +45,9 @@ struct ArchiveView: View {
             }
             .navigationTitle("アーカイブ")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color(red: 0.98, green: 0.94, blue: 0.93), for: .navigationBar)
+            .toolbarBackground(WFM.ColorToken.nightRaised, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarColorScheme(.light, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .task {
                 if userSettings.isPremiumUser {
                     loadQuotes()
@@ -78,7 +74,7 @@ struct ArchiveView: View {
             }) {
                 Text("アーカイブを見る")
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(WFM.ColorToken.nightInk)
                     .padding(.horizontal, 32)
                     .padding(.vertical, 16)
                     .background(accentRose)
@@ -86,8 +82,12 @@ struct ArchiveView: View {
             }
         }
         .padding(32)
-        .background(Color.white.opacity(0.82))
+        .background(Color.white.opacity(0.07))
         .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .stroke(Color.white.opacity(0.10), lineWidth: 1)
+        )
         .padding(.horizontal, 28)
     }
     
@@ -108,8 +108,8 @@ struct ArchiveView: View {
 
 struct MinimalArchiveCard: View {
     let quote: Quote
-    private let accentRose = Color(red: 0.86, green: 0.55, blue: 0.60)
-    private let ink = Color(red: 0.31, green: 0.24, blue: 0.24)
+    private let accentRose = WFM.ColorToken.nightRose
+    private let ink = WFM.ColorToken.nightTextPrimary
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -143,11 +143,11 @@ struct MinimalArchiveCard: View {
         }
         .padding(24)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.84))
+        .background(Color.white.opacity(0.07))
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(Color.white.opacity(0.6), lineWidth: 1)
+                .stroke(Color.white.opacity(0.10), lineWidth: 1)
         )
         .shadow(color: accentRose.opacity(0.10), radius: 16, x: 0, y: 8)
         .padding(.horizontal, 20)
@@ -170,10 +170,11 @@ struct CalendarShelfView: View {
     @State private var selectedDate: Date?
     @State private var isLoading = true
 
-    private let accentRose = Color(red: 0.86, green: 0.55, blue: 0.60)
-    private let accentPeach = Color(red: 0.95, green: 0.78, blue: 0.67)
-    private let ink = Color(red: 0.31, green: 0.24, blue: 0.24)
-    private let mutedInk = Color(red: 0.49, green: 0.42, blue: 0.46)
+    private let accentRose = WFM.ColorToken.nightRose
+    private let accentPeach = WFM.ColorToken.nightRoseSoft
+    private let ink = WFM.ColorToken.nightTextPrimary
+    private let mutedInk = WFM.ColorToken.nightTextSub
+    private let inkOnRose = WFM.ColorToken.nightInk
 
     private let calendar = Calendar.current
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 7)
@@ -183,11 +184,7 @@ struct CalendarShelfView: View {
         NavigationStack {
             ZStack {
                 LinearGradient(
-                    colors: [
-                        Color(red: 0.99, green: 0.95, blue: 0.93),
-                        Color(red: 0.98, green: 0.92, blue: 0.91),
-                        Color(red: 0.95, green: 0.94, blue: 0.98)
-                    ],
+                    colors: [WFM.ColorToken.nightRaised, WFM.ColorToken.nightHigh, WFM.ColorToken.nightBase],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -222,9 +219,9 @@ struct CalendarShelfView: View {
             }
             .navigationTitle("言葉のカレンダー")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color(red: 0.98, green: 0.94, blue: 0.93), for: .navigationBar)
+            .toolbarBackground(WFM.ColorToken.nightRaised, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarColorScheme(.light, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("閉じる") {
@@ -246,7 +243,7 @@ struct CalendarShelfView: View {
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(ink)
                     .frame(width: 36, height: 36)
-                    .background(Color.white.opacity(0.86))
+                    .background(Color.white.opacity(0.08))
                     .clipShape(Circle())
             }
             .buttonStyle(.plain)
@@ -270,7 +267,7 @@ struct CalendarShelfView: View {
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(ink)
                     .frame(width: 36, height: 36)
-                    .background(Color.white.opacity(0.86))
+                    .background(Color.white.opacity(0.08))
                     .clipShape(Circle())
             }
             .buttonStyle(.plain)
@@ -315,14 +312,14 @@ struct CalendarShelfView: View {
             VStack(spacing: 6) {
                 Text("\(calendar.component(.day, from: date))")
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(isSelected ? .white : (isCurrentMonth ? ink : mutedInk.opacity(0.45)))
+                    .foregroundColor(isSelected ? inkOnRose : (isCurrentMonth ? ink : mutedInk.opacity(0.45)))
 
                 Group {
                     if count > 0 {
                         HStack(spacing: 3) {
                             ForEach(0..<min(count, 3), id: \.self) { _ in
                                 Circle()
-                                    .fill(isSelected ? Color.white.opacity(0.92) : accentRose)
+                                    .fill(isSelected ? inkOnRose.opacity(0.85) : accentRose)
                                     .frame(width: 5, height: 5)
                             }
                         }
@@ -337,13 +334,13 @@ struct CalendarShelfView: View {
             .frame(height: 48)
             .background(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(isSelected ? accentRose : Color.white.opacity(count > 0 ? 0.88 : 0.52))
+                    .fill(isSelected ? accentRose : Color.white.opacity(count > 0 ? 0.13 : 0.05))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(isSelected ? accentRose.opacity(0.25) : Color.white.opacity(0.7), lineWidth: 1)
+                    .stroke(isSelected ? accentRose.opacity(0.6) : Color.white.opacity(0.10), lineWidth: 1)
             )
-            .shadow(color: accentRose.opacity(isSelected ? 0.18 : 0.06), radius: 10, x: 0, y: 6)
+            .shadow(color: accentRose.opacity(isSelected ? 0.22 : 0.0), radius: 10, x: 0, y: 6)
         }
         .buttonStyle(.plain)
     }
@@ -417,7 +414,7 @@ struct CalendarShelfView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             LinearGradient(
-                colors: [Color.white.opacity(0.95), accentPeach.opacity(0.26)],
+                colors: [Color.white.opacity(0.10), accentPeach.opacity(0.10)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -425,7 +422,7 @@ struct CalendarShelfView: View {
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(Color.white.opacity(0.72), lineWidth: 1)
+                .stroke(accentRose.opacity(0.28), lineWidth: 1)
         )
         .shadow(color: accentRose.opacity(0.12), radius: 16, x: 0, y: 10)
     }
@@ -466,11 +463,11 @@ struct CalendarShelfView: View {
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.86))
+        .background(Color.white.opacity(0.07))
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(Color.white.opacity(0.72), lineWidth: 1)
+                .stroke(Color.white.opacity(0.10), lineWidth: 1)
         )
         .shadow(color: accentRose.opacity(0.08), radius: 12, x: 0, y: 8)
     }

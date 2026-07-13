@@ -1,12 +1,31 @@
 default_platform(:ios)
 
-app_store_version = "1.1.2"
-app_build_number = "7"
+app_store_version = "1.1.3"
+app_build_number = "8"
 
 platform :ios do
+  private_lane :connect_api_key do
+    app_store_connect_api_key(
+      key_id: "JP67K2XPLL",
+      issuer_id: "c2a6ee5c-d2e0-4f89-ae8c-043fed09fc28",
+      key_filepath: File.expand_path("~/.appstoreconnect/private_keys/AuthKey_JP67K2XPLL.p8"),
+      in_house: false
+    )
+  end
+
+  desc "Read the latest uploaded build number"
+  lane :latest_build do
+    latest_testflight_build_number(
+      api_key: connect_api_key,
+      app_identifier: "com.antigravity.QuoteApp",
+      initial_build_number: 0
+    )
+  end
+
   desc "Upload metadata and screenshots to App Store Connect"
   lane :update_metadata do
     deliver(
+      api_key: connect_api_key,
       app_version: app_store_version,
       submit_for_review: false,
       skip_binary_upload: true,
@@ -18,6 +37,7 @@ platform :ios do
   desc "Upload metadata and screenshots to App Store Connect"
   lane :update_store_assets do
     deliver(
+      api_key: connect_api_key,
       app_version: app_store_version,
       submit_for_review: false,
       skip_binary_upload: true,
@@ -41,6 +61,7 @@ platform :ios do
     )
 
     upload_to_app_store(
+      api_key: connect_api_key,
       app_version: app_store_version,
       ipa: lane_context[SharedValues::IPA_OUTPUT_PATH],
       submit_for_review: false,
@@ -55,6 +76,7 @@ platform :ios do
   lane :upload_existing_ipa do
     ipa_path = "build/export/MyWords-#{app_store_version}-#{app_build_number}.ipa"
     upload_to_app_store(
+      api_key: connect_api_key,
       app_version: app_store_version,
       ipa: ipa_path,
       submit_for_review: false,

@@ -15,21 +15,18 @@ struct FavoritesView: View {
     @State private var isStoryMode = false
     @State private var showWeeklyShelf = false
     @State private var showMonthlyReport = false
+    @State private var showGiftComposer = false
 
-    private let accentRose = Color(red: 0.86, green: 0.55, blue: 0.60)
-    private let accentPeach = Color(red: 0.95, green: 0.78, blue: 0.67)
-    private let ink = Color(red: 0.31, green: 0.24, blue: 0.24)
-    private let cardFill = Color.white.opacity(0.9)
+    private let accentRose = WFM.ColorToken.nightRose
+    private let accentPeach = WFM.ColorToken.nightRoseSoft
+    private let ink = WFM.ColorToken.nightTextPrimary
+    private let cardFill = Color.white.opacity(0.07)
 
     var body: some View {
         NavigationStack {
             ZStack {
                 LinearGradient(
-                    colors: [
-                        Color(red: 0.99, green: 0.95, blue: 0.93),
-                        Color(red: 0.98, green: 0.91, blue: 0.90),
-                        Color(red: 0.95, green: 0.93, blue: 0.98)
-                    ],
+                    colors: [WFM.ColorToken.nightRaised, WFM.ColorToken.nightHigh, WFM.ColorToken.nightBase],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -94,9 +91,9 @@ struct FavoritesView: View {
             }
             .navigationTitle("言葉の棚")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color(red: 0.98, green: 0.94, blue: 0.93), for: .navigationBar)
+            .toolbarBackground(WFM.ColorToken.nightRaised, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarColorScheme(.light, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(action: {
@@ -105,11 +102,19 @@ struct FavoritesView: View {
                     }) {
                         Text("閉じる")
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(.white)
+                            .foregroundColor(WFM.ColorToken.nightInk)
                             .padding(.horizontal, 14)
                             .padding(.vertical, 8)
                             .background(accentRose)
                             .clipShape(Capsule())
+                    }
+                }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if Config.enableGiftOmamori, !favoriteQuotes.isEmpty {
+                        Button("贈る") { showGiftComposer = true }
+                            .font(.system(size: 12, weight: .bold))
+                            .accessibilityLabel("棚の言葉をお守りとして贈る")
                     }
                 }
 
@@ -125,7 +130,7 @@ struct FavoritesView: View {
                                 Text("棚をめくる")
                                     .font(.system(size: 12, weight: .bold))
                             }
-                            .foregroundColor(.white)
+                            .foregroundColor(WFM.ColorToken.nightInk)
                             .padding(.horizontal, 14)
                             .padding(.vertical, 8)
                             .background(accentRose)
@@ -160,6 +165,9 @@ struct FavoritesView: View {
             }
             .sheet(isPresented: $showMonthlyReport) {
                 MonthlyReportView().environmentObject(userSettings)
+            }
+            .sheet(isPresented: $showGiftComposer) {
+                GiftComposeView(quotes: favoriteQuotes)
             }
         }
     }
@@ -215,9 +223,9 @@ private extension FavoritesView {
 
                 Image(systemName: "sparkles")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(accentRose.opacity(0.75))
+                    .foregroundColor(accentRose.opacity(0.9))
                     .padding(12)
-                    .background(Color.white.opacity(0.72))
+                    .background(Color.white.opacity(0.10))
                     .clipShape(Circle())
             }
 
@@ -237,7 +245,7 @@ private extension FavoritesView {
             ZStack {
                 cardFill
                 LinearGradient(
-                    colors: [accentPeach.opacity(0.28), Color.white.opacity(0.35)],
+                    colors: [accentPeach.opacity(0.10), Color.white.opacity(0.04)],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -246,7 +254,7 @@ private extension FavoritesView {
         .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 26, style: .continuous)
-                .stroke(Color.white.opacity(0.65), lineWidth: 1)
+                .stroke(Color.white.opacity(0.10), lineWidth: 1)
         )
         .shadow(color: accentRose.opacity(0.10), radius: 20, x: 0, y: 10)
     }
@@ -266,7 +274,7 @@ private extension FavoritesView {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.vertical, 12)
         .padding(.horizontal, 14)
-        .background(Color.white.opacity(0.66))
+        .background(Color.white.opacity(0.08))
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }
@@ -326,13 +334,13 @@ struct MinimalFavoriteCard: View {
         .background(
             ZStack {
                 cardFill
-                LinearGradient(colors: [accentPeach.opacity(0.22), .clear], startPoint: .topLeading, endPoint: .bottomTrailing)
+                LinearGradient(colors: [accentPeach.opacity(0.08), .clear], startPoint: .topLeading, endPoint: .bottomTrailing)
             }
         )
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(Color.white.opacity(0.55), lineWidth: 1)
+                .stroke(Color.white.opacity(0.10), lineWidth: 1)
         )
         .shadow(color: accentRose.opacity(0.12), radius: 18, x: 0, y: 10)
     }
@@ -546,22 +554,22 @@ struct MinimalQuoteDetailView: View {
     @State private var noteText = ""
     @State private var noteSaveMessage: String?
 
-    private let pageBackground = Color(hex: "F1E9E3")
-    private let sheetBackground = Color(hex: "FFFCF8")
-    private let primaryText = Color(hex: "2F2730")
-    private let secondaryText = Color(hex: "7D7280")
-    private let accentRose = Color(hex: "EAA3A1")
+    private let pageBackground = WFM.ColorToken.nightBase
+    private let sheetBackground = WFM.ColorToken.nightRaised
+    private let primaryText = WFM.ColorToken.nightTextPrimary
+    private let secondaryText = WFM.ColorToken.nightTextSub
+    private let accentRose = WFM.ColorToken.nightRose
     private let accentLavender = Color(hex: "8D90A2")
-    private let borderColor = Color(hex: "E8DDD6")
+    private let borderColor = Color.white.opacity(0.12)
     private let quoteCardTop = Color(hex: "FFF1F4")
     private let quoteCardBottom = Color(hex: "F6C7D2")
-    private let noteFill = Color(hex: "F8F1EC")
+    private let noteFill = Color.white.opacity(0.06)
 
     var body: some View {
         GeometryReader { proxy in
             ZStack {
                 LinearGradient(
-                    colors: [pageBackground, Color(hex: "F7F1EB"), Color(hex: "EFE5DE")],
+                    colors: [pageBackground, WFM.ColorToken.nightHigh, pageBackground],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -579,7 +587,7 @@ struct MinimalQuoteDetailView: View {
                                         .foregroundColor(primaryText)
                                         .padding(.horizontal, 18)
                                         .padding(.vertical, 11)
-                                        .background(Color.white.opacity(0.9))
+                                        .background(Color.white.opacity(0.08))
                                         .clipShape(Capsule())
                                         .overlay(Capsule().stroke(borderColor, lineWidth: 1))
                                 }
@@ -592,7 +600,7 @@ struct MinimalQuoteDetailView: View {
                                         .font(.system(size: 14, weight: .bold))
                                         .foregroundColor(primaryText.opacity(0.82))
                                         .frame(width: 42, height: 42)
-                                        .background(Color.white.opacity(0.9))
+                                        .background(Color.white.opacity(0.08))
                                         .clipShape(Circle())
                                         .overlay(Circle().stroke(borderColor, lineWidth: 1))
                                 }
@@ -646,9 +654,9 @@ struct MinimalQuoteDetailView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 34, style: .continuous))
                     .overlay(
                         RoundedRectangle(cornerRadius: 34, style: .continuous)
-                            .stroke(Color.white.opacity(0.9), lineWidth: 1)
+                            .stroke(Color.white.opacity(0.10), lineWidth: 1)
                     )
-                    .shadow(color: Color(hex: "CDBEB6").opacity(0.35), radius: 28, x: 0, y: 12)
+                    .shadow(color: Color.black.opacity(0.45), radius: 28, x: 0, y: 12)
                     .padding(.horizontal, 10)
                     .padding(.bottom, 10)
                     .overlay(alignment: .bottom) {
@@ -675,7 +683,7 @@ struct MinimalQuoteDetailView: View {
             PremiumView(context: .favoriteLimit)
                 .environmentObject(userSettings)
         }
-        .preferredColorScheme(.light)
+        .preferredColorScheme(.dark)
     }
 
     private var quoteCard: some View {
@@ -686,12 +694,12 @@ struct MinimalQuoteDetailView: View {
 
             ZStack(alignment: .topLeading) {
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(Color.white.opacity(0.94))
+                    .fill(Color.white.opacity(0.06))
 
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .fill(
                         LinearGradient(
-                            colors: [quoteCardTop, quoteCardBottom],
+                            colors: [quoteCardTop.opacity(0.10), quoteCardBottom.opacity(0.18)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -700,7 +708,7 @@ struct MinimalQuoteDetailView: View {
                     .frame(maxHeight: .infinity, alignment: .top)
 
                 Circle()
-                    .fill(Color.white.opacity(0.45))
+                    .fill(Color.white.opacity(0.10))
                     .frame(width: 56, height: 56)
                     .blur(radius: 10)
                     .offset(x: 10, y: 8)
@@ -741,7 +749,7 @@ struct MinimalQuoteDetailView: View {
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .stroke(borderColor, lineWidth: 1)
         )
-        .shadow(color: Color(hex: "D8C8BF").opacity(0.14), radius: 14, x: 0, y: 8)
+        .shadow(color: Color.black.opacity(0.25), radius: 14, x: 0, y: 8)
         .opacity(appear ? 1 : 0)
         .offset(y: appear ? 0 : 20)
     }
@@ -801,7 +809,7 @@ struct MinimalQuoteDetailView: View {
                     title: "深く知る",
                     subtitle: "背景と意味を読む",
                     icon: "book.closed",
-                    fill: Color(hex: "F3ECE6"),
+                    fill: Color.white.opacity(0.08),
                     foreground: primaryText
                 ) {
                     showQuoteInsight = true
@@ -811,7 +819,7 @@ struct MinimalQuoteDetailView: View {
                     title: "シェア",
                     subtitle: "画像で共有",
                     icon: "square.and.arrow.up",
-                    fill: Color.white.opacity(0.92),
+                    fill: Color.white.opacity(0.08),
                     foreground: primaryText
                 ) {
                     showShareView = true
@@ -821,8 +829,8 @@ struct MinimalQuoteDetailView: View {
                     title: "外す",
                     subtitle: "お気に入り解除",
                     icon: "bookmark.slash",
-                    fill: Color(hex: "F8E1DE"),
-                    foreground: Color(hex: "A45C59")
+                    fill: WFM.ColorToken.nightRose.opacity(0.16),
+                    foreground: WFM.ColorToken.nightRoseSoft
                 ) {
                     try? quoteDataService.toggleFavorite(quote: quote, isPremium: userSettings.isPremiumUser)
                     dismiss()
@@ -870,7 +878,7 @@ struct MinimalQuoteDetailView: View {
                     .foregroundColor(primaryText)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(Color.white.opacity(0.92))
+                    .background(Color.white.opacity(0.08))
                     .clipShape(Capsule())
                     .overlay(Capsule().stroke(borderColor, lineWidth: 1))
             }
@@ -883,7 +891,7 @@ struct MinimalQuoteDetailView: View {
                     Text(noteText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "このまま置いておく" : "理由を保存")
                         .font(.system(size: 16, weight: .semibold))
                 }
-                .foregroundColor(.white)
+                .foregroundColor(WFM.ColorToken.nightInk)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(accentLavender)

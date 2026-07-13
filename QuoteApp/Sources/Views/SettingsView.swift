@@ -22,21 +22,18 @@ struct SettingsView: View {
 
     private let premiumSlotLabels = ["朝", "昼", "夜"]
     private let premiumSlotIcons  = ["sunrise.fill", "sun.max.fill", "moon.stars.fill"]
-    private let accentRose = Color(red: 0.86, green: 0.55, blue: 0.60)
-    private let accentPeach = Color(red: 0.95, green: 0.79, blue: 0.68)
-    private let cardFill = Color.white.opacity(0.84)
-    private let ink = Color(red: 0.31, green: 0.24, blue: 0.24)
-    private let subInk = Color(red: 0.50, green: 0.42, blue: 0.40)
+    // 夜の世界観(メイン体験と同一トークン)
+    private let accentRose = WFM.ColorToken.nightRose
+    private let cardFill = Color.white.opacity(0.06)
+    private let ink = WFM.ColorToken.nightTextPrimary
+    private let subInk = WFM.ColorToken.nightTextSub
+    private let inkOnRose = WFM.ColorToken.nightInk
 
     var body: some View {
         NavigationStack {
             ZStack {
                 LinearGradient(
-                    colors: [
-                        Color(red: 0.99, green: 0.95, blue: 0.93),
-                        Color(red: 0.98, green: 0.91, blue: 0.90),
-                        Color(red: 0.95, green: 0.94, blue: 0.98)
-                    ],
+                    colors: [WFM.ColorToken.nightRaised, WFM.ColorToken.nightHigh, WFM.ColorToken.nightBase],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -63,9 +60,9 @@ struct SettingsView: View {
             }
             .navigationTitle("設定")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color(red: 0.98, green: 0.94, blue: 0.93), for: .navigationBar)
+            .toolbarBackground(WFM.ColorToken.nightRaised, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarColorScheme(.light, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(action: { dismiss() }) {
@@ -115,7 +112,7 @@ struct SettingsView: View {
                     Image(systemName: "arrow.right")
                         .font(.system(size: 13, weight: .bold))
                 }
-                .foregroundColor(.white)
+                .foregroundColor(inkOnRose)
                 .padding(.horizontal, 18)
                 .padding(.vertical, 14)
                 .background(accentRose)
@@ -125,12 +122,16 @@ struct SettingsView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 LinearGradient(
-                    colors: [Color.white, Color(red: 1.0, green: 0.96, blue: 0.94)],
+                    colors: [Color.white.opacity(0.10), Color.white.opacity(0.04)],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
             )
             .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .stroke(accentRose.opacity(0.28), lineWidth: 1)
+            )
             .shadow(color: accentRose.opacity(0.14), radius: 18, x: 0, y: 10)
         }
         .buttonStyle(.plain)
@@ -293,7 +294,7 @@ struct SettingsView: View {
     private var timePickerSheet: some View {
         NavigationStack {
             ZStack {
-                Color(red: 0.98, green: 0.94, blue: 0.93).ignoresSafeArea()
+                WFM.ColorToken.nightRaised.ignoresSafeArea()
 
                 VStack {
                     DatePicker(
@@ -303,7 +304,7 @@ struct SettingsView: View {
                     )
                     .datePickerStyle(.wheel)
                     .labelsHidden()
-                    .colorScheme(.light)
+                    .colorScheme(.dark)
 
                     Spacer()
                 }
@@ -384,7 +385,7 @@ struct SettingsView: View {
                     Text("有効 (PREMIUM)")
                         .font(.system(size: 12, weight: .black, design: .monospaced))
                         .tracking(2)
-                        .foregroundColor(.white)
+                        .foregroundColor(inkOnRose)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
                         .background(accentRose)
@@ -402,7 +403,7 @@ struct SettingsView: View {
                         Text("プレミアムにアップグレード")
                             .font(.system(size: 13, weight: .black))
                             .tracking(2)
-                            .foregroundColor(.white)
+                            .foregroundColor(inkOnRose)
                             .padding(.horizontal, 24)
                             .padding(.vertical, 14)
                             .background(accentRose)

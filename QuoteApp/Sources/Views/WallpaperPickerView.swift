@@ -12,8 +12,8 @@ struct WallpaperPickerView: View {
         GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
     ]
-    private let accentRose = Color(red: 0.86, green: 0.55, blue: 0.60)
-    private let ink = Color(red: 0.31, green: 0.24, blue: 0.24)
+    private let accentRose = WFM.ColorToken.nightRose
+    private let ink = WFM.ColorToken.nightTextPrimary
     private let cardHeight: CGFloat = 232
 
     private var availableBackgrounds: [String] {
@@ -24,11 +24,7 @@ struct WallpaperPickerView: View {
         NavigationStack {
             ZStack {
                 LinearGradient(
-                    colors: [
-                        Color(red: 0.99, green: 0.95, blue: 0.93),
-                        Color(red: 0.98, green: 0.91, blue: 0.90),
-                        Color(red: 0.95, green: 0.94, blue: 0.98)
-                    ],
+                    colors: [WFM.ColorToken.nightRaised, WFM.ColorToken.nightHigh, WFM.ColorToken.nightBase],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -122,7 +118,7 @@ struct WallpaperPickerView: View {
                             .font(.system(size: 16, weight: .medium))
                             .foregroundColor(ink)
                             .padding(8)
-                            .background(Color.white.opacity(0.7))
+                            .background(Color.white.opacity(0.10))
                             .clipShape(Circle())
                     }
                 }
@@ -147,16 +143,16 @@ struct WallpaperPickerView: View {
                         dismiss()
                     }
                     .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(tempSelected.isEmpty ? ink.opacity(0.24) : .white)
+                    .foregroundColor(tempSelected.isEmpty ? ink.opacity(0.3) : WFM.ColorToken.nightInk)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
-                    .background(tempSelected.isEmpty ? Color.white.opacity(0.35) : accentRose)
+                    .background(tempSelected.isEmpty ? Color.white.opacity(0.08) : accentRose)
                     .clipShape(Capsule())
                     .disabled(tempSelected.isEmpty)
                 }
             }
         }
-        .preferredColorScheme(.light)
+        .preferredColorScheme(.dark)
         .onAppear {
             tempSelected = userSettings.selectedBackgrounds
         }

@@ -47,6 +47,7 @@ struct QuoteApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     @StateObject private var userSettings = UserSettings()
+    @StateObject private var giftLinkRouter = GiftLinkRouter()
 
     let modelContainer: ModelContainer = {
         let schema = Schema([Quote.self])
@@ -74,8 +75,13 @@ struct QuoteApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(userSettings)
+                .environmentObject(giftLinkRouter)
                 .modelContainer(modelContainer)
                 .task { await initializeApp() }
+                .onOpenURL { giftLinkRouter.handle($0) }
+                .sheet(item: $giftLinkRouter.route) { route in
+                    GiftReceiveView(giftID: route.id)
+                }
         }
     }
 

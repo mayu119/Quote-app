@@ -42,21 +42,22 @@ struct PremiumView: View {
     }
 
     // MARK: - Design Tokens
+    // 処方箋リビール〜メイン体験と同じ夜の世界観に固定する
 
-    private let bgDeep = Color(red: 0.99, green: 0.95, blue: 0.93)
-    private let panelBg = Color.white.opacity(0.86)
-    private let accentGold = Color(red: 0.86, green: 0.55, blue: 0.60)
-    private let accentPeach = Color(red: 0.96, green: 0.80, blue: 0.68)
-    private let textPrimary = Color(red: 0.30, green: 0.23, blue: 0.23)
-    private let textSub = Color(red: 0.50, green: 0.42, blue: 0.40)
+    private let panelBg = Color.white.opacity(0.06)
+    private let accentRose = WFM.ColorToken.nightRose
+    private let accentRoseSoft = WFM.ColorToken.nightRoseSoft
+    private let inkOnRose = WFM.ColorToken.nightInk
+    private let textPrimary = WFM.ColorToken.nightTextPrimary
+    private let textSub = WFM.ColorToken.nightTextSub
 
     // MARK: - Body
 
     var body: some View {
         ZStack {
-            // 背景レイヤー
+            // 背景レイヤー（処方箋リビールと同一グラデで画面遷移を地続きにする）
             LinearGradient(
-                colors: [bgDeep, Color(red: 0.98, green: 0.91, blue: 0.90), Color(red: 0.95, green: 0.93, blue: 0.98)],
+                colors: [WFM.ColorToken.nightRaised, WFM.ColorToken.nightHigh, WFM.ColorToken.nightBase],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -91,7 +92,7 @@ struct PremiumView: View {
             }
             .ignoresSafeArea(edges: .top)
         }
-        .preferredColorScheme(.light)
+        .preferredColorScheme(.dark)
         .task {
             await rcManager.refreshPackagesIfNeeded()
             updateSelectedPackage(for: .yearly)
@@ -118,11 +119,11 @@ struct PremiumView: View {
 
     private var heroSection: some View {
         ZStack {
-            // ボヤッとした光の玉（動画の代わりになる美しい背景）
+            // 夜の中に灯る光の玉（処方箋の余韻を引き継ぐランタン）
             Circle()
                 .fill(
                     RadialGradient(
-                        colors: [accentPeach, accentGold.opacity(0.9), Color.clear],
+                        colors: [accentRose, accentRoseSoft.opacity(0.9), Color.clear],
                         center: .center,
                         startRadius: 0,
                         endRadius: 200
@@ -131,13 +132,13 @@ struct PremiumView: View {
                 .frame(width: 380, height: 380)
                 .blur(radius: 60)
                 .scaleEffect(heroPulse ? 1.05 : 0.95)
-                .opacity(appear ? 0.8 : 0)
+                .opacity(appear ? 0.55 : 0)
                 .offset(y: -40)
-            
-            // 下部に黒のグラデーションマスクをかけて本文に繋げる
+
+            // 下部を夜の背景へ溶かして本文に繋げる
             VStack {
                 Spacer()
-                LinearGradient(colors: [Color.clear, Color(red: 0.99, green: 0.95, blue: 0.93)], startPoint: .top, endPoint: .bottom)
+                LinearGradient(colors: [Color.clear, WFM.ColorToken.nightRaised.opacity(0.9)], startPoint: .top, endPoint: .bottom)
                     .frame(height: 160)
             }
 
@@ -165,15 +166,15 @@ struct PremiumView: View {
                     HStack(spacing: 2) {
                         Text(text.prefix(3))
                             .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(textPrimary)
                         Image(systemName: icon)
                             .font(.system(size: 13))
-                            .foregroundColor(accentGold)
+                            .foregroundColor(accentRoseSoft)
                     }
                 } else {
                     Image(systemName: icon)
                         .font(.system(size: 18))
-                        .foregroundColor(accentGold)
+                        .foregroundColor(accentRoseSoft)
                 }
                 Text(subIcon ? "Apple Store" : text)
                     .font(.system(size: 10, weight: .bold))
@@ -290,7 +291,7 @@ struct PremiumView: View {
                         .frame(width: 78, alignment: .center)
                     Text("PRO")
                         .font(.system(size: 12, weight: .black))
-                        .foregroundColor(accentGold)
+                        .foregroundColor(accentRoseSoft)
                         .frame(width: 78, alignment: .center)
                 }
                 .padding(.horizontal, 16)
@@ -328,14 +329,14 @@ struct PremiumView: View {
 
             Text(proValue)
                 .font(.system(size: 13, weight: .black))
-                .foregroundColor(accentGold)
+                .foregroundColor(accentRoseSoft)
                 .frame(width: 78, alignment: .center)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 16)
                 .background(
                     Rectangle()
-                        .fill(Color.white.opacity(0.45))
+                        .fill(Color.white.opacity(0.10))
                         .frame(height: 1)
                     , alignment: .bottom
         )
@@ -368,7 +369,7 @@ struct PremiumView: View {
             }) {
                 HStack {
                     if rcManager.isLoading {
-                        ProgressView().tint(.white)
+                        ProgressView().tint(inkOnRose)
                     } else if selectedPackage == nil {
                         Text("プランを取得中...")
                             .font(.system(size: 16, weight: .bold))
@@ -379,8 +380,8 @@ struct PremiumView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 48)
-                .background(accentGold)
-                .foregroundColor(.white)
+                .background(accentRose)
+                .foregroundColor(inkOnRose)
                 .cornerRadius(12)
             }
             // 不要なdisabledは外し、Actionの中でハンドリングする
@@ -436,10 +437,10 @@ struct PremiumView: View {
                     .foregroundColor(textPrimary.opacity(0.86))
                     .frame(maxWidth: .infinity)
                     .frame(height: 44)
-                    .background(Color.white.opacity(0.58))
+                    .background(Color.white.opacity(0.07))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .stroke(accentGold.opacity(0.18), lineWidth: 1)
+                            .stroke(Color.white.opacity(0.12), lineWidth: 1)
                     )
                     .cornerRadius(12)
             }
@@ -449,8 +450,11 @@ struct PremiumView: View {
         .padding(16)
             .background(
                 RoundedRectangle(cornerRadius: 32, style: .continuous)
-                    .fill(panelBg.opacity(0.95))
-                    .shadow(color: accentGold.opacity(0.12), radius: 18, y: 10)
+                    .fill(panelBg)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 32, style: .continuous)
+                    .stroke(Color.white.opacity(0.08), lineWidth: 1)
         )
     }
 
@@ -492,22 +496,22 @@ struct PremiumView: View {
                         HStack(spacing: 8) {
                             Text(isYearly ? "プレミアム 年額" : "プレミアム 月額")
                                 .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(isSelected ? .white : textPrimary)
+                                .foregroundColor(textPrimary)
 
                             if isYearly {
                                 Text("おすすめ")
                                     .font(.system(size: 10, weight: .black))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(inkOnRose)
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 4)
-                                    .background(accentPeach)
+                                    .background(accentRoseSoft)
                                     .clipShape(Capsule())
                             }
                         }
 
                         Text(isYearly ? "12か月分をまとめて支払い" : "まずは気軽に始めたい方向け")
                             .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(isSelected ? Color.white.opacity(0.78) : textSub)
+                            .foregroundColor(textSub)
                     }
 
                     Spacer()
@@ -523,19 +527,19 @@ struct PremiumView: View {
                                             .font(.system(size: 20, weight: .black, design: .rounded))
                                     Text("その後 \(package.localizedPriceString) / 年")
                                         .font(.system(size: 11, weight: .bold))
-                                        .foregroundColor(isSelected ? Color.white.opacity(0.78) : textSub)
+                                        .foregroundColor(textSub)
                                 } else {
                                     Text(package.localizedPriceString)
                                         .font(.system(size: 22, weight: .black, design: .rounded))
                                     Text(isYearly ? " / 年" : " / 月")
                                         .font(.system(size: 11, weight: .bold))
-                                        .foregroundColor(isSelected ? Color.white.opacity(0.78) : textSub)
+                                        .foregroundColor(textSub)
                                 }
                             }
-                            .foregroundColor(isSelected ? .white : textPrimary)
+                            .foregroundColor(textPrimary)
                         } else {
                             ProgressView()
-                                .tint(isSelected ? .white : textPrimary)
+                                .tint(textPrimary)
                         }
                     }
                 }
@@ -543,12 +547,12 @@ struct PremiumView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(planSupportingText(for: type))
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(isSelected ? Color.white.opacity(0.92) : textPrimary.opacity(0.88))
+                        .foregroundColor(textPrimary.opacity(0.88))
 
                     if let footnote = planFootnote(for: type) {
                         Text(footnote)
                             .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(isSelected ? Color.white.opacity(0.72) : textSub.opacity(0.9))
+                            .foregroundColor(textSub.opacity(0.9))
                     }
                 }
             }
@@ -557,12 +561,12 @@ struct PremiumView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(isSelected ? accentGold : Color.white.opacity(0.55))
+                    .fill(isSelected ? accentRoseSoft.opacity(0.16) : Color.white.opacity(0.05))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
                     .stroke(
-                        isSelected ? accentGold.opacity(0.95) : Color.white.opacity(0.45),
+                        isSelected ? accentRose : Color.white.opacity(0.14),
                         lineWidth: isSelected ? 1.6 : 1
                     )
             )

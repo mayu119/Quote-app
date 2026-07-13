@@ -8,6 +8,7 @@ final class RevenueCatManager: ObservableObject {
     enum PurchaseError: LocalizedError {
         case notConfigured
         case productsUnavailable
+        case entitlementNotActive
 
         var errorDescription: String? {
             switch self {
@@ -15,6 +16,8 @@ final class RevenueCatManager: ObservableObject {
                 return "課金機能の初期化に失敗しました。アプリを再起動してもう一度お試しください。"
             case .productsUnavailable:
                 return "購入プランの取得に失敗しました。しばらくしてから再度お試しください。"
+            case .entitlementNotActive:
+                return "購入情報を確認できませんでした。しばらくしてから購入を復元してください。"
             }
         }
     }
@@ -127,8 +130,7 @@ final class RevenueCatManager: ObservableObject {
 
     /// パッケージを購入し、成功フラグとキャンセルされたかどうかの状態を返す
     ///
-    /// Apple決済が成功（エラーなし＋キャンセルなし）であれば `success: true` を返す。
-    /// RevenueCat側のエンタイトルメント反映状況に関わらず、決済完了をもって成功と判定する。
+    /// Apple決済の完了後、RevenueCatで有効な権利を確認できた場合のみ `success: true` を返す。
     func purchaseWithCancelStatus(package: Package) async throws -> (success: Bool, isCancelled: Bool) {
         guard isConfigured else {
             print("❌ purchaseWithCancelStatus: RevenueCat未初期化")
@@ -156,19 +158,32 @@ final class RevenueCatManager: ObservableObject {
             }
 
             // Apple決済成功 → プレミアムとして扱う
-            let entitlementActive = hasActivePremiumAccess(
-                in: result.customerInfo,
+            var customerInfo = result.customerInfo
+            var entitlementActive = hasActivePremiumAccess(
+                in: customerInfo,
                 purchasedProductID: productID
             )
 
-            logCustomerInfo(result.customerInfo, label: "購入直後")
+            // 決済結果だけでPremiumを開放せず、RevenueCatから最新の権利状態を再取得する。
+            // 一時的な通信・同期遅延があっても、未確認の権利をローカルで恒久化しない。
+            if !entitlementActive {
+                customerInfo = try await Purchases.shared.customerInfo(fetchPolicy: .fetchCurrent)
+                entitlementActive = hasActivePremiumAccess(
+                    in: customerInfo,
+                    purchasedProductID: productID
+                )
+            }
+
+            logCustomerInfo(customerInfo, label: "購入直後")
 
             if !entitlementActive {
-                print("⚠️ Apple決済は成功だがエンタイトルメント未反映 → 決済成功を信頼してプレミアム付与")
+                self.isPremiumUser = false
+                print("⚠️ Apple決済後もRevenueCatのpremium権利を確認できなかったため、Premiumは開放しない")
+                throw PurchaseError.entitlementNotActive
             }
 
             self.isPremiumUser = true
-            print("✅ 購入完了 → プレミアム (entitlement即時反映: \(entitlementActive))")
+            print("✅ 購入完了 → プレミアム")
             return (success: true, isCancelled: false)
 
         } catch {

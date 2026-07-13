@@ -31,7 +31,7 @@ struct NightWordView: View {
                     .foregroundStyle(.white)
                     .lineSpacing(10)
 
-                Text("— (quote.displayAuthor)")
+                Text("— \(quote.displayAuthor)")
                     .font(.subheadline)
                     .foregroundStyle(.white.opacity(0.58))
 

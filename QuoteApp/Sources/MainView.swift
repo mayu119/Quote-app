@@ -367,32 +367,32 @@ struct MainQuoteView: View {
 
             HStack {
                 Spacer()
-                VStack(spacing: 9) {
+                HStack(spacing: 10) {
                     Text(currentDateString())
                         .font(.system(size: 11, weight: .bold, design: .rounded))
                         .tracking(1.8)
                         .foregroundColor(warmIvory.opacity(0.96))
 
-                    Capsule()
+                    Rectangle()
                         .fill(
                             LinearGradient(
-                                colors: [Color.clear, softGold.opacity(0.95), blush.opacity(0.92), Color.clear],
-                                startPoint: .leading,
-                                endPoint: .trailing
+                                colors: [softGold.opacity(0.82), blush.opacity(0.76)],
+                                startPoint: .top,
+                                endPoint: .bottom
                             )
                         )
-                        .frame(width: showControls ? 66 : 0, height: 2)
-                        .animation(.spring(response: 0.8, dampingFraction: 0.7), value: showControls)
+                        .frame(width: 1, height: 16)
 
                     Text(quote.category.displayTitleJa)
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.system(size: 11, weight: .bold))
                         .tracking(0.8)
                         .foregroundColor(warmIvory)
+                        .lineLimit(1)
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 14)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 11)
                 .background(
-                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    Capsule()
                         .fill(
                             LinearGradient(
                                 colors: [
@@ -405,21 +405,16 @@ struct MainQuoteView: View {
                             )
                         )
                         .overlay(
-                            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            Capsule()
                                 .stroke(softGold.opacity(0.24), lineWidth: 1)
                         )
                 )
-                .overlay(alignment: .topTrailing) {
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(softGold.opacity(0.75))
-                        .padding(.top, 10)
-                        .padding(.trailing, 12)
-                }
                 .shadow(color: mysticPlum.opacity(0.30), radius: 22, x: 0, y: 10)
                 Spacer()
             }
-            .padding(.top, max(effectiveTopInset + 76, 108))
+            // GeometryReader is extended under the status bar. Keep the compact
+            // badge below Dynamic Island and above the quote's reserved top edge.
+            .padding(.top, max(effectiveTopInset + 55, 112))
             .opacity(showControls ? 1 : 0)
             .offset(y: showControls ? 0 : -20)
             .blur(radius: showControls ? 0 : 5)
@@ -1360,17 +1355,12 @@ struct MainQuoteView: View {
             isPremium: userSettings.isPremiumUser
         )
         closeReflection()
-        if shouldOfferInsight(for: quote.id) {
+        if ExperimentAssignmentService.shared.recordEligibleInsightSaveAndShouldShow() {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 AnalyticsService.shared.logInsightSuggestionShown(quoteId: quote.id)
                 showInsightSuggestion = true
             }
         }
-    }
-
-    /// quote ID から常に同じ結果を作るため、同じ言葉で提案の有無は変わらない。
-    private func shouldOfferInsight(for quoteID: String) -> Bool {
-        quoteID.unicodeScalars.reduce(0) { ($0 &* 31 &+ Int($1.value)) & 0x7fff_ffff } % 3 == 0
     }
 
     private func closeReflection() {
@@ -1658,7 +1648,7 @@ struct ReflectionComposerView: View {
                             }
                             .padding(.horizontal, 20)
                             .padding(.top, 20)
-                            .padding(.bottom, isEditorFocused ? 24 : max(proxy.safeAreaInsets.bottom, 20) + 108)
+                            .padding(.bottom, 24)
                         }
                         .scrollDismissesKeyboard(.interactively)
                     }
@@ -1671,7 +1661,7 @@ struct ReflectionComposerView: View {
                     .shadow(color: Color(hex: "CDBEB6").opacity(0.35), radius: 28, x: 0, y: 12)
                     .padding(.horizontal, 10)
                     .padding(.bottom, 10)
-                    .overlay(alignment: .bottom) {
+                    .safeAreaInset(edge: .bottom, spacing: 0) {
                         if !isEditorFocused {
                         HStack(spacing: 12) {
                             Button(action: onClose) {

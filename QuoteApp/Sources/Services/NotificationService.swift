@@ -84,14 +84,14 @@ final class NotificationService: ObservableObject {
         case tease
     }
 
-    /// 同一端末では常に同じ群。Remote Config導入前の安全なローカル50%割当。
+    /// Keychain install_id + SHA256 で同一端末は常に同じ群に割り当てる。
     private var notificationCopyMode: NotificationCopyMode {
         if let stored = UserDefaults.standard.string(forKey: Self.notificationModeKey),
            let mode = NotificationCopyMode(rawValue: stored) {
             return mode
         }
-        let seed = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
-        let mode: NotificationCopyMode = seed.unicodeScalars.reduce(0) { $0 + Int($1.value) } % 2 == 0 ? .full : .tease
+        let assigned = ExperimentAssignmentService.shared.variant(for: "notification_copy_v2")
+        let mode = NotificationCopyMode(rawValue: assigned) ?? .full
         UserDefaults.standard.set(mode.rawValue, forKey: Self.notificationModeKey)
         return mode
     }
@@ -264,9 +264,7 @@ final class NotificationService: ObservableObject {
         
         let mode = notificationCopyMode
         if mode == .tease {
-            content.body = timeLabel.contains("夜")
-                ? "今日のあなたに、置いていきたい言葉があります。"
-                : "今朝の一枚を選びました。(quote.author)さんの言葉です。"
+            content.body = "まだ言葉にできない気持ちへ。今日の一枚を、引いてみませんか。"
         } else {
             content.body = quote.quoteJa.isEmpty ? quote.punchline : quote.quoteJa
         }

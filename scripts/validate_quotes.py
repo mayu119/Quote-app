@@ -55,9 +55,12 @@ def validate(quotes: list[dict], path: Path) -> list[str]:
         errors.append(f"{path.name}: duplicate English quotes: {duplicates}")
 
     category_counts = Counter(item["category"] for item in quotes)
-    invalid_categories = {category: count for category, count in category_counts.items() if count != 20}
+    invalid_categories = {category: count for category, count in category_counts.items() if count != 30}
     if invalid_categories:
-        errors.append(f"{path.name}: category counts must be 20: {invalid_categories}")
+        errors.append(f"{path.name}: category counts must be 30: {invalid_categories}")
+
+    if len(quotes) != 300:
+        errors.append(f"{path.name}: total quote count must be 300: {len(quotes)}")
 
     original_count = sum(item.get("author") == "Original" for item in quotes)
     if original_count < 60:

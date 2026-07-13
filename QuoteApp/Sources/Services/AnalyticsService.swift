@@ -1,9 +1,73 @@
 import Foundation
 import UIKit
+import CryptoKit
+import Security
 
 #if canImport(FirebaseAnalytics)
 import FirebaseAnalytics
 #endif
+
+/// 実験に共通で使う、再インストールやIDFVに依存しない安定識別子と群割り当て。
+final class ExperimentAssignmentService {
+    static let shared = ExperimentAssignmentService()
+
+    private let keychainService = "com.antigravity.QuoteApp.experiments"
+    private let installAccount = "install_id"
+    private let insightCounterKey = "experiment.insight_suggestion_v2.eligible_save_count"
+
+    private init() {}
+
+    lazy var installID: String = {
+        if let existing = readInstallID() { return existing }
+        let created = UUID().uuidString.lowercased()
+        saveInstallID(created)
+        return created
+    }()
+
+    func variant(for experimentID: String) -> String {
+        let digest = SHA256.hash(data: Data("\(installID)\(experimentID)".utf8))
+        let bucket = digest.withUnsafeBytes { bytes in Int(bytes[0]) % 2 }
+        return bucket == 0 ? "full" : "tease"
+    }
+
+    /// 振り返りメモ保存の3回に1回だけ追加提案を出す。
+    func recordEligibleInsightSaveAndShouldShow() -> Bool {
+        let next = UserDefaults.standard.integer(forKey: insightCounterKey) + 1
+        UserDefaults.standard.set(next, forKey: insightCounterKey)
+        return Self.shouldShowInsight(eligibleSaveCount: next)
+    }
+
+    static func shouldShowInsight(eligibleSaveCount: Int) -> Bool {
+        eligibleSaveCount > 0 && eligibleSaveCount % 3 == 0
+    }
+
+    private func readInstallID() -> String? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: keychainService,
+            kSecAttrAccount as String: installAccount,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+        var item: CFTypeRef?
+        guard SecItemCopyMatching(query as CFDictionary, &item) == errSecSuccess,
+              let data = item as? Data else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    private func saveInstallID(_ value: String) {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: keychainService,
+            kSecAttrAccount as String: installAccount
+        ]
+        SecItemDelete(query as CFDictionary)
+        var item = query
+        item[kSecValueData as String] = Data(value.utf8)
+        item[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+        SecItemAdd(item as CFDictionary, nil)
+    }
+}
 
 /// Firebase Analytics イベントロギングサービス
 /// 全42イベント + 4ユーザープロパティを一元管理
@@ -34,11 +98,15 @@ final class AnalyticsService {
     // MARK: - Private Helpers
 
     private func log(_ name: String, params: [String: Any] = [:]) {
+        var enriched = params
+        enriched["app_version"] = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
+        enriched["build"] = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "unknown"
+        enriched["install_id"] = ExperimentAssignmentService.shared.installID
         #if canImport(FirebaseAnalytics)
-        Analytics.logEvent(name, parameters: params)
+        Analytics.logEvent(name, parameters: enriched)
         #endif
         #if DEBUG
-        let paramStr = params.isEmpty ? "" : " | \(params)"
+        let paramStr = enriched.isEmpty ? "" : " | \(enriched)"
         print("📊 [Analytics] \(name)\(paramStr)")
         #endif
     }
@@ -77,6 +145,11 @@ final class AnalyticsService {
         quotesViewedInSession = 0
 
         log("app_session_start", params: [
+            "session_number": sessionCount,
+            "days_since_install": daysSinceInstall,
+            "is_premium": isPremium ? "true" : "false"
+        ])
+        log("session_start", params: [
             "session_number": sessionCount,
             "days_since_install": daysSinceInstall,
             "is_premium": isPremium ? "true" : "false"
@@ -243,6 +316,7 @@ final class AnalyticsService {
             "category_medium": categoryMedium,
             "total_favorites": totalFavorites
         ])
+        log("quote_saved", params: ["quote_id": quoteId, "source": "deck"])
         setUserProperty("\(totalFavorites)", forName: "total_favorites")
     }
 
@@ -317,6 +391,7 @@ final class AnalyticsService {
             "note_length": noteLength,
             "is_premium": isPremium ? "true" : "false"
         ])
+        log("reflection_note_saved", params: ["quote_id": quoteId, "note_length": noteLength])
     }
 
     // ============================================================
@@ -406,8 +481,24 @@ final class AnalyticsService {
 
     func logNightWordView() { log("night_word_view") }
     func logNightNoteSave(quoteId: String) { log("night_note_save", params: ["quote_id": quoteId]) }
+    func logDailyDrawPresented(timeSlot: String, source: String) {
+        log("daily_draw_presented", params: ["time_slot": timeSlot, "source": source, "algorithm_version": "v1"])
+    }
+    func logDailyDrawRevealed(timeSlot: String, quoteID: String, revealMilliseconds: Int) {
+        log("daily_draw_revealed", params: ["time_slot": timeSlot, "quote_id": quoteID, "reveal_ms": revealMilliseconds])
+    }
+    func logDailyDrawSaved(quoteID: String, timeSlot: String) {
+        log("daily_draw_saved", params: ["quote_id": quoteID, "time_slot": timeSlot])
+        log("quote_saved", params: ["quote_id": quoteID, "source": "daily_draw", "time_slot": timeSlot])
+    }
+    func logDailyDrawToDeck(quoteID: String, entryAction: String) {
+        log("daily_draw_to_deck", params: ["quote_id": quoteID, "entry_action": entryAction])
+    }
+    func logDailyDrawSkipped(timeSlot: String, source: String) {
+        log("daily_draw_skipped", params: ["time_slot": timeSlot, "source": source])
+    }
     func logInsightSuggestionShown(quoteId: String) { log("insight_suggestion_shown", params: ["quote_id": quoteId]) }
-    func logInsightSuggestionOpen(quoteId: String) { log("insight_suggestion_open", params: ["quote_id": quoteId]) }
+    func logInsightSuggestionOpen(quoteId: String) { log("insight_suggestion_opened", params: ["quote_id": quoteId]) }
     func logStreakBroken(days: Int) { log("streak_broken", params: ["days": days]) }
     func logStreakRestore(days: Int) { log("streak_restore", params: ["days": days]) }
 
@@ -437,6 +528,12 @@ final class AnalyticsService {
             "time_slot_count": timeSlotCount,
             "is_premium": isPremium ? "true" : "false"
         ])
+        let variant = ExperimentAssignmentService.shared.variant(for: "notification_copy_v2")
+        log("notification_scheduled_eligible", params: [
+            "time_slot_count": timeSlotCount,
+            "experiment_id": "notification_copy_v2",
+            "variant": variant
+        ])
     }
 
     /// 通知時間変更
@@ -457,13 +554,24 @@ final class AnalyticsService {
 
     /// 通知からアプリ起動
     func logNotificationOpen(notificationType: String) {
-        log("notification_open", params: [
-            "notification_type": notificationType
+        log("notification_opened", params: [
+            "notification_type": notificationType,
+            "experiment_id": "notification_copy_v2",
+            "variant": ExperimentAssignmentService.shared.variant(for: "notification_copy_v2")
         ])
     }
 
     func logNotificationExperiment(mode: String, event: String) {
-        log("notification_copy_experiment", params: ["mode": mode, "event": event])
+        log("notification_copy_experiment", params: [
+            "mode": mode,
+            "event": event,
+            "experiment_id": "notification_copy_v2",
+            "variant": mode
+        ])
+    }
+
+    func logGift(_ event: String, params: [String: Any] = [:]) {
+        log(event, params: params)
     }
 
     // ============================================================

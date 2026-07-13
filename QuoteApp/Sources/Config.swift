@@ -24,6 +24,10 @@ enum Config {
     /// 言葉のお守り（買い切りギフト）
     static let giftOmamoriProductID = "com.quoteapp.gift.omamori"
 
+    /// Gift APIの本番URL。Cloudflare Workerのデプロイ完了後にtrueへ切り替える。
+    static let giftAPIBaseURL = URL(string: "https://quote-gift-api.mayu119.workers.dev")!
+    static let enableGiftOmamori = false
+
     // MARK: - Free User Limits
 
     /// 無料ユーザーの日替わり無料カテゴリ閲覧制限

@@ -19,21 +19,21 @@ struct CategoryPickerView: View {
 
     @State private var appear = false
 
-    private let pageBackground = Color(hex: "F1E9E3")
-    private let sheetBackground = Color(hex: "FFFCF8")
-    private let primaryText = Color(hex: "2F2730")
-    private let secondaryText = Color(hex: "7D7280")
-    private let accentRose = Color(hex: "EAA3A1")
+    private let pageBackground = WFM.ColorToken.nightBase
+    private let sheetBackground = WFM.ColorToken.nightRaised
+    private let primaryText = WFM.ColorToken.nightTextPrimary
+    private let secondaryText = WFM.ColorToken.nightTextSub
+    private let accentRose = WFM.ColorToken.nightRose
     private let accentLavender = Color(hex: "8D90A2")
     private let accentSage = Color(hex: "9EB59B")
     private let accentSky = Color(hex: "9FC8D8")
-    private let borderColor = Color(hex: "E8DDD6")
+    private let borderColor = Color.white.opacity(0.12)
     private let columns = [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)]
 
     var body: some View {
         ZStack {
             LinearGradient(
-                colors: [pageBackground, Color(hex: "F7F1EB"), Color(hex: "EFE5DE")],
+                colors: [pageBackground, WFM.ColorToken.nightHigh, pageBackground],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -69,9 +69,9 @@ struct CategoryPickerView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 34, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: 34, style: .continuous)
-                        .stroke(Color.white.opacity(0.9), lineWidth: 1)
+                        .stroke(Color.white.opacity(0.10), lineWidth: 1)
                 )
-                .shadow(color: Color(hex: "CDBEB6").opacity(0.35), radius: 28, x: 0, y: 12)
+                .shadow(color: Color.black.opacity(0.45), radius: 28, x: 0, y: 12)
                 .padding(.horizontal, 10)
                 .padding(.bottom, 10)
             }
@@ -97,7 +97,7 @@ struct CategoryPickerView: View {
                         .foregroundColor(primaryText)
                         .padding(.horizontal, 18)
                         .padding(.vertical, 11)
-                        .background(Color.white.opacity(0.9))
+                        .background(Color.white.opacity(0.08))
                         .clipShape(Capsule())
                         .overlay(Capsule().stroke(borderColor, lineWidth: 1))
                 }
@@ -135,23 +135,23 @@ struct CategoryPickerView: View {
             HStack(spacing: 16) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(isSelected ? accentLavender : Color(hex: "EEE7E2"))
+                        .fill(isSelected ? accentLavender : Color.white.opacity(0.10))
                         .frame(width: 44, height: 44)
                     Image(systemName: "shuffle")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(isSelected ? .white : primaryText.opacity(0.8))
+                        .foregroundColor(isSelected ? WFM.ColorToken.nightInk : primaryText.opacity(0.8))
                 }
-                
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text("独自のミックスを作る")
                         .font(.system(size: 18, weight: .bold))
                     Text("その日の気分に合わせて幅広く表示")
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(isSelected ? Color.white.opacity(0.78) : secondaryText)
+                        .foregroundColor(secondaryText)
                 }
-                
+
                 Spacer()
-                
+
                 if isSelected {
                     Image(systemName: "checkmark")
                         .font(.system(size: 14, weight: .bold))
@@ -160,14 +160,14 @@ struct CategoryPickerView: View {
                         .background(Circle().fill(Color.white))
                 }
             }
-            .foregroundColor(isSelected ? .white : primaryText)
+            .foregroundColor(primaryText)
             .padding(.horizontal, 20)
             .padding(.vertical, 18)
-            .background(isSelected ? accentLavender : Color(hex: "F6EFEB"))
+            .background(isSelected ? accentLavender.opacity(0.22) : Color.white.opacity(0.06))
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .stroke(isSelected ? accentLavender.opacity(0.2) : borderColor, lineWidth: 1)
+                    .stroke(isSelected ? accentLavender.opacity(0.8) : borderColor, lineWidth: isSelected ? 1.4 : 1)
             )
             .shadow(color: isSelected ? accentLavender.opacity(0.22) : .clear, radius: 16, x: 0, y: 8)
         }
@@ -258,12 +258,12 @@ struct CategoryPickerView: View {
         }) {
             ZStack(alignment: .bottomLeading) {
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(Color.white.opacity(0.94))
+                    .fill(Color.white.opacity(0.06))
 
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .fill(
                         LinearGradient(
-                            colors: [cardColorTop(for: medium), cardColorBottom(for: medium)],
+                            colors: [cardColorTop(for: medium).opacity(0.10), cardColorBottom(for: medium).opacity(0.18)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -275,7 +275,7 @@ struct CategoryPickerView: View {
                     .fill(cardGradient(for: medium))
                     .frame(height: 118)
                     .frame(maxHeight: .infinity, alignment: .top)
-                    .opacity(0.65)
+                    .opacity(0.22)
 
                 Image(systemName: symbolName(for: medium))
                     .font(.system(size: 34, weight: .regular))
@@ -285,7 +285,7 @@ struct CategoryPickerView: View {
                     .padding(.trailing, 18)
 
                 Circle()
-                    .fill(Color.white.opacity(0.45))
+                    .fill(Color.white.opacity(0.10))
                     .frame(width: 56, height: 56)
                     .blur(radius: 10)
                     .offset(x: 10, y: 8)
@@ -304,10 +304,10 @@ struct CategoryPickerView: View {
                         if isFreeToday {
                             Text("FREE")
                                 .font(.system(size: 8, weight: .bold, design: .rounded))
-                                .foregroundColor(primaryText)
+                                .foregroundColor(WFM.ColorToken.nightInk)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 3)
-                                .background(Color.white.opacity(0.92))
+                                .background(WFM.ColorToken.nightRoseSoft)
                                 .clipShape(Capsule())
                         } else if isLocked {
                             Image(systemName: "lock.fill")
@@ -344,11 +344,11 @@ struct CategoryPickerView: View {
                 
                 if isLocked {
                     RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .fill(Color.white.opacity(0.42))
+                        .fill(Color.black.opacity(0.38))
                 }
             }
             .frame(height: 210)
-            .shadow(color: Color(hex: "D8C8BF").opacity(0.18), radius: 16, x: 0, y: 10)
+            .shadow(color: Color.black.opacity(0.25), radius: 16, x: 0, y: 10)
         }
         .buttonStyle(.plain)
         .scaleEffect(isSelected ? 0.96 : 1.0)

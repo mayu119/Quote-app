@@ -5,8 +5,7 @@ import WidgetKit
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var userSettings: UserSettings
-    @AppStorage("lastDailyRitualPresentedDate") private var lastDailyRitualPresentedDate = ""
-    @AppStorage("lastNightWordPresentedDate") private var lastNightWordPresentedDate = ""
+    @AppStorage("lastDailyDrawPresentedDate") private var lastDailyDrawPresentedDate = ""
 
     @State private var isLoading = true
     @State private var dailyQuotes: [Quote] = []
@@ -90,16 +89,18 @@ struct ContentView: View {
     enum CoverType: Identifiable {
         case premiumWall(PaywallContext)
         case onboarding
+        case dailyDraw(Quote)
         case dailyCheckIn
         case dailyRitual
         case nightWord(Quote)
         var id: String {
             switch self {
-            case .premiumWall(let context): return "premium_\\(context.rawValue)"
+            case .premiumWall(let context): return "premium_\(context.rawValue)"
             case .onboarding: return "onboarding"
+            case .dailyDraw(let quote): return "daily_draw_\(quote.id)"
             case .dailyCheckIn: return "daily_check_in"
             case .dailyRitual: return "daily_ritual"
-            case .nightWord(let quote): return "night_\\(quote.id)"
+            case .nightWord(let quote): return "night_\(quote.id)"
             }
         }
     }
@@ -232,6 +233,8 @@ struct ContentView: View {
                     .environmentObject(userSettings)
             case .onboarding:
                 OnboardingView(onDismiss: {
+                    // 初回オンボーディングの処方箋を、その日の最初の一枚として扱う。
+                    markDailyDrawPresented()
                     activeCover = nil
                     if !userSettings.hasSeenInteractionGuide {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
@@ -242,6 +245,15 @@ struct ContentView: View {
                     }
                 })
                     .environmentObject(userSettings)
+            case .dailyDraw(let quote):
+                DailyDrawView(
+                    quote: quote,
+                    isNight: isNightTime(),
+                    onSave: { saveDailyDrawQuote(quote) },
+                    onClose: dismissDailyDrawAndContinue,
+                    onDeck: dismissDailyDrawAndContinue,
+                    onSkip: dismissDailyDrawAndContinue
+                )
             case .dailyCheckIn:
                 DailyCheckInView(
                     streakDays: userSettings.currentStreakDays,
@@ -267,18 +279,15 @@ struct ContentView: View {
                     DailyRitualView(
                         selectedBundle: selectedSpiritualBundle,
                         onClose: {
-                            markDailyRitualPresented()
                             activeCover = nil
                         },
                         onPremiumRequired: {
-                            markDailyRitualPresented()
                             activeCover = nil
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                                 activeCover = .premiumWall(.general)
                             }
                         },
                         onStart: { bundle in
-                            markDailyRitualPresented()
                             activeCover = nil
                             userSettings.saveDailyRitual(bundle: bundle)
                             switchSpiritualBundle(bundle)
@@ -288,7 +297,6 @@ struct ContentView: View {
                 }
             case .nightWord(let quote):
                 NightWordView(quote: quote) {
-                    lastNightWordPresentedDate = UserSettings.dateString(for: Date())
                     activeCover = nil
                 }
                 .environmentObject(userSettings)
@@ -500,6 +508,21 @@ struct ContentView: View {
                 preferredCategories: userSettings.preferredCategories,
                 affinityScores: userSettings.categoryAffinityScores
             )
+            let drawQuote: Quote?
+            if isNightTime() {
+                let nightQuotes = try await dataService.getDailyQuotes(
+                    limit: 1,
+                    isPremium: userSettings.isPremiumUser,
+                    mediumCategory: .wantToQuit,
+                    largeCategory: nil,
+                    spiritualBundle: nil,
+                    preferredCategories: userSettings.preferredCategories,
+                    affinityScores: userSettings.categoryAffinityScores
+                )
+                drawQuote = nightQuotes.first ?? quotes.first
+            } else {
+                drawQuote = quotes.first
+            }
             await MainActor.run {
                 self.dailyQuotes = quotes
                 self.weeklyFavoriteSummary = (try? dataService.getWeeklyFavoriteSummary()) ?? .init(favoriteCount: 0, topCategory: nil)
@@ -514,18 +537,24 @@ struct ContentView: View {
                     WidgetCenter.shared.reloadAllTimelines()
                 }
 
-                if userSettings.isFirstLaunch {
+                #if DEBUG
+                let forceDailyDraw = ProcessInfo.processInfo.arguments.contains("-forceDailyDraw")
+                #else
+                let forceDailyDraw = false
+                #endif
+                if forceDailyDraw, let drawQuote {
+                    activeCover = .dailyDraw(drawQuote)
+                } else if userSettings.isFirstLaunch {
                     activeCover = .onboarding
+                } else if shouldPresentDailyDraw(), let drawQuote {
+                    markDailyDrawPresented()
+                    activeCover = .dailyDraw(drawQuote)
                 } else if !userSettings.hasSeenInteractionGuide {
                     interactionGuideStage = .verticalSwipe
                     interactionGuideCompletedCount = 0
                     withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) {
                         showInteractionGuide = true
                     }
-                } else if shouldPresentNightWord(), let nightQuote = nightQuote(from: quotes) {
-                    activeCover = .nightWord(nightQuote)
-                } else if Config.enableSpiritualRitual && shouldPresentDailyRitual() {
-                    activeCover = .dailyRitual
                 } else if userSettings.shouldPresentDailyCheckIn() {
                     activeCover = .dailyCheckIn
                 }
@@ -553,16 +582,24 @@ struct ContentView: View {
             print("🚨 Failed: \(error)")
             await MainActor.run {
                 withAnimation(.easeOut(duration: 0.8)) { self.isLoading = false }
-                if userSettings.isFirstLaunch {
+                #if DEBUG
+                let forceDailyDraw = ProcessInfo.processInfo.arguments.contains("-forceDailyDraw")
+                #else
+                let forceDailyDraw = false
+                #endif
+                if forceDailyDraw, let drawQuote = dailyQuotes.first {
+                    activeCover = .dailyDraw(drawQuote)
+                } else if userSettings.isFirstLaunch {
                     activeCover = .onboarding
+                } else if shouldPresentDailyDraw(), let drawQuote = dailyQuotes.first {
+                    markDailyDrawPresented()
+                    activeCover = .dailyDraw(drawQuote)
                 } else if !userSettings.hasSeenInteractionGuide {
                     interactionGuideStage = .verticalSwipe
                     interactionGuideCompletedCount = 0
                     withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) {
                         showInteractionGuide = true
                     }
-                } else if Config.enableSpiritualRitual && shouldPresentDailyRitual() {
-                    activeCover = .dailyRitual
                 } else if userSettings.shouldPresentDailyCheckIn() {
                     activeCover = .dailyCheckIn
                 }
@@ -570,23 +607,19 @@ struct ContentView: View {
         }
     }
 
-    private func shouldPresentNightWord(on date: Date = Date()) -> Bool {
-        guard Calendar.current.component(.hour, from: date) >= 21 else { return false }
-        return lastNightWordPresentedDate != UserSettings.dateString(for: date)
-    }
-
-    private func nightQuote(from quotes: [Quote]) -> Quote? {
-        quotes.first { $0.category == .wantToQuit && $0.author == "Original" } ?? quotes.first
+    private func isNightTime(on date: Date = Date()) -> Bool {
+        DailyDrawPolicy.isNight(date)
     }
 
     private var streakRescueBanner: some View {
         VStack(spacing: WFM.Space.s) {
-            Text("昨日までの(userSettings.lastBrokenStreakDays)日は消えていません。")
+            Text("昨日までの\(userSettings.lastBrokenStreakDays)日は消えていません。")
                 .font(.headline)
+                .foregroundStyle(WFM.ColorToken.nightTextPrimary)
             Text("今日の言葉から、続きを受け取れます。")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
-            Button(userSettings.isPremiumUser ? "続きにする" : "記録を続ける") {
+                .foregroundStyle(WFM.ColorToken.nightTextSub)
+            Button(action: {
                 if userSettings.isPremiumUser {
                     if userSettings.restoreBrokenStreakIfAvailable(isPremium: true) {
                         withAnimation(WFM.Motion.quick) { showStreakRescue = false }
@@ -595,13 +628,28 @@ struct ContentView: View {
                     AnalyticsService.shared.logPaywallView(trigger: "streak_rescue")
                     activeCover = .premiumWall(.general)
                 }
+            }) {
+                Text(userSettings.isPremiumUser ? "続きにする" : "記録を続ける")
+                    .foregroundStyle(WFM.ColorToken.nightInk)
             }
             .buttonStyle(.borderedProminent)
-            .tint(WFM.ColorToken.accentRose)
+            .tint(WFM.ColorToken.nightRose)
+
+            Button("今日はこのまま") {
+                userSettings.lastBrokenStreakDays = 0
+                withAnimation(WFM.Motion.quick) { showStreakRescue = false }
+            }
+            .font(.subheadline)
+            .foregroundStyle(WFM.ColorToken.nightTextSub)
+            .frame(minHeight: 44)
         }
         .padding(WFM.Space.l)
         .frame(maxWidth: .infinity)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: WFM.Radius.l, style: .continuous))
+        .background(WFM.ColorToken.nightRaised.opacity(0.96), in: RoundedRectangle(cornerRadius: WFM.Radius.l, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: WFM.Radius.l, style: .continuous)
+                .stroke(Color.white.opacity(0.10), lineWidth: 1)
+        )
         .padding(WFM.Space.m)
         .frame(maxHeight: .infinity, alignment: .bottom)
     }
@@ -706,21 +754,34 @@ struct ContentView: View {
         }
     }
 
-    private func shouldPresentDailyRitual() -> Bool {
-        let today = ritualDateString(for: Date())
-        return lastDailyRitualPresentedDate != today
+    private func shouldPresentDailyDraw() -> Bool {
+        DailyDrawPolicy.shouldPresent(lastPresentedDate: lastDailyDrawPresentedDate)
     }
 
-    private func markDailyRitualPresented() {
-        lastDailyRitualPresentedDate = ritualDateString(for: Date())
+    private func markDailyDrawPresented() {
+        lastDailyDrawPresentedDate = DailyDrawPolicy.dateKey(for: Date())
     }
 
-    private func ritualDateString(for date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.calendar = Calendar.current
-        formatter.locale = Locale(identifier: "ja_JP")
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.string(from: date)
+    private func saveDailyDrawQuote(_ quote: Quote) {
+        guard !quote.isFavorited else { return }
+        quote.isFavorited = true
+        quote.favoritedAt = Date()
+        do {
+            try modelContext.save()
+            WidgetCenter.shared.reloadAllTimelines()
+        } catch {
+            print("🚨 Daily draw save failed: \(error)")
+        }
+    }
+
+    private func dismissDailyDrawAndContinue() {
+        activeCover = nil
+        guard !userSettings.hasSeenInteractionGuide else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            interactionGuideStage = .verticalSwipe
+            interactionGuideCompletedCount = 0
+            withAnimation(WFM.Motion.smooth) { showInteractionGuide = true }
+        }
     }
 
     private func schedulePreviewPaywallIfNeeded(for index: Int, quoteId: String) {
@@ -1465,18 +1526,18 @@ struct DailyCheckInView: View {
 
     @State private var isVisible = false
 
-    private let pageBackground = Color(hex: "F1E9E3")
-    private let sheetBackground = Color(hex: "FFFCF8")
-    private let primaryText = Color(hex: "2F2730")
-    private let secondaryText = Color(hex: "7D7280")
+    private let pageBackground = WFM.ColorToken.nightBase
+    private let sheetBackground = WFM.ColorToken.nightRaised
+    private let primaryText = WFM.ColorToken.nightTextPrimary
+    private let secondaryText = WFM.ColorToken.nightTextSub
     private let accentLavender = Color(hex: "8D90A2")
-    private let borderColor = Color(hex: "E8DDD6")
+    private let borderColor = Color.white.opacity(0.12)
 
     var body: some View {
         GeometryReader { proxy in
             ZStack {
                 LinearGradient(
-                    colors: [pageBackground, Color(hex: "F7F1EB"), Color(hex: "EFE5DE")],
+                    colors: [pageBackground, WFM.ColorToken.nightHigh, pageBackground],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -1485,7 +1546,7 @@ struct DailyCheckInView: View {
                 Circle()
                     .fill(
                         RadialGradient(
-                            colors: [Color.white.opacity(0.75), .clear],
+                            colors: [Color.white.opacity(0.10), .clear],
                             center: .center,
                             startRadius: 0,
                             endRadius: 180
@@ -1496,7 +1557,7 @@ struct DailyCheckInView: View {
                     .blur(radius: 16)
 
                 Circle()
-                    .fill(Color(hex: "F7D9D4").opacity(0.42))
+                    .fill(WFM.ColorToken.nightRoseSoft.opacity(0.10))
                     .frame(width: 220, height: 220)
                     .offset(x: -proxy.size.width * 0.34, y: -proxy.size.height * 0.12)
                     .blur(radius: 28)
@@ -1560,7 +1621,7 @@ struct DailyCheckInView: View {
                                 }
                                 .padding(18)
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(Color(hex: "F6EFEB"))
+                                .background(Color.white.opacity(0.07))
                                 .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 22, style: .continuous)
@@ -1577,10 +1638,10 @@ struct DailyCheckInView: View {
                                 Spacer()
                                 Text("今日の言葉を読む")
                                     .font(.system(size: 17, weight: .semibold))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(WFM.ColorToken.nightInk)
                                 Image(systemName: "arrow.right")
                                     .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(.white.opacity(0.9))
+                                    .foregroundColor(WFM.ColorToken.nightInk.opacity(0.9))
                                 Spacer()
                             }
                             .padding(.vertical, 18)
@@ -1598,9 +1659,9 @@ struct DailyCheckInView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 34, style: .continuous))
                     .overlay(
                         RoundedRectangle(cornerRadius: 34, style: .continuous)
-                            .stroke(Color.white.opacity(0.92), lineWidth: 1)
+                            .stroke(Color.white.opacity(0.10), lineWidth: 1)
                     )
-                    .shadow(color: Color(hex: "CDBEB6").opacity(0.35), radius: 28, x: 0, y: 12)
+                    .shadow(color: Color.black.opacity(0.45), radius: 28, x: 0, y: 12)
                     .padding(.horizontal, 10)
                     .padding(.bottom, 10)
                 }
@@ -1608,7 +1669,7 @@ struct DailyCheckInView: View {
                 .offset(y: isVisible ? 0 : 24)
             }
         }
-        .preferredColorScheme(.light)
+        .preferredColorScheme(.dark)
         .onAppear {
             withAnimation(.easeOut(duration: 0.55)) {
                 isVisible = true
@@ -1621,12 +1682,12 @@ struct DailyCheckInView: View {
 
         return ZStack(alignment: .topLeading) {
             RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .fill(Color.white.opacity(0.94))
+                .fill(Color.white.opacity(0.06))
 
             RoundedRectangle(cornerRadius: 28, style: .continuous)
                 .fill(
                     LinearGradient(
-                        colors: [palette.top, palette.bottom],
+                        colors: [palette.top.opacity(0.10), palette.bottom.opacity(0.18)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -1635,7 +1696,7 @@ struct DailyCheckInView: View {
                 .frame(maxHeight: .infinity, alignment: .top)
 
             Circle()
-                .fill(Color.white.opacity(0.45))
+                .fill(Color.white.opacity(0.10))
                 .frame(width: 84, height: 84)
                 .blur(radius: 10)
                 .offset(x: -10, y: -4)
@@ -1670,7 +1731,7 @@ struct DailyCheckInView: View {
             RoundedRectangle(cornerRadius: 28, style: .continuous)
                 .stroke(borderColor, lineWidth: 1)
         )
-        .shadow(color: Color(hex: "D8C8BF").opacity(0.18), radius: 16, x: 0, y: 10)
+        .shadow(color: Color.black.opacity(0.25), radius: 16, x: 0, y: 10)
     }
 
     private func metricCard(label: String, value: String, detail: String) -> some View {
@@ -1686,7 +1747,7 @@ struct DailyCheckInView: View {
         }
         .padding(18)
         .frame(maxWidth: .infinity, minHeight: 118, alignment: .leading)
-        .background(Color(hex: "F6EFEB"))
+        .background(Color.white.opacity(0.07))
         .overlay(
             RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .stroke(borderColor, lineWidth: 1)

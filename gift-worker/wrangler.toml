@@ -1,0 +1,14 @@
+name = "quote-gift-api"
+main = "src/index.js"
+compatibility_date = "2026-07-13"
+
+[vars]
+BUNDLE_ID = "com.antigravity.QuoteApp"
+PRODUCT_ID = "com.quoteapp.gift.omamori"
+PUBLIC_GIFT_BASE_URL = "https://mayu119.github.io/Quote-app/gift"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "quote-gifts"
+database_id = "REPLACE_AFTER_D1_CREATE"
+migrations_dir = "migrations"

@@ -47,5 +47,6 @@ struct MonthlyReportView: View {
             .task { summary = try? QuoteDataService(modelContext: modelContext).getMonthlyShelfSummary() }
             .fullScreenCover(isPresented: $showPaywall) { PremiumView(context: .weeklyShelf).environmentObject(userSettings) }
         }
+        .preferredColorScheme(.dark)
     }
 }

@@ -4,8 +4,8 @@
     {
       "product_id": "com.quoteapp.gift.omamori",
       "name": "言葉のお守り",
-      "type": "NON_CONSUMABLE",
-      "review_note": "A one-time gift card containing one selected quote, a sender note, and a special background. The recipient can open and save it without any payment prompt.",
+      "type": "CONSUMABLE",
+      "review_note": "Each purchase issues one shareable gift card containing one selected quote, a sender note, and a special background. The same customer may purchase additional gifts. Recipients can open and save gifts without any payment prompt.",
       "family_sharable": false,
       "localizations": [
         {

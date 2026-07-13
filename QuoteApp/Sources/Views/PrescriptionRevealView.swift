@@ -13,7 +13,7 @@ struct PrescriptionRevealView: View {
     var body: some View {
         ZStack {
             LinearGradient(
-                colors: [Color(hex: "211B2A"), Color(hex: "332A3C"), Color(hex: "18151F")],
+                colors: [WFM.ColorToken.nightRaised, WFM.ColorToken.nightHigh, WFM.ColorToken.nightBase],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -36,7 +36,7 @@ struct PrescriptionRevealView: View {
                     VStack(spacing: WFM.Space.l) {
                         Text("あなたの処方箋")
                             .font(.system(size: 20, weight: .semibold, design: .serif))
-                            .foregroundStyle(Color(hex: "EEC7BE"))
+                            .foregroundStyle(WFM.ColorToken.nightRoseSoft)
 
                         VStack(alignment: .leading, spacing: WFM.Space.m) {
                             Text(tone.summary(for: focusTitle))
@@ -66,10 +66,11 @@ struct PrescriptionRevealView: View {
                         Button(action: onContinue) {
                             Text("処方箋を受け取る")
                                 .font(.body.weight(.semibold))
+                                .foregroundStyle(WFM.ColorToken.nightInk)
                                 .frame(maxWidth: .infinity, minHeight: 52)
                         }
                         .buttonStyle(.borderedProminent)
-                        .tint(Color(hex: "D99AA3"))
+                        .tint(WFM.ColorToken.nightRose)
                     }
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }
@@ -102,9 +103,9 @@ enum PrescriptionTone {
         case .gentle:
             return "がんばり方は知っているのに、休み方を自分に許していない。\nあなたに必要なのは、背中を押す言葉より、肩の力を抜く言葉です。"
         case .direct:
-            return "「(focus)」を選んだあなたには、迷いを消すより、次の一歩を具体的にする言葉を選びました。"
+            return "「\(focus)」を選んだあなたには、迷いを消すより、次の一歩を具体的にする言葉を選びました。"
         case .deep:
-            return "答えを急がず、いまの気持ちを置いておける余白を。\n「(focus)」を選んだあなたへ、静かに残る言葉を届けます。"
+            return "答えを急がず、いまの気持ちを置いておける余白を。\n「\(focus)」を選んだあなたへ、静かに残る言葉を届けます。"
         }
     }
 
