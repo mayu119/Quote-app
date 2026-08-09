@@ -22,7 +22,6 @@ struct ContentView: View {
     @State private var visibleQuoteId: String?
     /// セッション中に既に見た名言ID（戻りスクロールでカウントしないため）
     @State private var seenQuoteIds: Set<String> = []
-    @State private var previewPaywallTask: Task<Void, Never>?
     @State private var showInteractionGuide = false
     @State private var interactionGuideStage: InteractionGuideOverlay.Stage = .verticalSwipe
     @State private var interactionGuideCompletedCount: Int = 0
@@ -236,6 +235,9 @@ struct ContentView: View {
                     // 初回オンボーディングの処方箋を、その日の最初の一枚として扱う。
                     markDailyDrawPresented()
                     activeCover = nil
+                    Task {
+                        await reloadDailyQuotesAfterOnboarding()
+                    }
                     if !userSettings.hasSeenInteractionGuide {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                             withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) {
@@ -336,7 +338,6 @@ struct ContentView: View {
             seenQuoteIds.insert(newId)
             
                 if let idx = dailyQuotes.firstIndex(where: { $0.id == newId }) {
-                    schedulePreviewPaywallIfNeeded(for: idx, quoteId: newId)
                     let currentQuote = dailyQuotes[idx]
 
                 // Analytics: 名言表示
@@ -445,6 +446,10 @@ struct ContentView: View {
                 let trigger = isLockedPreview ? "free_preview_locked" : "home_toolbar"
                 AnalyticsService.shared.logPaywallView(trigger: trigger)
                 activeCover = .premiumWall(isLockedPreview ? .categoryLock : .general)
+            },
+            onFavoriteLimit:   {
+                AnalyticsService.shared.logPaywallView(trigger: "favorite_limit")
+                activeCover = .premiumWall(.favoriteLimit)
             },
             onTutorialVerticalSwipe: {
                 completeInteractionGuideStep(.verticalSwipe, message: "上下スワイプできました")
@@ -607,13 +612,46 @@ struct ContentView: View {
         }
     }
 
+    /// オンボーディング完了直後、preferredCategories を反映した初日のデッキに差し替える
+    private func reloadDailyQuotesAfterOnboarding() async {
+        let dataService = QuoteDataService(modelContext: modelContext)
+        do {
+            let fetchLimit = currentFetchLimit
+            let quotes = try await dataService.getDailyQuotes(
+                limit: fetchLimit,
+                isPremium: userSettings.isPremiumUser,
+                mediumCategory: selectedMediumCategory,
+                largeCategory: selectedLargeCategory,
+                spiritualBundle: Config.enableSpiritualRitual ? selectedSpiritualBundle : nil,
+                preferredCategories: userSettings.preferredCategories,
+                affinityScores: userSettings.categoryAffinityScores
+            )
+            guard !quotes.isEmpty else { return }
+            await MainActor.run {
+                self.dailyQuotes = quotes
+                self.weeklyFavoriteSummary = (try? dataService.getWeeklyFavoriteSummary()) ?? .init(favoriteCount: 0, topCategory: nil)
+                self.favoriteRecommendation = try? dataService.getFavoriteRecommendation(excluding: quotes.first?.id)
+                self.visibleQuoteId = quotes.first?.id
+                self.seenQuoteIds = Set([quotes.first?.id].compactMap { $0 })
+
+                if let first = quotes.first {
+                    let bgName = currentBackgroundName
+                    userSettings.syncWidgetQuote(defaultQuote: first, backgroundName: bgName)
+                    WidgetCenter.shared.reloadAllTimelines()
+                }
+            }
+        } catch {
+            print("🚨 Reload after onboarding failed: \(error)")
+        }
+    }
+
     private func isNightTime(on date: Date = Date()) -> Bool {
         DailyDrawPolicy.isNight(date)
     }
 
     private var streakRescueBanner: some View {
         VStack(spacing: WFM.Space.s) {
-            Text("昨日までの\(userSettings.lastBrokenStreakDays)日は消えていません。")
+            Text("昨日までの\(userSettings.lastBrokenStreakDays)日は、消えていません。")
                 .font(.headline)
                 .foregroundStyle(WFM.ColorToken.nightTextPrimary)
             Text("今日の言葉から、続きを受け取れます。")
@@ -626,7 +664,7 @@ struct ContentView: View {
                     }
                 } else {
                     AnalyticsService.shared.logPaywallView(trigger: "streak_rescue")
-                    activeCover = .premiumWall(.general)
+                    activeCover = .premiumWall(.streakRescue)
                 }
             }) {
                 Text(userSettings.isPremiumUser ? "続きにする" : "記録を続ける")
@@ -781,21 +819,6 @@ struct ContentView: View {
             interactionGuideStage = .verticalSwipe
             interactionGuideCompletedCount = 0
             withAnimation(WFM.Motion.smooth) { showInteractionGuide = true }
-        }
-    }
-
-    private func schedulePreviewPaywallIfNeeded(for index: Int, quoteId: String) {
-        previewPaywallTask?.cancel()
-
-        guard isCategoryLimitedForFreeUser,
-              !userSettings.isPremiumUser,
-              index == previewCardIndex else { return }
-
-        previewPaywallTask = Task { @MainActor in
-            try? await Task.sleep(nanoseconds: UInt64(Config.freeUserPreviewPaywallDelay * 1_000_000_000))
-            guard !Task.isCancelled, visibleQuoteId == quoteId else { return }
-            AnalyticsService.shared.logPaywallView(trigger: "free_preview_delay")
-            activeCover = .premiumWall(.categoryLock)
         }
     }
 

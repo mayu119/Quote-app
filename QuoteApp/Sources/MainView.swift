@@ -29,6 +29,7 @@ struct MainQuoteView: View {
     var onWallpaperSelect: () -> Void
     var onToggleTodayWord: () -> Void
     var onPremium: () -> Void
+    var onFavoriteLimit: () -> Void
     var onTutorialVerticalSwipe: (() -> Void)? = nil
     var onTutorialSaveSwipe: (() -> Void)? = nil
     var onTutorialShareSwipe: (() -> Void)? = nil
@@ -71,7 +72,6 @@ struct MainQuoteView: View {
     // Reflection Flow
     @State private var showReflectionComposer = false
     @State private var reflectionNoteText = ""
-    @State private var reflectionPrompt = "なぜこの言葉に心が動いた？"
     @State private var showInsightSuggestion = false
     private let blush = Color(red: 0.90, green: 0.74, blue: 0.83)
     private let warmIvory = Color(red: 0.99, green: 0.94, blue: 0.95)
@@ -291,14 +291,16 @@ struct MainQuoteView: View {
         }
         .coordinateSpace(name: "MainQuoteViewSpace")
         .ignoresSafeArea(.all)
-        .fullScreenCover(isPresented: $showReflectionComposer) {
+        .sheet(isPresented: $showReflectionComposer) {
             ReflectionComposerView(
                 quote: quote,
-                prompt: reflectionPrompt,
                 noteText: $reflectionNoteText,
                 onClose: closeReflection,
                 onSave: saveReflectionNote
             )
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(WFM.ColorToken.nightBase)
         }
         .sheet(isPresented: $showQuoteInsight) {
             QuoteInsightSheet(
@@ -1292,7 +1294,7 @@ struct MainQuoteView: View {
                 currentCount: Config.freeUserFavoriteLimit,
                 limit: Config.freeUserFavoriteLimit
             )
-            onPremium()
+            onFavoriteLimit()
             withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
                 swipeOffset = .zero
             }
@@ -1327,7 +1329,6 @@ struct MainQuoteView: View {
         }
 
         reflectionNoteText = quote.favoriteNote ?? ""
-        reflectionPrompt = reflectionPromptText()
         showReflectionComposer = true
     }
 
@@ -1400,15 +1401,6 @@ struct MainQuoteView: View {
         }
     }
 
-    private func reflectionPromptText() -> String {
-        let prompts = [
-            "今の自分に、どこが触れた？",
-            "今日この言葉を置いておきたい理由は？",
-            "あとで開いた自分に、何を残しておく？"
-        ]
-        return prompts[quoteIndex % prompts.count]
-    }
-
     private func currentDateString() -> String {
         let f = DateFormatter(); f.dateFormat = "M/d"; f.timeZone = .current
         return f.string(from: Date())
@@ -1455,268 +1447,176 @@ struct NativeShareSheet: UIViewControllerRepresentable {
 
 struct ReflectionComposerView: View {
     let quote: Quote
-    let prompt: String
     @Binding var noteText: String
     let onClose: () -> Void
     let onSave: () -> Void
     @FocusState private var isEditorFocused: Bool
 
-    private let pageBackground = Color(hex: "F1E9E3")
-    private let sheetBackground = Color(hex: "FFFCF8")
-    private let primaryText = Color(hex: "2F2730")
-    private let secondaryText = Color(hex: "7D7280")
-    private let accentRose = Color(hex: "EAA3A1")
-    private let accentLavender = Color(hex: "8D90A2")
-    private let borderColor = Color(hex: "E8DDD6")
-    private let quoteCardTop = Color(hex: "FFF1F4")
-    private let quoteCardBottom = Color(hex: "F6C7D2")
-    private let noteFill = Color(hex: "F8F1EC")
+    private var trimmedNote: String {
+        noteText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var hasStoredNote: Bool {
+        !(quote.favoriteNote ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private var actionTitle: String {
+        if !trimmedNote.isEmpty {
+            return hasStoredNote ? "理由を更新" : "理由を残す"
+        }
+        return hasStoredNote ? "理由を削除して閉じる" : "今は書かない"
+    }
 
     var body: some View {
-        GeometryReader { proxy in
+        NavigationStack {
             ZStack {
-                LinearGradient(
-                    colors: [
-                        pageBackground,
-                        Color(hex: "F7F1EB"),
-                        Color(hex: "EFE5DE")
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+                WFM.ColorToken.nightBase
+                    .ignoresSafeArea()
 
-                VStack(spacing: 0) {
-                    Spacer(minLength: 12)
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: WFM.Space.l) {
+                    VStack(alignment: .leading, spacing: WFM.Space.s) {
+                        Label("棚に置きました", systemImage: "checkmark.circle.fill")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(WFM.ColorToken.nightRoseSoft)
 
-                    VStack(spacing: 0) {
-                        VStack(spacing: 0) {
-                            HStack {
-                                Button(action: onClose) {
-                                    Text("あとで")
-                                        .font(.system(size: 17, weight: .semibold))
-                                        .foregroundColor(primaryText)
-                                        .padding(.horizontal, 18)
-                                        .padding(.vertical, 11)
-                                        .background(Color.white.opacity(0.9))
-                                        .clipShape(Capsule())
-                                        .overlay(Capsule().stroke(borderColor, lineWidth: 1))
-                                }
-                                .buttonStyle(.plain)
+                        Text("この言葉に、ひとこと残す？")
+                            .font(WFM.Typography.title())
+                            .foregroundStyle(WFM.ColorToken.nightTextPrimary)
 
-                                Spacer()
-
-                                Button(action: onClose) {
-                                    Image(systemName: "xmark")
-                                        .font(.system(size: 14, weight: .bold))
-                                        .foregroundColor(primaryText.opacity(0.82))
-                                        .frame(width: 42, height: 42)
-                                        .background(Color.white.opacity(0.9))
-                                        .clipShape(Circle())
-                                        .overlay(Circle().stroke(borderColor, lineWidth: 1))
-                                }
-                                .buttonStyle(.plain)
-                            }
-
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("残した理由")
-                                    .font(.system(size: 11, weight: .bold))
-                                    .foregroundColor(accentLavender)
-                                    .tracking(0.8)
-
-                                Text(prompt)
-                                    .font(.system(size: 31, weight: .bold))
-                                    .foregroundColor(primaryText)
-                                    .lineSpacing(5)
-                                    .fixedSize(horizontal: false, vertical: true)
-
-                                Text("いまの自分に触れた理由を残しておくと、あとで読み返したときに気持ちの流れまで見えてきます。")
-                                    .font(.system(size: 14, weight: .medium))
-                                    .foregroundColor(secondaryText)
-                                    .lineSpacing(4)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.top, 18)
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.top, max(proxy.safeAreaInsets.top, 16) + 6)
-                        .padding(.bottom, 18)
-
-                        ScrollView(showsIndicators: false) {
-                            VStack(alignment: .leading, spacing: 22) {
-                                VStack(alignment: .leading, spacing: 12) {
-                                    Text("今日、置いておく言葉")
-                                        .font(.system(size: 13, weight: .bold))
-                                        .foregroundColor(primaryText)
-
-                                    ZStack(alignment: .topLeading) {
-                                        RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                            .fill(Color.white.opacity(0.94))
-
-                                        RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                            .fill(
-                                                LinearGradient(
-                                                    colors: [quoteCardTop, quoteCardBottom],
-                                                    startPoint: .topLeading,
-                                                    endPoint: .bottomTrailing
-                                                )
-                                            )
-                                            .frame(height: 116)
-                                            .frame(maxHeight: .infinity, alignment: .top)
-
-                                        Circle()
-                                            .fill(Color.white.opacity(0.45))
-                                            .frame(width: 56, height: 56)
-                                            .blur(radius: 10)
-                                            .offset(x: 10, y: 8)
-                                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-
-                                        Image(systemName: "quote.bubble.fill")
-                                            .font(.system(size: 30, weight: .regular))
-                                            .foregroundColor(accentRose.opacity(0.88))
-                                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                                            .padding(.top, 20)
-                                            .padding(.trailing, 18)
-
-                                        VStack(alignment: .leading, spacing: 8) {
-                                            Text(quote.quoteJa)
-                                                .font(.system(size: 16, weight: .bold))
-                                                .foregroundColor(primaryText)
-                                                .lineSpacing(4)
-                                                .fixedSize(horizontal: false, vertical: true)
-
-                                            Text(quote.displayAuthor)
-                                                .font(.system(size: 12, weight: .medium))
-                                                .foregroundColor(secondaryText)
-                                        }
-                                        .padding(18)
-                                        .padding(.top, 112)
-                                    }
-                                    .frame(minHeight: 208)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                            .stroke(borderColor, lineWidth: 1)
-                                    )
-                                    .shadow(color: Color(hex: "D8C8BF").opacity(0.14), radius: 14, x: 0, y: 8)
-                                }
-
-                                VStack(alignment: .leading, spacing: 12) {
-                                    Text("残した理由")
-                                        .font(.system(size: 13, weight: .bold))
-                                        .foregroundColor(primaryText)
-
-                                    Text("長く書かなくて大丈夫です。その瞬間の本音をひとことで残せば十分です。")
-                                        .font(.system(size: 13, weight: .medium))
-                                        .foregroundColor(secondaryText)
-
-                                    ZStack(alignment: .topLeading) {
-                                        if noteText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                            Text("例えば: 比べて苦しかったけど、この一言で自分に戻れた")
-                                                .font(.system(size: 15, weight: .medium))
-                                                .foregroundColor(secondaryText.opacity(0.55))
-                                                .padding(.top, 18)
-                                                .padding(.leading, 18)
-                                                .allowsHitTesting(false)
-                                        }
-
-                                        TextEditor(text: $noteText)
-                                            .scrollContentBackground(.hidden)
-                                            .foregroundColor(primaryText)
-                                            .font(.system(size: 16, weight: .medium))
-                                            .frame(minHeight: 220)
-                                            .padding(12)
-                                            .focused($isEditorFocused)
-                                    }
-                                    .background(noteFill)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                            .stroke(borderColor, lineWidth: 1)
-                                    )
-                                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                                }
-
-                                HStack(spacing: 10) {
-                                    Image(systemName: "sparkles")
-                                        .font(.system(size: 14, weight: .bold))
-                                        .foregroundColor(accentRose)
-
-                                    Text("残した理由は、言葉の棚からあとで書き直せます。")
-                                        .font(.system(size: 13, weight: .medium))
-                                        .foregroundColor(secondaryText)
-                                }
-                                .padding(.horizontal, 4)
-                            }
-                            .padding(.horizontal, 20)
-                            .padding(.top, 20)
-                            .padding(.bottom, 24)
-                        }
-                        .scrollDismissesKeyboard(.interactively)
+                        Text("今は書かなくても大丈夫。あとで言葉の棚から追加・編集できます。")
+                            .font(.subheadline)
+                            .foregroundStyle(WFM.ColorToken.nightTextSub)
+                            .lineSpacing(4)
                     }
-                    .background(sheetBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 34, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 34, style: .continuous)
-                            .stroke(Color.white.opacity(0.9), lineWidth: 1)
-                    )
-                    .shadow(color: Color(hex: "CDBEB6").opacity(0.35), radius: 28, x: 0, y: 12)
-                    .padding(.horizontal, 10)
-                    .padding(.bottom, 10)
-                    .safeAreaInset(edge: .bottom, spacing: 0) {
-                        if !isEditorFocused {
-                        HStack(spacing: 12) {
-                            Button(action: onClose) {
-                                Text("まずは置いておく")
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(primaryText)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 16)
-                                    .background(Color.white.opacity(0.92))
-                                    .clipShape(Capsule())
-                                    .overlay(Capsule().stroke(borderColor, lineWidth: 1))
-                            }
-                            .buttonStyle(.plain)
 
-                            Button(action: onSave) {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "square.and.pencil")
-                                        .font(.system(size: 14, weight: .semibold))
-                                    Text(noteText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "言葉を棚に置く" : "理由を残して置く")
-                                        .font(.system(size: 16, weight: .semibold))
-                                }
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(accentLavender)
-                                .clipShape(Capsule())
-                                .shadow(color: accentLavender.opacity(0.25), radius: 12, x: 0, y: 6)
+                    VStack(alignment: .leading, spacing: WFM.Space.s) {
+                        Text(quote.quoteJa)
+                            .font(.system(.body, design: .serif, weight: .semibold))
+                            .foregroundStyle(WFM.ColorToken.nightTextPrimary)
+                            .lineSpacing(5)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        Rectangle()
+                            .fill(WFM.ColorToken.nightRoseSoft.opacity(0.18))
+                            .frame(height: 1)
+
+                        Text(quote.displayAuthor)
+                            .font(.caption)
+                            .foregroundStyle(WFM.ColorToken.nightTextSub)
+                    }
+                    .padding(WFM.Space.m)
+                    .background(WFM.ColorToken.nightRaised)
+                    .clipShape(RoundedRectangle(cornerRadius: WFM.Radius.m, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: WFM.Radius.m, style: .continuous)
+                            .stroke(WFM.ColorToken.nightRoseSoft.opacity(0.12), lineWidth: 1)
+                    }
+
+                    VStack(alignment: .leading, spacing: WFM.Space.xs) {
+                        Text("残した理由（任意）")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(WFM.ColorToken.nightTextPrimary)
+
+                        Text("長く書かず、その瞬間の気持ちをひとことだけ。")
+                            .font(.caption)
+                            .foregroundStyle(WFM.ColorToken.nightTextSub)
+
+                        ZStack(alignment: .topLeading) {
+                            if trimmedNote.isEmpty {
+                                Text("例：不安から少し離れられた")
+                                    .font(.body)
+                                    .foregroundStyle(WFM.ColorToken.nightTextSub.opacity(0.72))
+                                    .padding(.horizontal, WFM.Space.s)
+                                    .padding(.vertical, 14)
+                                    .allowsHitTesting(false)
                             }
-                            .buttonStyle(.plain)
+
+                            TextEditor(text: $noteText)
+                                .scrollContentBackground(.hidden)
+                                .font(.body)
+                                .foregroundStyle(WFM.ColorToken.nightTextPrimary)
+                                .frame(minHeight: 148)
+                                .padding(WFM.Space.xs)
+                                .focused($isEditorFocused)
+                                .tint(WFM.ColorToken.nightRose)
                         }
-                        .padding(.horizontal, 22)
-                        .padding(.bottom, max(proxy.safeAreaInsets.bottom, 20) + 8)
-                        .padding(.top, 16)
-                        .background(
-                            LinearGradient(
-                                colors: [sheetBackground.opacity(0.0), sheetBackground.opacity(0.92), sheetBackground],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
+                        .background(WFM.ColorToken.nightRaised)
+                        .clipShape(RoundedRectangle(cornerRadius: WFM.Radius.m, style: .continuous))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: WFM.Radius.m, style: .continuous)
+                                .stroke(
+                                    isEditorFocused
+                                        ? WFM.ColorToken.nightRose.opacity(0.82)
+                                        : WFM.ColorToken.nightTextSub.opacity(0.22),
+                                    lineWidth: isEditorFocused ? 1.5 : 1
+                                )
                         }
+                    }
+                    }
+                    .padding(.horizontal, WFM.Space.m)
+                    .padding(.top, WFM.Space.s)
+                    .padding(.bottom, WFM.Space.xl)
+                }
+                .scrollDismissesKeyboard(.interactively)
+            }
+            .navigationTitle("保存した言葉")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(WFM.ColorToken.nightRaised, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .tint(WFM.ColorToken.nightRoseSoft)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: onClose) {
+                        Image(systemName: "xmark")
+                            .foregroundStyle(WFM.ColorToken.nightRoseSoft)
+                            .frame(minWidth: 44, minHeight: 44)
+                    }
+                    .accessibilityLabel("閉じる")
+                }
+
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("完了") {
+                        isEditorFocused = false
+                    }
+                }
+            }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if !isEditorFocused {
+                    VStack(spacing: WFM.Space.xs) {
+                        Label("言葉はすでに棚へ保存されています", systemImage: "bookmark.fill")
+                            .font(.caption)
+                            .foregroundStyle(WFM.ColorToken.nightTextSub)
+
+                        Button(actionTitle) {
+                            if !trimmedNote.isEmpty || hasStoredNote {
+                                onSave()
+                            } else {
+                                onClose()
+                            }
+                        }
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(WFM.ColorToken.nightInk)
+                        .frame(maxWidth: .infinity, minHeight: 52)
+                        .background(WFM.ColorToken.nightRose)
+                        .clipShape(RoundedRectangle(cornerRadius: WFM.Radius.m, style: .continuous))
+                    }
+                    .padding(.horizontal, WFM.Space.m)
+                    .padding(.top, WFM.Space.s)
+                    .padding(.bottom, WFM.Space.xs)
+                    .frame(maxWidth: .infinity)
+                    .background(WFM.ColorToken.nightRaised)
+                    .overlay(alignment: .top) {
+                        Divider()
+                            .overlay(WFM.ColorToken.nightTextSub.opacity(0.12))
                     }
                 }
             }
         }
-        .toolbar {
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                Button("完了") {
-                    isEditorFocused = false
-                }
-                .foregroundColor(primaryText)
-            }
-        }
-        .preferredColorScheme(.light)
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+        .preferredColorScheme(.dark)
     }
 }
 

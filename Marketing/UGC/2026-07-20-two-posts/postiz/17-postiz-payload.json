@@ -1,0 +1,45 @@
+{
+  "type": "schedule",
+  "date": "2026-07-20T08:00:00.000Z",
+  "shortLink": false,
+  "tags": [],
+  "posts": [
+    {
+      "integration": {
+        "id": "cmmwxv838000hp5734ulrbutj"
+      },
+      "value": [
+        {
+          "content": "人には「無理しないでね」って言えるのに、\n自分にはずっと厳しいままの人へ。\n\n頑張り方を増やすというより、\n自分を責める時間を少し減らすための4つです。\n\n私は、言葉が欲しい日はWords For Me、\n頭の中を整理したい日はmuuteを開いてます。\n\nあとで見返せるように保存しておいてね。\n\n#セルフケア #自己肯定感 #メンタルケア #おすすめアプリ #WordsForMe",
+          "image": [
+            {
+              "id": "e13d474e-7612-4ff9-9242-3155f0d3d2a2",
+              "path": "https://media.stoic-jornal.com/iSB4IJ6XfW.png"
+            },
+            {
+              "id": "be18a214-bc71-4d99-b1cc-36d81063f994",
+              "path": "https://media.stoic-jornal.com/pylFnJdiw6.png"
+            },
+            {
+              "id": "e4d9bcaa-0312-4790-953a-f7f52a78a8af",
+              "path": "https://media.stoic-jornal.com/ApBwyC5KGG.png"
+            }
+          ]
+        }
+      ],
+      "settings": {
+        "__type": "tiktok",
+        "title": "人には優しいのに、自分には厳しい人へ｜アプリ4選",
+        "privacy_level": "PUBLIC_TO_EVERYONE",
+        "duet": false,
+        "stitch": false,
+        "comment": true,
+        "autoAddMusic": "no",
+        "brand_content_toggle": false,
+        "brand_organic_toggle": false,
+        "video_made_with_ai": true,
+        "content_posting_method": "DIRECT_POST"
+      }
+    }
+  ]
+}

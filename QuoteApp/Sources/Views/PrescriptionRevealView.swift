@@ -4,10 +4,12 @@ struct PrescriptionRevealView: View {
     let focusTitle: String
     let tags: [String]
     let tone: PrescriptionTone
+    var quote: Quote? = nil
     let onContinue: () -> Void
     let onSkip: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var phase = 0
 
     var body: some View {
@@ -44,20 +46,26 @@ struct PrescriptionRevealView: View {
                                 .foregroundStyle(.white.opacity(0.94))
                                 .lineSpacing(7)
 
-                            Divider().overlay(.white.opacity(0.18))
+                            if let quote {
+                                prescriptionCard(quote)
+                            } else {
+                                VStack(alignment: .leading, spacing: WFM.Space.m) {
+                                    Divider().overlay(.white.opacity(0.18))
 
-                            Text(tone.quote)
-                                .font(.system(size: 22, weight: .medium, design: .serif))
-                                .foregroundStyle(.white)
-                                .lineSpacing(7)
+                                    Text(tone.quote)
+                                        .font(.system(size: 22, weight: .medium, design: .serif))
+                                        .foregroundStyle(.white)
+                                        .lineSpacing(7)
 
-                            Text("Words For Me — 最初の一枚")
-                                .font(.caption)
-                                .foregroundStyle(.white.opacity(0.58))
+                                    Text("Words For Me — 最初の一枚")
+                                        .font(.caption)
+                                        .foregroundStyle(.white.opacity(0.58))
+                                }
+                                .padding(WFM.Space.l)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(.white.opacity(0.10), in: RoundedRectangle(cornerRadius: WFM.Radius.l, style: .continuous))
+                            }
                         }
-                        .padding(WFM.Space.l)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(.white.opacity(0.10), in: RoundedRectangle(cornerRadius: WFM.Radius.l, style: .continuous))
 
                         Text("この処方箋を、7日間ぜんぶ受け取れます")
                             .font(.subheadline.weight(.medium))
@@ -92,6 +100,115 @@ struct PrescriptionRevealView: View {
                 withAnimation(reduceMotion ? nil : WFM.Motion.smooth) { phase = 1 }
             }
         }
+    }
+
+    private func prescriptionCard(_ quote: Quote) -> some View {
+        GeometryReader { proxy in
+            let width = proxy.size.width
+            let height = proxy.size.height
+
+            ZStack {
+                Image(quote.backgroundImage)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: width, height: height)
+                    .clipped()
+                    .accessibilityHidden(true)
+
+                LinearGradient(
+                    colors: [.black.opacity(0.46), .black.opacity(0.72), .black.opacity(0.54)],
+                    startPoint: .topTrailing,
+                    endPoint: .bottomLeading
+                )
+                .frame(width: width, height: height)
+
+                Text(quote.category.displayTitleJa)
+                    .font(.system(size: 12, weight: .semibold))
+                    .tracking(1.2)
+                    .foregroundStyle(WFM.ColorToken.nightRoseSoft.opacity(0.9))
+                    .dynamicTypeSize(...DynamicTypeSize.large)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+                    .padding(.top, WFM.Space.m)
+                    .padding(.trailing, WFM.Space.m)
+                    .frame(width: width, height: height, alignment: .topTrailing)
+
+                if dynamicTypeSize.isAccessibilitySize {
+                    VStack(alignment: .leading, spacing: WFM.Space.m) {
+                        Text(quote.quoteJa)
+                            .font(.system(.title3, design: .serif, weight: .semibold))
+                            .lineSpacing(6)
+                            .foregroundStyle(WFM.ColorToken.nightTextPrimary)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        if quote.hasVisibleAuthorAttribution {
+                            Text("—  \(quote.displayAuthor)")
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(WFM.ColorToken.nightTextSub)
+                        }
+                    }
+                    .dynamicTypeSize(...DynamicTypeSize.large)
+                    .padding(.horizontal, WFM.Space.l)
+                    .frame(width: width, height: height, alignment: .center)
+                } else {
+                    let layout = verticalLayout(for: CGSize(width: width, height: height), quote: quote)
+                    VerticalTextView(
+                        text: layout.text,
+                        fontName: "HiraMinProN-W6",
+                        fontSize: layout.fontSize,
+                        lineSpacing: 15,
+                        textColor: WFM.ColorToken.nightTextPrimary,
+                        scalesWithDynamicType: false
+                    )
+                    .shadow(color: .black.opacity(0.46), radius: 8, x: 0, y: 2)
+                    .frame(width: width, height: height, alignment: .center)
+                }
+
+                if quote.hasVisibleAuthorAttribution && !dynamicTypeSize.isAccessibilitySize {
+                    HStack(alignment: .bottom, spacing: WFM.Space.s) {
+                        Rectangle()
+                            .fill(WFM.ColorToken.nightRoseSoft.opacity(0.72))
+                            .frame(width: 1, height: 32)
+
+                        VerticalTextView(
+                            text: quote.displayAuthor,
+                            fontName: "HiraginoSans-W6",
+                            fontSize: 12,
+                            lineSpacing: 0,
+                            textColor: WFM.ColorToken.nightTextSub,
+                            scalesWithDynamicType: false
+                        )
+                    }
+                    .padding(.leading, WFM.Space.m)
+                    .padding(.bottom, WFM.Space.m)
+                    .frame(width: width, height: height, alignment: .bottomLeading)
+                }
+            }
+            .frame(width: width, height: height)
+            .clipShape(RoundedRectangle(cornerRadius: WFM.Radius.l, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: WFM.Radius.l, style: .continuous)
+                    .stroke(Color.white.opacity(0.18), lineWidth: 1)
+            }
+            .shadow(color: .black.opacity(0.32), radius: 20, x: 0, y: 12)
+        }
+        .frame(height: 320)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(quote.quoteJa)、\(quote.displayAuthor)")
+    }
+
+    private func verticalLayout(for size: CGSize, quote: Quote) -> (text: String, fontSize: CGFloat) {
+        let baseFontSize: CGFloat = dynamicTypeSize.isAccessibilitySize ? 22 : 26
+        let availableHeight = size.height * 0.62
+        let normalizedText = quote.quoteJa.replacingOccurrences(of: "\n", with: "")
+        let totalCount = normalizedText.count
+        let heightLimit = max(9, Int(availableHeight / (baseFontSize * 1.12)))
+        let columns = min(5, max(3, Int((size.width - 60) / (baseFontSize + 15))))
+        let widthLimit = Int(ceil(Double(max(totalCount, 1)) / Double(columns)))
+        let folded = JapaneseLineBreaker.fold(normalizedText, maxPerLine: max(heightLimit, widthLimit))
+        let longest = folded.components(separatedBy: "\n").map(\.count).max() ?? 1
+        let fitted = availableHeight / CGFloat(longest) / 1.12
+        return (folded, min(baseFontSize, max(19, fitted)))
     }
 }
 

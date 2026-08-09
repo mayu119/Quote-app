@@ -1,0 +1,45 @@
+{
+  "type": "schedule",
+  "date": "2026-07-20T11:00:00.000Z",
+  "shortLink": false,
+  "tags": [],
+  "posts": [
+    {
+      "integration": {
+        "id": "cmmwxv838000hp5734ulrbutj"
+      },
+      "value": [
+        {
+          "content": "夜になると、できなかったことばかり思い出す。\nでも本当は「何もできなかった日」じゃなくて、\n覚えていないくらい頑張った日なのかもしれない。\n\n記録する、ひと息つく、言葉を受け取る、明日の準備をする。\n全部やらなくて大丈夫。今夜はひとつだけでいい。\n\n疲れた夜に見返せるように保存してね。\n\n#夜の過ごし方 #セルフケア #自己肯定感 #おすすめアプリ #WordsForMe",
+          "image": [
+            {
+              "id": "3969e9d5-f9b4-4fa4-a5cc-818be6ce6638",
+              "path": "https://media.stoic-jornal.com/akAKC9odk4.png"
+            },
+            {
+              "id": "38f13ed6-2434-46ab-b8ed-7897929061cb",
+              "path": "https://media.stoic-jornal.com/quumw9EJ3z.png"
+            },
+            {
+              "id": "9f6a99f1-2898-4bbb-98ef-5b3b6080310e",
+              "path": "https://media.stoic-jornal.com/dYbjt2u6Ty.png"
+            }
+          ]
+        }
+      ],
+      "settings": {
+        "__type": "tiktok",
+        "title": "何もできなかった気がする夜に｜アプリ4選",
+        "privacy_level": "PUBLIC_TO_EVERYONE",
+        "duet": false,
+        "stitch": false,
+        "comment": true,
+        "autoAddMusic": "no",
+        "brand_content_toggle": false,
+        "brand_organic_toggle": false,
+        "video_made_with_ai": true,
+        "content_posting_method": "DIRECT_POST"
+      }
+    }
+  ]
+}

@@ -3,7 +3,7 @@ import RevenueCat
 import UIKit
 
 enum PaywallContext: String {
-    case onboarding, favoriteLimit, archive, wallpaper, categoryLock, insight, weeklyShelf, general
+    case onboarding, favoriteLimit, archive, wallpaper, categoryLock, insight, streakRescue, general
 }
 
 /// 女性向けの柔らかいプレミアム画面
@@ -91,6 +91,17 @@ struct PremiumView: View {
                 }
             }
             .ignoresSafeArea(edges: .top)
+
+            // 常時表示の閉じるボタン（唯一の離脱手段をスクロール最下部に限定しない）
+            VStack {
+                HStack {
+                    Spacer()
+                    closeButton
+                }
+                Spacer()
+            }
+            .padding(.top, max(safeAreaTop, 12) + 8)
+            .padding(.trailing, 20)
         }
         .preferredColorScheme(.dark)
         .task {
@@ -113,6 +124,20 @@ struct PremiumView: View {
         } message: {
             Text(alertMessage)
         }
+    }
+
+    // MARK: - Close Button
+
+    private var closeButton: some View {
+        Button(action: dismissPaywallLater) {
+            Image(systemName: "xmark")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.white.opacity(0.85))
+                .frame(width: 32, height: 32)
+                .background(Circle().fill(Color.white.opacity(0.16)))
+        }
+        .accessibilityLabel("閉じる")
+        .accessibilityHint("プレミアム画面を閉じて元の画面に戻ります")
     }
 
     // MARK: - Hero Artwork
@@ -191,15 +216,26 @@ struct PremiumView: View {
     // MARK: - Main Copy
 
     private var mainCopySection: some View {
-        Text(context == .onboarding
-             ? "処方箋が決まった記念に、\n7日間、すべての言葉と棚を\n受け取れます"
-             : "響いた言葉をただ流さず、\nあなたの文脈として\n静かに残せるように")
+        Text(contextualHeadline)
             .font(.system(size: 24, weight: .bold))
             .foregroundColor(textPrimary)
             .multilineTextAlignment(.center)
             .lineSpacing(6)
             .opacity(appear ? 1 : 0)
             .offset(y: appear ? 0 : 20)
+    }
+
+    private var contextualHeadline: String {
+        switch context {
+        case .onboarding:
+            return "処方箋が決まった記念に、\n7日間、すべての言葉と棚を\n受け取れます"
+        case .favoriteLimit:
+            return "この言葉も、棚に置けるように。\nいま置けている10枚は、そのまま。"
+        case .streakRescue:
+            return "昨日までの\(userSettings.lastBrokenStreakDays)日は、消えていません。"
+        default:
+            return "響いた言葉をただ流さず、\nあなたの文脈として\n静かに残せるように"
+        }
     }
 
     // MARK: - Benefit List
@@ -232,6 +268,7 @@ struct PremiumView: View {
         let category = Benefit(icon: "square.grid.2x2", title: "全カテゴリを自由に巡る", description: "自己肯定、恋愛、家族、対人関係まで、その日の気分に近い言葉を自分で選べます。")
         let wallpaper = Benefit(icon: "photo.on.rectangle", title: "背景と空気感を自分好みに", description: "やわらかな光や静かな景色を選んで、言葉を受け取る余白を整えられます。")
         let insight = Benefit(icon: "book.pages.fill", title: "言葉の余韻を最後まで受け取る", description: "実在の言葉でも創作の言葉でも、その意味や背景を最後まで読めます。")
+        let streak = Benefit(icon: "flame.fill", title: "昨日までの記録を続きにする", description: "途切れた日があっても、これまでの積み重ねからまた続けられます。")
         let leading: Benefit
         switch context {
         case .favoriteLimit: leading = shelf
@@ -239,7 +276,8 @@ struct PremiumView: View {
         case .wallpaper: leading = wallpaper
         case .categoryLock, .onboarding: leading = category
         case .insight: leading = insight
-        case .weeklyShelf, .general: leading = shelf
+        case .streakRescue: leading = streak
+        case .general: leading = shelf
         }
         return [leading] + [shelf, archive, category, wallpaper, insight].filter { $0.title != leading.title }.prefix(3)
     }
@@ -776,6 +814,14 @@ struct PremiumView: View {
     private var safeAreaBottom: CGFloat {
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
             return windowScene.windows.first?.safeAreaInsets.bottom ?? 0
+        }
+        return 0
+    }
+
+    // 安全領域の上部（ノッチ／ステータスバー分）
+    private var safeAreaTop: CGFloat {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            return windowScene.windows.first?.safeAreaInsets.top ?? 0
         }
         return 0
     }

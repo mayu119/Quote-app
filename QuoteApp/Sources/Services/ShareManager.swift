@@ -84,7 +84,7 @@ final class ShareManager {
         let bgImage = UIImage(named: backgroundName) ?? UIImage()
 
         // 3. Instagram StoriesのURL Schemeを構築
-        guard let url = URL(string: "instagram-stories://share?source_application=9W24U28U8Q") else { return false } // BundleIDやAppIDを指定（無くても動作することが多いが推奨）
+        guard let url = URL(string: "instagram-stories://share?source_application=\(Config.instagramSourceApplicationID)") else { return false }
         
         if UIApplication.shared.canOpenURL(url) {
             // Instagramアプリがインストールされている場合
@@ -259,7 +259,7 @@ struct QuoteShareSnapshotView: View {
             // 4. Quote Index Watermark
             Text(String(format: "%02d", quoteIndex))
                 .font(.system(size: 500, weight: .black, design: .monospaced))
-                .foregroundColor(.white.opacity(0.04))
+                .foregroundColor(.white.opacity(0.10))
                 .offset(x: 200, y: -80)
             
             // 4.5 App Name
@@ -517,6 +517,7 @@ struct ShelfShareSnapshotView: View {
 
 struct ShareQuoteView: View {
     let quote: Quote
+    var isVertical: Bool = false
     @Environment(\.dismiss) private var dismiss
 
     @State private var showShareSheet = false
@@ -628,7 +629,8 @@ struct ShareQuoteView: View {
                 quote: quote,
                 quoteIndex: 1,
                 backgroundName: quote.backgroundImage,
-                format: .stories
+                format: .stories,
+                isVertical: isVertical
             ))
         }
     }

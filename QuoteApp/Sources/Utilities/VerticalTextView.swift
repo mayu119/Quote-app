@@ -8,15 +8,15 @@ struct VerticalTextView: View {
     var fontSize: CGFloat
     var lineSpacing: CGFloat
     var textColor: Color = .white
+    var scalesWithDynamicType: Bool = true
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         let _ = dynamicTypeSize
-        let effectiveFontSize = min(
-            UIFontMetrics(forTextStyle: .title2).scaledValue(for: fontSize),
-            fontSize * 1.25
-        )
+        let effectiveFontSize = scalesWithDynamicType
+            ? min(UIFontMetrics(forTextStyle: .title2).scaledValue(for: fontSize), fontSize * 1.25)
+            : fontSize
         HStack(alignment: .top, spacing: lineSpacing) {
             let lines = text.split(separator: "\n").map(String.init)
             ForEach(Array(lines.reversed().enumerated()), id: \.offset) { _, line in

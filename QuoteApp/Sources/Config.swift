@@ -28,6 +28,11 @@ enum Config {
     static let giftAPIBaseURL = URL(string: "https://quote-gift-api.mayu119.workers.dev")!
     static let enableGiftOmamori = false
 
+    /// Instagram Storiesのsource_applicationに渡す値。
+    /// Metaの仕様ではMeta for Developersで発行されるFacebook App ID（数値）が正。
+    /// 現在はApple Team IDの暫定値のままで、Meta未登録のため属性計測は効かない。
+    static let instagramSourceApplicationID = "9W24U28U8Q"
+
     // MARK: - Free User Limits
 
     /// 無料ユーザーの日替わり無料カテゴリ閲覧制限
@@ -35,9 +40,6 @@ enum Config {
 
     /// 無料ユーザー向けロックプレビューの表示位置（11枚目）
     static let freeUserCategoryPreviewIndex = freeUserCategorySwipeLimit
-
-    /// ロックプレビュー表示後にペイウォールを出すまでの待機秒数
-    static let freeUserPreviewPaywallDelay: TimeInterval = 2.5
 
     /// 無料ユーザーのお気に入り登録制限
     static let freeUserFavoriteLimit = 10

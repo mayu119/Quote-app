@@ -1,0 +1,26 @@
+[
+  {
+    "id": "cms8dghu4000gmj6p481gamwv",
+    "state": "QUEUE",
+    "publishDate": "2026-08-03T01:00:00.000Z",
+    "releaseURL": null,
+    "releaseId": null,
+    "integration": "stoic -前へ進むための言葉"
+  },
+  {
+    "id": "cms8dghws000hmj6p61bu8ue7",
+    "state": "QUEUE",
+    "publishDate": "2026-08-04T01:00:00.000Z",
+    "releaseURL": null,
+    "releaseId": null,
+    "integration": "stoic -前へ進むための言葉"
+  },
+  {
+    "id": "cms8dgi1f000imj6pb3ddfunj",
+    "state": "QUEUE",
+    "publishDate": "2026-08-05T01:00:00.000Z",
+    "releaseURL": null,
+    "releaseId": null,
+    "integration": "stoic -前へ進むための言葉"
+  }
+]

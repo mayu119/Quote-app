@@ -670,7 +670,7 @@ struct MinimalQuoteDetailView: View {
             withAnimation(.easeOut(duration: 0.6)) { appear = true }
         }
         .sheet(isPresented: $showShareView) {
-            ShareQuoteView(quote: quote)
+            ShareQuoteView(quote: quote, isVertical: userSettings.isVerticalTextMode)
         }
         .sheet(isPresented: $showQuoteInsight) {
             QuoteInsightSheet(

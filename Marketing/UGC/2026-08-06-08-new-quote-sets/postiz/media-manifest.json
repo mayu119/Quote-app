@@ -1,0 +1,23 @@
+{
+  "integration": "cmmwxv838000hp5734ulrbutj",
+  "sets": {
+    "i-three-choices": [
+      {"file":"01-cover.png","id":"2e76904d-128d-4581-a0b3-01c940daee8c","path":"https://media.stoic-jornal.com/ZvPh8NoNSd.png"},
+      {"file":"02-quotes.png","id":"5999c230-2a83-48f3-8158-42990271367b","path":"https://media.stoic-jornal.com/dveB5pDVzx.png"},
+      {"file":"03-keep.png","id":"9cf5783e-398b-40aa-aff9-0c226ebccd88","path":"https://media.stoic-jornal.com/Q15SWtWsvY.png"},
+      {"file":"04-app-proof.png","id":"05be4e97-c9af-41be-8d70-a5779d0c9253","path":"https://media.stoic-jornal.com/rShIITrNFo.png"}
+    ],
+    "j-love-quotes": [
+      {"file":"01-cover.png","id":"6d391313-4a31-41cc-9e31-8f2efff28cda","path":"https://media.stoic-jornal.com/e3Ds999Cyz.png"},
+      {"file":"02-quotes.png","id":"d98a8c83-2e67-4798-b840-483371e179d9","path":"https://media.stoic-jornal.com/SlxYaRAgQY.png"},
+      {"file":"03-keep.png","id":"5aa6d4d3-38bc-43f2-919b-b0c15aac2564","path":"https://media.stoic-jornal.com/8RBw61igL9.png"},
+      {"file":"04-app-proof.png","id":"ecbadaca-2614-4f6a-8fd9-d1413356000f","path":"https://media.stoic-jornal.com/ASdtI2GnyK.png"}
+    ],
+    "k-day-parts": [
+      {"file":"01-cover.png","id":"a964e57f-7598-4fa6-a91c-03b6f465c040","path":"https://media.stoic-jornal.com/zA66Usdwpd.png"},
+      {"file":"02-quotes.png","id":"b09b015d-3f35-46fb-b742-4bdbfd33724f","path":"https://media.stoic-jornal.com/QfgPtnq0pb.png"},
+      {"file":"03-keep.png","id":"5d7f3ef9-c258-4c51-b45e-9393774d9d68","path":"https://media.stoic-jornal.com/PVp0vIUncE.png"},
+      {"file":"04-app-proof.png","id":"3165b97d-c4a6-4a5f-aa7c-2fb4e71cdf46","path":"https://media.stoic-jornal.com/sRLtgfWmqq.png"}
+    ]
+  }
+}

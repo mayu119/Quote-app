@@ -4,6 +4,7 @@ struct OnboardingView: View {
     var onDismiss: () -> Void
 
     @EnvironmentObject private var userSettings: UserSettings
+    @Environment(\.modelContext) private var modelContext
 
     @State private var currentStep = 0
     @State private var selectedFocus: QuoteLargeCategory? = nil
@@ -15,6 +16,7 @@ struct OnboardingView: View {
     @State private var showPremiumAtEnd = false
     @State private var showPrescription = false
     @State private var isFinished = false
+    @State private var prescriptionQuote: Quote? = nil
 
     private let pageBackground = Color(hex: "F1E9E3")
     private let sheetBackground = Color(hex: "FFFCF8")
@@ -53,6 +55,7 @@ struct OnboardingView: View {
                             focusTitle: selectedFocus?.displayName ?? "今の自分",
                             tags: previewTags,
                             tone: prescriptionTone,
+                            quote: prescriptionQuote,
                             onContinue: {
                                 withAnimation(WFM.Motion.quick) {
                                     showPrescription = false
@@ -244,7 +247,9 @@ struct OnboardingView: View {
     private var topicsStep: some View {
         VStack(alignment: .leading, spacing: 18) {
             if let selectedFocus {
-                Text("2つ以上選ぶと、その方向に寄せた言葉の棚が最初から整います。")
+                Text(mediumOptions(for: selectedFocus).count >= 2
+                     ? "2つ以上選ぶと、その方向に寄せた言葉の棚が最初から整います。"
+                     : "このテーマだけで、まっすぐ整えます。")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(secondaryText)
 
@@ -491,7 +496,9 @@ struct OnboardingView: View {
         case 0:
             return selectedFocus != nil
         case 1:
-            return selectedTopics.count >= 2
+            guard let selectedFocus else { return selectedTopics.count >= 2 }
+            let required = min(2, mediumOptions(for: selectedFocus).count)
+            return selectedTopics.count >= required
         case 2:
             return selectedTone != nil
         case 3:
@@ -507,6 +514,9 @@ struct OnboardingView: View {
         case 0:
             return "まずは今の自分に近い方向をひとつ選んでください。"
         case 1:
+            if let selectedFocus, mediumOptions(for: selectedFocus).count < 2 {
+                return "このテーマを選んでください。"
+            }
             return "テーマを2つ以上選ぶと、最初の言葉がぶれません。"
         case 2:
             return "受け取りたい言葉の温度をひとつ選んでください。"
@@ -598,7 +608,16 @@ struct OnboardingView: View {
                 notificationGranted: granted
             )
 
+            let dataService = QuoteDataService(modelContext: modelContext)
+            let fetchedQuote = try? await dataService.getDailyQuotes(
+                limit: 1,
+                isPremium: userSettings.isPremiumUser,
+                preferredCategories: userSettings.preferredCategories,
+                affinityScores: userSettings.categoryAffinityScores
+            ).first
+
             await MainActor.run {
+                prescriptionQuote = fetchedQuote
                 withAnimation(.easeInOut(duration: 0.28)) {
                     showPrescription = true
                 }

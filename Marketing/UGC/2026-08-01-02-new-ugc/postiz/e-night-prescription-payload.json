@@ -1,0 +1,49 @@
+{
+  "type": "schedule",
+  "date": "2026-08-02T02:00:00.000Z",
+  "shortLink": false,
+  "tags": [],
+  "posts": [
+    {
+      "integration": {
+        "id": "cmmwxv838000hp5734ulrbutj"
+      },
+      "value": [
+        {
+          "content": "今日うまくできなかったことを、\n寝る前に何度も採点してしまう人へ。\n\n反省が必要な夜もあるけど、\n今日はもう十分やった、と言ってあげる夜があってもいい。\n\nWords For Meで、眠る前の自分に渡す一言を残しています。\n\n失敗した夜に、開いてほしい。\n\n#自己肯定感 #夜の習慣 #言葉 #名言 #WordsForMe\n",
+          "image": [
+            {
+              "id": "d4755287-f8f0-4d4f-b524-43058f9342ec",
+              "path": "https://media.stoic-jornal.com/JBvi5OT5Iq.png"
+            },
+            {
+              "id": "071dd4c4-efbd-43ee-8490-54882a6893e3",
+              "path": "https://media.stoic-jornal.com/HKmyI9GOsC.png"
+            },
+            {
+              "id": "8e0fb9ba-cb0e-4b85-a669-8e151928c37c",
+              "path": "https://media.stoic-jornal.com/jsIodGp8e3.png"
+            },
+            {
+              "id": "e6ed8097-3334-4edc-9fe3-455303377cf7",
+              "path": "https://media.stoic-jornal.com/qyq7L90bdL.png"
+            }
+          ]
+        }
+      ],
+      "settings": {
+        "__type": "tiktok",
+        "title": "失敗した夜に開く言葉",
+        "privacy_level": "PUBLIC_TO_EVERYONE",
+        "duet": true,
+        "stitch": true,
+        "comment": true,
+        "autoAddMusic": "no",
+        "brand_content_toggle": false,
+        "brand_organic_toggle": false,
+        "video_made_with_ai": true,
+        "content_posting_method": "UPLOAD"
+      }
+    }
+  ]
+}

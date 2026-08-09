@@ -1,0 +1,49 @@
+{
+  "type": "schedule",
+  "date": "2026-08-01T02:00:00.000Z",
+  "shortLink": false,
+  "tags": [],
+  "posts": [
+    {
+      "integration": {
+        "id": "cmmwxv838000hp5734ulrbutj"
+      },
+      "value": [
+        {
+          "content": "「大丈夫」って送ったあと、\nほんとは誰かに「大丈夫じゃない」って言いたかった日がある。\n\n送れなかった言葉まで、なかったことにしなくていい。\n今日くらいは、自分に返してあげよう。\n\nWords For Meは、今の自分に必要な言葉を受け取って、\nその時の気持ちも一緒に残しておける場所です。\n\n言葉を飲み込みがちな人へ。\n\n#言葉 #名言 #自分を大切にする #夜の言葉 #WordsForMe\n",
+          "image": [
+            {
+              "id": "c5287578-2e7e-4b0c-9caa-019718e4bbbb",
+              "path": "https://media.stoic-jornal.com/S5A6oux7lZ.png"
+            },
+            {
+              "id": "2821cbcc-46e1-44e5-a1cf-82dfaf17a3c2",
+              "path": "https://media.stoic-jornal.com/rwXVN1IeHV.png"
+            },
+            {
+              "id": "a09925c5-a7f5-422a-807c-496e0a0dc1e9",
+              "path": "https://media.stoic-jornal.com/vBORiXIBfn.png"
+            },
+            {
+              "id": "46d0f8d7-709d-475f-ae5d-0933a93ed858",
+              "path": "https://media.stoic-jornal.com/HAg8MGmRCH.png"
+            }
+          ]
+        }
+      ],
+      "settings": {
+        "__type": "tiktok",
+        "title": "送れなかった言葉を、自分には返せる人へ",
+        "privacy_level": "PUBLIC_TO_EVERYONE",
+        "duet": true,
+        "stitch": true,
+        "comment": true,
+        "autoAddMusic": "no",
+        "brand_content_toggle": false,
+        "brand_organic_toggle": false,
+        "video_made_with_ai": true,
+        "content_posting_method": "UPLOAD"
+      }
+    }
+  ]
+}

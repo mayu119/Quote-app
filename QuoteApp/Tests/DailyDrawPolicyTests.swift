@@ -42,6 +42,23 @@ final class DailyDrawPolicyTests: XCTestCase {
         XCTAssertFalse(DailyDrawPolicy.isNight(day, calendar: calendar, timeZone: tokyo))
     }
 
+    func testDailyCardArtworkFollowsTimeOfDay() throws {
+        let tokyo = try XCTUnwrap(TimeZone(identifier: "Asia/Tokyo"))
+        var localCalendar = calendar
+        localCalendar.timeZone = tokyo
+
+        let dawn = try XCTUnwrap(localCalendar.date(from: DateComponents(year: 2026, month: 7, day: 16, hour: 7)))
+        let day = try XCTUnwrap(localCalendar.date(from: DateComponents(year: 2026, month: 7, day: 16, hour: 12)))
+        let dusk = try XCTUnwrap(localCalendar.date(from: DateComponents(year: 2026, month: 7, day: 16, hour: 18)))
+        let night = try XCTUnwrap(localCalendar.date(from: DateComponents(year: 2026, month: 7, day: 16, hour: 23)))
+
+        XCTAssertEqual(DailyCardArtwork.resolve(for: dawn, calendar: localCalendar), .dawn)
+        XCTAssertEqual(DailyCardArtwork.resolve(for: day, calendar: localCalendar), .day)
+        XCTAssertEqual(DailyCardArtwork.resolve(for: dusk, calendar: localCalendar), .dusk)
+        XCTAssertEqual(DailyCardArtwork.resolve(for: night, calendar: localCalendar), .night)
+        XCTAssertEqual(DailyCardArtwork.resolve(for: day, calendar: localCalendar, forceNight: true), .night)
+    }
+
     func testInsightSuggestionIsExactlyEveryThirdEligibleSave() {
         XCTAssertEqual((1...9).filter(ExperimentAssignmentService.shouldShowInsight), [3, 6, 9])
     }

@@ -4,12 +4,14 @@ import SwiftUI
 /// 旧値対応: PremiumView の `bgDeep/panelBg/textPrimary/textSub/accentGold` をここへ集約。
 enum WFM {
     enum ColorToken {
-        static let pageBase = Color("WFM/PageBase")
-        static let sheetBase = Color("WFM/SheetBase")
-        static let textPrimary = Color("WFM/TextPrimary")
-        static let textSub = Color("WFM/TextSub")
-        static let accentRose = Color("WFM/AccentRose")
-        static let accentGold = Color("WFM/AccentGold")
+        // The WFM asset folder is organizational only ("Provides Namespace" is off),
+        // so the compiled asset names do not include the folder prefix.
+        static let pageBase = Color("PageBase")
+        static let sheetBase = Color("SheetBase")
+        static let textPrimary = Color("TextPrimary")
+        static let textSub = Color("TextSub")
+        static let accentRose = Color("AccentRose")
+        static let accentGold = Color("AccentGold")
 
         // メインの引用画面は没入感を優先する意図的な固定ダーク。Asset の自動反転対象外。
         static let nightVeil = Color.black.opacity(0.72)
@@ -37,7 +39,10 @@ enum WFM {
     enum Motion {
         static let quick = Animation.spring(response: 0.34, dampingFraction: 0.82)
         static let smooth = Animation.spring(response: 0.48, dampingFraction: 0.9)
-        static let revealDuration: TimeInterval = 1.5
+        static let cardFloatDuration: TimeInterval = 3.8
+        static let cardShimmerDuration: TimeInterval = 4.6
+        static let cardLiftDuration: TimeInterval = 0.18
+        static let revealDuration: TimeInterval = 0.92
         static let reducedRevealDuration: TimeInterval = 0.2
     }
 }
