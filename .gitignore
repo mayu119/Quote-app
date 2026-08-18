@@ -26,3 +26,7 @@ fastlane/test_output
 # Local development
 *.log
 .cursor/
+
+# 競合調査の一時成果物（第三者著作物の画像を含むためコミットしない）
+output/
+.playwright-cli/

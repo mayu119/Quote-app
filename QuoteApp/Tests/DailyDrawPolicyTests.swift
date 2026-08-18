@@ -62,4 +62,27 @@ final class DailyDrawPolicyTests: XCTestCase {
     func testInsightSuggestionIsExactlyEveryThirdEligibleSave() {
         XCTAssertEqual((1...9).filter(ExperimentAssignmentService.shouldShowInsight), [3, 6, 9])
     }
+
+    func testNotificationCopyAlwaysLeavesAReasonToOpenTheApp() {
+        XCTAssertEqual(NotificationService.activeCopyMode, .tease)
+    }
+
+    func testNotificationIdentifiersMapToStableAnalyticsTypes() {
+        XCTAssertEqual(
+            NotificationService.notificationType(for: "daily_quote_notification"),
+            "daily_quote"
+        )
+        XCTAssertEqual(
+            NotificationService.notificationType(for: "daily_quote_notification_premium_2"),
+            "premium_quote"
+        )
+        XCTAssertEqual(
+            NotificationService.notificationType(for: "weekly_shelf_notification"),
+            "weekly_shelf"
+        )
+        XCTAssertEqual(
+            NotificationService.notificationType(for: "future_notification"),
+            "future_notification"
+        )
+    }
 }

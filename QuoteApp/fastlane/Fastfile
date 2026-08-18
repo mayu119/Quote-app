@@ -1,14 +1,14 @@
 default_platform(:ios)
 
-app_store_version = "1.1.4"
-app_build_number = "12"
+app_store_version = "1.1.5"
+app_build_number = "13"
 
 platform :ios do
   private_lane :connect_api_key do
     app_store_connect_api_key(
-      key_id: "JP67K2XPLL",
+      key_id: "WA9V8XCLZZ",
       issuer_id: "c2a6ee5c-d2e0-4f89-ae8c-043fed09fc28",
-      key_filepath: File.expand_path("~/.appstoreconnect/private_keys/AuthKey_JP67K2XPLL.p8"),
+      key_filepath: File.expand_path("~/.appstoreconnect/private_keys/AuthKey_WA9V8XCLZZ.p8"),
       in_house: false
     )
   end

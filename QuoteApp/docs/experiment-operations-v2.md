@@ -14,27 +14,23 @@
 - 結果は `QuoteApp/docs/experiment-results/<experiment-id>.md` に終了7日以内に保存する
 - 「有意差なし」は敗北ではない。必要サンプル未達なら延長または終了判断を記録する
 
-## E10 通知文言A/B
+## E10 通知文言（終了）
 
 | 項目 | 定義 |
 | --- | --- |
 | ID | `notification_copy_v2` |
 | 対象 | 通知許可済みで日次通知を1件以上設定した利用者 |
-| 割当 | `SHA256(install_id + experiment_id) % 2`。A=`full`、B=`tease` |
-| 開始 | v2公開後、両群への通知予約が確認できた翌日0:00 JST |
-| 期間 | 最低14日。各群200配信相当未満なら最大28日まで延長 |
-| A | 言葉の本文を通知に表示 |
-| B | 「まだ言葉にできない気持ちへ。今日の一枚を、引いてみませんか。」 |
+| 状態 | 2026-08-17終了。`tease`に統一 |
+| 終了理由 | 旧期間は開封delegateが未配線で、群別の勝敗が観測不能だった。通知内で読了させず、アプリを開く理由を残す構造判断で統一 |
+| 現行文言 | 「まだ言葉にできない気持ちへ。今日の一枚を、引いてみませんか。」 |
 
-判定指標:
+統一後の観測指標:
 
-1. 通知タップ率 = `notification_opened / notification_scheduled_eligible`
+1. 通知タップ率 = `notification_opened` があるユニーク `install_id` / `notification_scheduled_eligible` があるユニーク `install_id`
 2. 30分以内の儀式開示率 = `daily_draw_revealed within 30m / notification_opened`
 3. 同一セッション保存率 = `quote_saved in session / notification_opened`
 
-勝者は、タップ率を悪化させず、儀式開示率または保存率が相対10%以上改善した群。いずれも満たさない場合はAを維持する。Day 14と、延長時はDay 28に判定し、負けた文言と分岐コードを次版で削除する。
-
-必要イベント: `notification_scheduled_eligible`, `notification_opened`, `daily_draw_revealed`, `quote_saved`。iOSのローカル通知には配信完了コールバックがないため「配信数」と呼ばず、予約対象数を分母名に使う。
+必要イベント: `notification_scheduled_eligible`, `notification_opened`, `daily_draw_revealed`, `quote_saved`。iOSのローカル通知には配信完了コールバックがないため「配信数」と呼ばず、予約対象者数を分母に使う。繰り返し通知の再登録と複数回開封があるため、イベント件数同士は割らない。同一アプリ版・同一観測期間のユニーク `install_id` で集計する。
 
 ## E15 深掘り提案
 
@@ -72,17 +68,19 @@
 
 - トライアル開始率: `trial_start` を `paywall_view` のユニーク `install_id` で割った集計済みカード
 - トライアル転換率: `trial_convert` を `trial_start` のユニーク `install_id` で割った集計済みカード
+- D1再訪率: Day 0に `first_open` があるコホートのうち、その翌暦日に `session_start` があるユニーク `install_id` の割合。JST基準で、Day 1が完了していないコホートは分母へ入れない
 - D7: Day 0コホートのうちDay 7に `session_start` があるユニーク `install_id` の割合
 - 儀式D7/D30: `daily_draw_revealed` 有無のコホート比較
 
 ダッシュボードは率だけでなく分子・分母・対象期間・アプリ版を同じカード内に表示する。ゲートはトライアル開始率8%、転換率25%。7日未満のコホートをD7分母へ入れない。
 
+当面のリテンション判断はD1再訪率に絞る。週次で、全体に加えて `app_version` と新規流入元別の分子・分母を記録する。通知・Day1導線の変更後に成熟した新規コホートが2週分たまるまでは、次の構造変更を勝敗判定しない。
+
 ## 運用チェックリスト
 
-- [ ] Day 0: 本番イベント、variant固定、除外条件を確認
-- [ ] Day 1: 両群の件数差が45:55以内か確認
-- [ ] Day 7: 欠損・クラッシュ・課金への悪影響だけ確認し、勝敗は決めない
-- [ ] Day 14: E10一次判定
-- [ ] Day 28: E10延長判定、E15、SNS実験を確定
+- [ ] 本番版で `notification_scheduled_eligible` と `notification_opened` が同一バージョンから発火するか確認
+- [ ] 通知タイプ別（daily / premium / weekly）に開封が分類されるか確認
+- [ ] 毎週、成熟済みコホートのD1再訪率を分子・分母・アプリ版・流入元付きで記録
+- [ ] Day 7: 欠損・クラッシュ・課金への悪影響を確認
+- [ ] Day 28: E15、SNS実験を確定
 - [ ] 結果文書に継続/削除/再試験のどれかを明記
-

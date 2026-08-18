@@ -41,7 +41,7 @@ final class QuoteDataService: ObservableObject {
     /// JSONデータを更新したらこの値をインクリメントする
     /// v29: 300件化(全カテゴリ30件)。Original+107件、カテゴリ再配置13件、重複・不適合7件削除、解説文の使い回し解消
     /// v28: 削除済み引用をお気に入り棚に残す移行を追加
-    private static let currentDataVersion: Int = 29
+    private static let currentDataVersion: Int = 30
     private static let dataVersionKey = "quotesDataVersion"
 
     @Published var quotes: [Quote] = []

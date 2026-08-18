@@ -201,7 +201,6 @@ struct ContentView: View {
                 WallpaperPickerView(
                     onPremiumRequired: {
                         activeSheet = nil
-                        AnalyticsService.shared.logPaywallView(trigger: "wallpaper_lock")
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                             activeCover = .premiumWall(.wallpaper)
                         }
@@ -217,7 +216,7 @@ struct ContentView: View {
                     onPremiumRequired: {
                         activeSheet = nil
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                            activeCover = .premiumWall(.general)
+                            activeCover = .premiumWall(.categoryLock)
                         }
                     }
                 )
@@ -443,12 +442,9 @@ struct ContentView: View {
                 }
             },
             onPremium:         {
-                let trigger = isLockedPreview ? "free_preview_locked" : "home_toolbar"
-                AnalyticsService.shared.logPaywallView(trigger: trigger)
-                activeCover = .premiumWall(isLockedPreview ? .categoryLock : .general)
+                activeCover = .premiumWall(isLockedPreview ? .freePreviewLocked : .homeToolbar)
             },
             onFavoriteLimit:   {
-                AnalyticsService.shared.logPaywallView(trigger: "favorite_limit")
                 activeCover = .premiumWall(.favoriteLimit)
             },
             onTutorialVerticalSwipe: {
@@ -663,7 +659,6 @@ struct ContentView: View {
                         withAnimation(WFM.Motion.quick) { showStreakRescue = false }
                     }
                 } else {
-                    AnalyticsService.shared.logPaywallView(trigger: "streak_rescue")
                     activeCover = .premiumWall(.streakRescue)
                 }
             }) {

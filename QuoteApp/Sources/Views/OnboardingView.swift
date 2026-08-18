@@ -15,7 +15,11 @@ struct OnboardingView: View {
     @State private var contentVisible = false
     @State private var showPremiumAtEnd = false
     @State private var showPrescription = false
+    @State private var showReturnPromise = false
     @State private var isFinished = false
+    @State private var isLeavingPrescription = false
+    @State private var notificationGrantedForAnalytics = false
+    @State private var didLogOnboardingComplete = false
     @State private var prescriptionQuote: Quote? = nil
 
     private let pageBackground = Color(hex: "F1E9E3")
@@ -47,8 +51,11 @@ struct OnboardingView: View {
                 ambientGlow
 
                 if !isFinished {
-                    if showPremiumAtEnd {
-                        PremiumView(context: .onboarding, onDismiss: finishOnboarding)
+                    if showReturnPromise {
+                        OnboardingReturnPromiseView(onFinish: finishOnboarding)
+                            .transition(.opacity)
+                    } else if showPremiumAtEnd {
+                        PremiumView(context: .onboarding, onDismiss: presentReturnPromise)
                             .transition(.opacity)
                     } else if showPrescription {
                         PrescriptionRevealView(
@@ -57,12 +64,11 @@ struct OnboardingView: View {
                             tone: prescriptionTone,
                             quote: prescriptionQuote,
                             onContinue: {
-                                withAnimation(WFM.Motion.quick) {
-                                    showPrescription = false
-                                    showPremiumAtEnd = true
-                                }
+                                leavePrescription(showPremium: true)
                             },
-                            onSkip: finishOnboarding
+                            onSkip: {
+                                leavePrescription(showPremium: false)
+                            }
                         )
                         .transition(.opacity)
                     } else {
@@ -599,15 +605,6 @@ struct OnboardingView: View {
         applySelections()
 
         Task {
-            let granted = await requestNotificationIfNeeded()
-
-            AnalyticsService.shared.logOnboardingGenreSelect(genres: userSettings.preferredCategories)
-            AnalyticsService.shared.updatePreferredCategories(userSettings.preferredCategories)
-            AnalyticsService.shared.logOnboardingComplete(
-                selectedGenreCount: userSettings.preferredCategories.count,
-                notificationGranted: granted
-            )
-
             let dataService = QuoteDataService(modelContext: modelContext)
             let fetchedQuote = try? await dataService.getDailyQuotes(
                 limit: 1,
@@ -642,12 +639,49 @@ struct OnboardingView: View {
     }
 
     private func finishOnboarding() {
+        guard !didLogOnboardingComplete else { return }
+        didLogOnboardingComplete = true
+        AnalyticsService.shared.logOnboardingGenreSelect(genres: userSettings.preferredCategories)
+        AnalyticsService.shared.updatePreferredCategories(userSettings.preferredCategories)
+        AnalyticsService.shared.logOnboardingComplete(
+            selectedGenreCount: userSettings.preferredCategories.count,
+            notificationGranted: notificationGrantedForAnalytics
+        )
+
         withAnimation(.easeOut(duration: 0.25)) {
             isFinished = true
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
             userSettings.completeFirstLaunch()
             onDismiss()
+        }
+    }
+
+    private func leavePrescription(showPremium: Bool) {
+        guard !isLeavingPrescription else { return }
+        isLeavingPrescription = true
+
+        Task {
+            let granted = await configureNotifications(requestPermission: showPremium)
+            await MainActor.run {
+                notificationGrantedForAnalytics = granted
+                withAnimation(WFM.Motion.quick) {
+                    showPrescription = false
+                    if showPremium {
+                        showPremiumAtEnd = true
+                    } else {
+                        showReturnPromise = true
+                    }
+                }
+                isLeavingPrescription = false
+            }
+        }
+    }
+
+    private func presentReturnPromise() {
+        withAnimation(WFM.Motion.quick) {
+            showPremiumAtEnd = false
+            showReturnPromise = true
         }
     }
 
@@ -672,23 +706,34 @@ struct OnboardingView: View {
         }
     }
 
-    private func requestNotificationIfNeeded() async -> Bool {
+    private func configureNotifications(requestPermission: Bool) async -> Bool {
         guard let selectedReminder else { return false }
         guard let reminderDate = selectedReminder.date else { return false }
 
         let status = await NotificationService.shared.getAuthorizationStatus()
         let granted: Bool
+        let shouldLogPermissionOutcome: Bool
 
         switch status {
         case .notDetermined:
-            granted = (try? await NotificationService.shared.requestAuthorization()) ?? false
+            if requestPermission {
+                granted = (try? await NotificationService.shared.requestAuthorization()) ?? false
+                shouldLogPermissionOutcome = true
+            } else {
+                granted = false
+                shouldLogPermissionOutcome = false
+            }
         case .authorized, .provisional, .ephemeral:
             granted = true
+            shouldLogPermissionOutcome = true
         default:
             granted = false
+            shouldLogPermissionOutcome = true
         }
 
-        AnalyticsService.shared.logNotificationPermission(granted: granted)
+        if shouldLogPermissionOutcome {
+            AnalyticsService.shared.logNotificationPermission(granted: granted)
+        }
 
         guard granted else {
             await MainActor.run {
@@ -916,6 +961,81 @@ struct OnboardingView: View {
     private func deduplicated(_ values: [String]) -> [String] {
         var seen = Set<String>()
         return values.filter { seen.insert($0).inserted }
+    }
+}
+
+private struct OnboardingReturnPromiseView: View {
+    let onFinish: () -> Void
+
+    var body: some View {
+        ZStack {
+            WFM.ColorToken.nightBase
+                .ignoresSafeArea()
+
+            VStack(spacing: WFM.Space.xl) {
+                Spacer()
+
+                VStack(spacing: WFM.Space.s) {
+                    Text("TOMORROW")
+                        .font(.caption.weight(.semibold))
+                        .tracking(3)
+                        .foregroundStyle(WFM.ColorToken.nightRoseSoft)
+
+                    Text("明日の一枚は、\nもう伏せてあります。")
+                        .font(.title2.weight(.semibold))
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(6)
+                        .foregroundStyle(WFM.ColorToken.nightTextPrimary)
+                }
+
+                ZStack {
+                    RoundedRectangle(cornerRadius: WFM.Radius.xl, style: .continuous)
+                        .fill(WFM.ColorToken.nightRaised)
+
+                    VStack(spacing: WFM.Space.l) {
+                        Text("明日の私に、一枚。")
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(WFM.ColorToken.nightTextPrimary)
+
+                        Rectangle()
+                            .fill(WFM.ColorToken.nightRoseSoft.opacity(0.5))
+                            .frame(width: 48, height: 1)
+
+                        Text("開くまで、言葉は見えません。")
+                            .font(.subheadline)
+                            .foregroundStyle(WFM.ColorToken.nightTextSub)
+                    }
+                    .padding(WFM.Space.l)
+                }
+                .frame(maxWidth: 320, minHeight: 240)
+                .overlay {
+                    RoundedRectangle(cornerRadius: WFM.Radius.xl, style: .continuous)
+                        .stroke(WFM.ColorToken.nightRoseSoft.opacity(0.28), lineWidth: 1)
+                }
+                .accessibilityHidden(true)
+
+                Text("次に開く理由を、そっと残しておきます。")
+                    .font(.body)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(WFM.ColorToken.nightTextSub)
+
+                Button(action: onFinish) {
+                    Text("今日はここまで")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(WFM.ColorToken.nightInk)
+                        .frame(maxWidth: .infinity, minHeight: 52)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(WFM.ColorToken.nightRose)
+
+                Spacer(minLength: WFM.Space.l)
+            }
+            .padding(.horizontal, WFM.Space.l)
+        }
+        .preferredColorScheme(.dark)
+        .onAppear {
+            AnalyticsService.shared.logOnboardingReturnPromiseView()
+        }
     }
 }
 

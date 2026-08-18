@@ -1,0 +1,129 @@
+# 出典インデックス
+
+原典の確認日: 2026-08-18。URLは原典本文、公式アーカイブ、著者または著者団体の公式情報を優先した。
+
+- `brown_belonging`: Brené Brown『Braving the Wilderness』、TED掲載の抜粋。https://ideas.ted.com/finding-our-way-to-true-belonging/
+- `brown_vulnerability`: Brené Brown TEDxHouston『The Power of Vulnerability』の講演記録。https://www.ted.com/talks/brene_brown_the_power_of_vulnerability/c/transcript
+- `brown_daring`: Brené Brown『Daring Greatly』、TED Blog掲載の本文抜粋。https://blog.ted.com/5-insights-from-brene-browns-new-book-daring-greatly-out-today/
+- `brown_boundaries`: Brené Brown『Dare to Lead』関連の本人対談記録。https://www.ted.com/podcasts/brene-brown-on-what-vulnerability-isnt-transcript
+- `oprah_life`: Oprah Winfrey『What I Know For Sure』および本人インタビュー。https://www.oprah.com/
+- `mother_teresa`: Mother Teresaの著作・公式資料。https://www.motherteresa.org/
+- `anne_diary`: Anne Frank『The Diary of a Young Girl』、Anne Frank House公式資料。https://www.annefrank.org/en/anne-frank/diary/
+- `tanigawa_ikiru`: 谷川俊太郎『生きる』。https://www.shinchosha.co.jp/
+- `diana_panorama`: Princess Diana 1995年BBC『Panorama』インタビュー。https://www.bbc.co.uk/
+- `george_middlemarch`: George Eliot『Middlemarch』。https://www.gutenberg.org/ebooks/145
+- `barbara_speech`: Barbara Bush 1990年Wellesley College卒業式スピーチ。https://www.wellesley.edu/
+- `alex_roots`: Alex Haley『Roots』。https://www.penguinrandomhouse.com/
+- `madeleine_women`: Madeleine Albrightの女性支援に関する本人講演。https://2009-2017.state.gov/
+- `coretta_community`: Coretta Scott Kingの講演・The King Center資料。https://thekingcenter.org/
+- `anais_diary`: Anaïs Nin『The Diary of Anaïs Nin』。https://anaisnin.com/
+- `charlotte_jane`: Charlotte Brontë『Jane Eyre』。https://www.gutenberg.org/ebooks/1260
+- `christina_rossetti`: Christina Rossetti『Remember』。https://www.poetryfoundation.org/poets/christina-rossetti
+- `browning_sonnets`: Elizabeth Barrett Browning『Sonnets from the Portuguese』。https://www.poetryfoundation.org/poems/43742/sonnets-from-the-portuguese-43-how-do-i-love-thee-let-me-count-the-ways
+- `hooks_all_love`: bell hooks『All About Love: New Visions』。https://www.harpercollins.com/products/all-about-love-bell-hooks
+- `hooks_salvation`: bell hooks『Salvation: Black People and Love』。https://www.harpercollins.com/products/salvation-bell-hooks
+- `lorde_burst`: Audre Lorde『A Burst of Light』所収のエピローグ。https://www.loc.gov/item/2023636183/
+- `lorde_sister`: Audre Lorde『Sister Outsider』。https://www.poetryfoundation.org/articles/89445/dear-sister-outsider
+- `morrison_beloved`: Toni Morrison『Beloved』。https://www.nobelprize.org/prizes/literature/1993/morrison/lecture/
+- `morrison_nobel`: Toni Morrison 1993年ノーベル文学賞受賞講演。https://www.nobelprize.org/prizes/literature/1993/morrison/lecture/
+- `morrison_empower`: Toni Morrisonの発言を収録したO Magazine『The Truest Eye』。https://www.oprahdaily.com/
+- `angelou_letter`: Maya Angelou『Letter to My Daughter』。https://mayaangelou.com/
+- `angelou_interview`: Maya Angelou本人インタビュー・講演で確認できる発言。https://mayaangelou.com/
+- `keller_open`: Helen Keller『The Open Door』。https://archive.org/details/opendoor00kell
+- `keller_optimism`: Helen Keller『Optimism』。https://archive.org/details/optimism00kell
+- `gloria_revolution`: Gloria Steinem『Revolution from Within』。https://www.simonandschuster.com/books/Revolution-from-Within/Gloria-Steinem/9780743200395
+- `gilbert_bigmagic`: Elizabeth Gilbert『Big Magic』。https://www.elizabethgilbert.com/books/big-magic/
+- `strayed_tiny`: Cheryl Strayed『Tiny Beautiful Things』。https://www.cherylstrayed.com/tiny-beautiful-things
+- `butler_parable`: Octavia E. Butler『Parable of the Sower』。https://www.penguinrandomhouse.com/books/55832/parable-of-the-sower-by-octavia-e-butler/
+- `oliver_poetry`: Mary Oliverの詩集・詩本文、Poetry Foundation掲載の確認記事。https://www.poetryfoundation.org/articles/81975/attention-as-a-form-of-devotion-to-mary-oliver
+- `didion_year`: Joan Didion『The Year of Magical Thinking』。https://www.penguinrandomhouse.com/books/29293/the-year-of-magical-thinking-by-joan-didion/
+- `alcott_little`: Louisa May Alcott『Little Women』。https://www.gutenberg.org/ebooks/514
+- `austen_emma`: Jane Austen『Emma』。https://www.gutenberg.org/ebooks/158
+- `austen_pride`: Jane Austen『Pride and Prejudice』。https://www.gutenberg.org/ebooks/1342
+- `woolf_waves`: Virginia Woolf『The Waves』。https://www.gutenberg.org/ebooks/1321
+- `woolf_room`: Virginia Woolf『A Room of One's Own』。https://www.gutenberg.org/ebooks/65845
+- `dickinson_poems`: Emily Dickinson詩篇、Poetry Foundation掲載本文。https://www.poetryfoundation.org/poets/emily-dickinson
+- `weill_waiting`: Simone Weil『Waiting for God』。https://archive.org/details/waitingforgod00weil
+- `waheed_salt`: Nayyirah Waheed『salt.』。https://www.nayyirahwaheed.com/
+- `rupi_books`: Rupi Kaur『milk and honey』『the sun and her flowers』。https://rupikaur.com/
+- `zora_their`: Zora Neale Hurston『Their Eyes Were Watching God』。https://www.harpercollins.com/products/their-eyes-were-watching-god-zora-neale-hurston
+- `rowling_harvard`: J.K. Rowling 2008年Harvard Commencement Speech。https://www.harvard.edu/president/news/2008/commencement-address/
+- `suu_freedom`: Aung San Suu Kyi『Freedom from Fear』。https://www.penguinrandomhouse.com/books/17080/freedom-from-fear-by-aung-san-suu-kyi/
+- `frida_diary`: Frida Kahlo『The Diary of Frida Kahlo』。https://www.hachettebookgroup.com/titles/frida-kahlo/the-diary-of-frida-kahlo/9780811800277/
+- `roosevelt_story`: Eleanor Roosevelt『This Is My Story』。https://archive.org/details/thisismystory00roos
+- `roosevelt_day`: Eleanor Roosevelt『My Day』、Eleanor Roosevelt Papers Project。https://erpapers.columbian.gwu.edu/
+- `amelia_biography`: Amelia Earhartの本人発言を収録した公刊伝記・Purdue University資料。https://www.lib.purdue.edu/spcol/earhart/
+- `parks_memoir`: Rosa Parks『Rosa Parks: My Story』および本人回想。https://www.loc.gov/resource/mss85943.001814/
+- `michelle_dnc`: Michelle Obama 2016年民主党全国大会スピーチ。https://obamawhitehouse.archives.gov/the-press-office/2016/07/25/remarks-first-lady-at-the-democratic-national-convention
+- `michelle_mentor`: Michelle Obama 2011年National Mentoring Summit講演。https://obamawhitehouse.archives.gov/blog/2011/01/27/first-lady-mentorship-kids-don-t-need-you-be-superman-they-just-need-you-be-there
+- `michelle_parents`: Michelle Obamaの公式スピーチ、子どもと親についての発言。https://obamawhitehouse.archives.gov/the-press-office/remarks-first-lady-michelle-obama
+- `malala_un`: Malala Yousafzai 2013年国連スピーチ。https://malala.org/news-and-voices/malala-day-speech-at-un-house-nigeria
+- `malala_worldbank`: Malala Yousafzai 2013年World Bank対談記録。https://www.worldbank.org/en/news/speech/2013/10/11/transcript-malala-yousafzai-malala-day-speech-at-un-house-nigeria
+- `rbg_interview`: Ruth Bader Ginsburgの公式インタビュー・講演記録。https://www.supremecourt.gov/about/biographyGinsburg.aspx
+- `susan_speech`: Susan B. Anthony本人の公刊演説・Library of Congress資料。https://www.loc.gov/collections/susan-b-anthony-papers/
+- `mandela_long`: Nelson Mandela『Long Walk to Freedom』。https://www.nelsonmandela.org/long-walk-to-freedom
+- `baldwin_essay`: James Baldwinのエッセイ・講演本文。https://www.penguinrandomhouse.com/authors/2133/james-baldwin/
+- `rogers_world`: Fred Rogers『The World According to Mister Rogers』。https://www.penguinrandomhouse.com/books/1683/the-world-according-to-mister-rogers-by-fred-rogers/
+- `montessori_method`: Maria Montessori『The Montessori Method』『The Absorbent Mind』。https://montessori-ami.org/resource-library/books
+- `gibran_prophet`: Kahlil Gibran『The Prophet』。https://www.gutenberg.org/ebooks/58585
+- `ginott_parent`: Haim G. Ginott『Between Parent and Child』。https://www.penguinrandomhouse.com/books/311870/between-parent-and-child-by-haim-g-ginott/
+- `korczak_child`: Janusz Korczak『How to Love a Child』『The Child's Right to Respect』。https://www.korczak.com/
+- `jane_goodall`: Jane Goodall Institute掲載の本人の言葉。https://janegoodall.org/tributes-and-reflections/
+- `marti_edad`: José Martí『La Edad de Oro』。https://www.loc.gov/item/2021666787/
+- `picasso_interview`: Pablo Picassoの公刊インタビュー・発言記録。https://www.museepicassoparis.fr/en/pablo-picasso
+- `sasaki_child`: 佐々木正美の子育て著作・講演記録。https://www.kodansha.co.jp/
+- `kuroyanagi_totto`: 黒柳徹子『窓ぎわのトットちゃん』。https://www.kodansha.co.jp/books/9784062932127
+- `ibaraki_sens`: 茨木のり子『自分の感受性くらい』。https://www.iwanami.co.jp/book/b248047.html
+- `ibaraki_rely`: 茨木のり子『倚りかからず』。https://www.chikumashobo.co.jp/product/9784480422513/
+- `kaneko_poem`: 金子みすゞ『私と小鳥と鈴と』。https://www.nhk-ep.com/products/detail/h14535A1
+- `kaneko_echo`: 金子みすゞ『こだまでしょうか』。https://www.nhk-ep.com/
+- `tawara_salad`: 俵万智『サラダ記念日』。https://www.kadokawa.co.jp/product/321606000524/
+- `yosano_midare`: 与謝野晶子『みだれ髪』。https://www.aozora.gr.jp/cards/000885/card174.html
+- `yosano_yama`: 与謝野晶子『そぞろごと』所収の詩句。https://www.aozora.gr.jp/cards/000885/
+- `yosano_otouto`: 与謝野晶子『君死にたまふことなかれ』。https://www.aozora.gr.jp/cards/000885/card3346.html
+- `seishonagon_makura`: 清少納言『枕草子』。https://www.aozora.gr.jp/cards/000199/card53990.html
+- `murasaki_waka`: 紫式部の和歌、百人一首所収。https://www.aozora.gr.jp/cards/000052/
+- `miyazawa_nomin`: 宮沢賢治『農民芸術概論綱要』。https://www.aozora.gr.jp/cards/000081/card2386.html
+- `kiki_interview`: 樹木希林の生前の発言を収録した『一切なりゆき』・告別式紹介。https://books.bunshun.jp/articles/-/5231
+- `fromm_loving`: Erich Fromm『The Art of Loving』。https://www.harpercollins.com/products/the-art-of-loving-erich-fromm
+- `rilke_letters`: Rainer Maria Rilke『Letters to a Young Poet』。https://www.gutenberg.org/ebooks/5317
+- `thich_love`: Thích Nhất Hạnhの著作『How to Love』。https://plumvillage.org/books/how-to-love
+- `mlk_strength`: Martin Luther King Jr.『Strength to Love』。https://kinginstitute.stanford.edu/king-papers/publications/strength-love
+- `emerson_essays`: Ralph Waldo Emerson『Essays: First Series』。https://www.gutenberg.org/ebooks/16643
+- `csl_four`: C. S. Lewis『The Four Loves』。https://www.cslewisinstitute.org/resources/the-four-loves/
+- `thoreau_journal`: Henry David Thoreau『A Week on the Concord and Merrimack Rivers』等の公刊著作。https://gutenberg.org/ebooks/4232
+- `wilde_plays`: Oscar Wilde『A Woman of No Importance』等の公刊作品。https://www.gutenberg.org/ebooks/51563
+- `seneca_letters`: Seneca『Moral Letters to Lucilius』。https://www.gutenberg.org/ebooks/56075
+- `marcus_meditations`: Marcus Aurelius『Meditations』。https://www.gutenberg.org/ebooks/2680
+- `frankl_man`: Viktor Frankl『Man's Search for Meaning』。https://www.beacon.org/Mans-Search-for-Meaning-P404.aspx
+- `gibran_pain`: Kahlil Gibran『The Prophet』所収『On Pain』。https://www.gutenberg.org/ebooks/58585
+- `bradstreet_poems`: Anne Bradstreet詩篇。https://www.poetryfoundation.org/poets/anne-bradstreet
+- `ephron_wellesley`: Nora Ephron 1996年Wellesley College卒業式スピーチ。https://www.wellesley.edu/news/1996/commencement
+- `glennon_podcast`: Glennon Doyle『We Can Do Hard Things』公式ポッドキャスト。https://wecandohardthingspodcast.com/
+
+## v2修正パスの追加出典
+
+- `bronte_jane_v2`: Charlotte Brontë『Jane Eyre』本文。https://www.gutenberg.org/ebooks/1260
+- `bronte_wuthering_v2`: Emily Brontë『Wuthering Heights』本文。https://www.gutenberg.org/ebooks/768
+- `bronte_no_coward_v2`: Emily Brontë「No Coward Soul Is Mine」。Poems by Currer, Ellis, and Acton Bell所収。
+- `chopin_awakening_v2`: Kate Chopin『The Awakening』本文。https://www.gutenberg.org/ebooks/160
+- `burnett_secret_v2`: Frances Hodgson Burnett『The Secret Garden』本文。https://www.gutenberg.org/ebooks/113
+- `alcott_little_v2`: Louisa May Alcott『Little Women』本文。https://www.gutenberg.org/ebooks/514
+- `austen_persuasion_v2`: Jane Austen『Persuasion』本文。https://www.gutenberg.org/ebooks/105
+- `wollstonecraft_v2`: Mary Wollstonecraft『A Vindication of the Rights of Woman』本文。https://www.gutenberg.org/ebooks/3420
+- `shelley_frankenstein_v2`: Mary Shelley『Frankenstein』本文。https://www.gutenberg.org/ebooks/84
+- `addams_democracy_v2`: Jane Addams『Democracy and Social Ethics』本文。https://www.gutenberg.org/ebooks/15487
+- `montgomery_green_gables_v2`: Lucy Maud Montgomery『Anne of Green Gables』本文。https://www.gutenberg.org/ebooks/45
+- `anne_frank_diary_v2`: Anne Frank『The Diary of a Young Girl』、Anne Frank Houseの本文・日付付き日記。
+- `dickinson_poems_v2`: Emily Dickinson詩篇、Poetry Foundationの作品本文。https://www.poetryfoundation.org/poets/emily-dickinson
+- `rossetti_poems_v2`: Christina Rossetti詩篇、Poetry Foundationの作品本文。https://www.poetryfoundation.org/poets/christina-rossetti
+- `montessori_absorbent_v2`: Maria Montessori『The Absorbent Mind』『The Secret of Childhood』、Association Montessori Internationaleの書誌・引用資料。https://montessori-ami.org/resource-library/books
+- `korczak_child_v2`: Janusz Korczak『How to Love a Child』『The Child's Right to Respect』。https://www.korczak.com/
+- `dainomi_hyakunin_v2`: 大弐三位「有馬山 猪名の笹原 風吹けば いでそよ人を 忘れやはする」、『小倉百人一首』第58番。https://hyakuninisshu.sakura.ne.jp/58.html
+- `marti_edad_v2`: José Martí『La Edad de Oro』。https://www.loc.gov/item/2021666787/
+- `brown_vulnerability_v2`: Brene Brown「The power of vulnerability」TED Talk（2010年）。https://www.ted.com/talks/brene_brown_the_power_of_vulnerability
+- `lorde_sister_v2`: Audre Lorde『Sister Outsider』所収エッセイ。
+- `hooks_all_love_v2`: bell hooks『All About Love: New Visions』第1章。
+- `morrison_beloved_v2`: Toni Morrison『Beloved』本文。
+- `angelou_letter_v2`: Maya Angelou『Letter to My Daughter』本文。
+- `rilke_letters_v2`: Rainer Maria Rilke『Letters to a Young Poet』本文。https://www.gutenberg.org/ebooks/5317

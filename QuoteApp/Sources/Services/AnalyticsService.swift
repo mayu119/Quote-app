@@ -1,13 +1,12 @@
 import Foundation
 import UIKit
-import CryptoKit
 import Security
 
 #if canImport(FirebaseAnalytics)
 import FirebaseAnalytics
 #endif
 
-/// 実験に共通で使う、再インストールやIDFVに依存しない安定識別子と群割り当て。
+/// 計測に共通で使う安定識別子と、対象アクションのカウンタを管理する。
 final class ExperimentAssignmentService {
     static let shared = ExperimentAssignmentService()
 
@@ -23,12 +22,6 @@ final class ExperimentAssignmentService {
         saveInstallID(created)
         return created
     }()
-
-    func variant(for experimentID: String) -> String {
-        let digest = SHA256.hash(data: Data("\(installID)\(experimentID)".utf8))
-        let bucket = digest.withUnsafeBytes { bytes in Int(bytes[0]) % 2 }
-        return bucket == 0 ? "full" : "tease"
-    }
 
     /// 振り返りメモ保存の3回に1回だけ追加提案を出す。
     func recordEligibleInsightSaveAndShouldShow() -> Bool {
@@ -523,16 +516,15 @@ final class AnalyticsService {
     // ============================================================
 
     /// 通知スケジュール登録
-    func logNotificationSchedule(timeSlotCount: Int, isPremium: Bool) {
+    func logNotificationSchedule(timeSlotCount: Int, isPremium: Bool, copyVariant: String) {
         log("notification_schedule", params: [
             "time_slot_count": timeSlotCount,
             "is_premium": isPremium ? "true" : "false"
         ])
-        let variant = ExperimentAssignmentService.shared.variant(for: "notification_copy_v2")
         log("notification_scheduled_eligible", params: [
             "time_slot_count": timeSlotCount,
             "experiment_id": "notification_copy_v2",
-            "variant": variant
+            "variant": copyVariant
         ])
     }
 
@@ -553,12 +545,13 @@ final class AnalyticsService {
     }
 
     /// 通知からアプリ起動
-    func logNotificationOpen(notificationType: String) {
-        log("notification_opened", params: [
-            "notification_type": notificationType,
-            "experiment_id": "notification_copy_v2",
-            "variant": ExperimentAssignmentService.shared.variant(for: "notification_copy_v2")
-        ])
+    func logNotificationOpen(notificationType: String, copyVariant: String?) {
+        var params: [String: Any] = ["notification_type": notificationType]
+        if let copyVariant {
+            params["experiment_id"] = "notification_copy_v2"
+            params["variant"] = copyVariant
+        }
+        log("notification_opened", params: params)
     }
 
     func logNotificationExperiment(mode: String, event: String) {
@@ -568,6 +561,10 @@ final class AnalyticsService {
             "experiment_id": "notification_copy_v2",
             "variant": mode
         ])
+    }
+
+    func logOnboardingReturnPromiseView() {
+        log("onboarding_return_promise_view")
     }
 
     func logGift(_ event: String, params: [String: Any] = [:]) {

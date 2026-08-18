@@ -9,7 +9,7 @@ import RevenueCat
 import FirebaseCore
 #endif
 
-class AppDelegate: NSObject, UIApplicationDelegate {
+class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     private func clearBadgeAndDeliveredNotifications(_ application: UIApplication) {
         let center = UNUserNotificationCenter.current()
         center.removeAllDeliveredNotifications()
@@ -24,6 +24,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        UNUserNotificationCenter.current().delegate = self
         #if canImport(FirebaseCore)
         FirebaseApp.configure()
         print("✅ Firebase initialized.")
@@ -39,6 +40,20 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     func applicationDidBecomeActive(_ application: UIApplication) {
         // アクティブ化のたびに、残っているバッジと配信済み通知を消す
         clearBadgeAndDeliveredNotifications(application)
+    }
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        let request = response.notification.request
+        let copyVariant = request.content.userInfo["copy_mode"] as? String
+        AnalyticsService.shared.logNotificationOpen(
+            notificationType: NotificationService.notificationType(for: request.identifier),
+            copyVariant: copyVariant
+        )
+        completionHandler()
     }
 }
 

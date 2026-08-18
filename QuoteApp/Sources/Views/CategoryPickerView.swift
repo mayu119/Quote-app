@@ -187,7 +187,6 @@ struct CategoryPickerView: View {
                     UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
                     // Analytics: ロックカテゴリタップ
                     AnalyticsService.shared.logCategoryLockedTap(categoryMedium: nil, categoryLarge: large.rawValue)
-                    AnalyticsService.shared.logPaywallView(trigger: "category_lock")
                     onPremiumRequired()
                 } else {
                     UIImpactFeedbackGenerator(style: .medium).impactOccurred()
@@ -248,7 +247,6 @@ struct CategoryPickerView: View {
                 UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
                 // Analytics: ロックカテゴリタップ
                 AnalyticsService.shared.logCategoryLockedTap(categoryMedium: medium.rawValue, categoryLarge: medium.largeCategory.rawValue)
-                AnalyticsService.shared.logPaywallView(trigger: "category_lock")
                 onPremiumRequired()
             } else {
                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()

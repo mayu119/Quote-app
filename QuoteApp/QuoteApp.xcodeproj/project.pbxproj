@@ -211,8 +211,6 @@
 			children = (
 				49F60D52286711DE32BFB4D9 /* backgrounds.json */,
 				97FACCFED8A3F33956F41848 /* GoogleService-Info.plist */,
-				9FBEDF0C112C703D759FA3DF /* InfoPlist.strings */,
-				5911B0D93974AA4ADD77503D /* Localizable.strings */,
 				B329E9FE02522062362686F2 /* PrivacyInfo.xcprivacy */,
 				97CFDA263F7B781661E9E5FC /* quotes_full.json */,
 				8C4C2D5D14D4E1259C61712F /* quotes_full.json.archive_mens_2026-04-02 */,
@@ -221,6 +219,8 @@
 				17C919369A332E3DA4790B5C /* quotes.json.backup_v8 */,
 				28BAAA18EA7F6B27C55ECCCA /* quotes.json.backup_v9 */,
 				BAD082EEDC594AE699BCBAC4 /* quotes.json.backup_v10 */,
+				9FBEDF0C112C703D759FA3DF /* InfoPlist.strings */,
+				5911B0D93974AA4ADD77503D /* Localizable.strings */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -366,7 +366,6 @@
 				};
 			};
 			buildConfigurationList = 96229B68A584E0E0463CDFC7 /* Build configuration list for PBXProject "QuoteApp" */;
-			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = ja;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -380,6 +379,7 @@
 				02BF14634656D72B097FCEF0 /* XCRemoteSwiftPackageReference "purchases-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
+			productRefGroup = 48BA63277649980E71F6E33F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -511,7 +511,7 @@
 				CODE_SIGN_ENTITLEMENTS = Sources/QuoteApp.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = 9W24U28U8Q;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
@@ -526,7 +526,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.4;
+				MARKETING_VERSION = 1.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.antigravity.QuoteApp;
 				PRODUCT_NAME = MyWords;
 				SDKROOT = iphoneos;
@@ -540,7 +540,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Sources/QuoteWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = 9W24U28U8Q;
 				INFOPLIST_FILE = com.antigravity.QuoteApp/Info.plist;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
@@ -550,7 +550,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.1.4;
+				MARKETING_VERSION = 1.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.antigravity.QuoteApp.QuoteWidget;
 				PRODUCT_NAME = QuoteWidget;
 				SDKROOT = iphoneos;
@@ -584,7 +584,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Sources/QuoteWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = 9W24U28U8Q;
 				INFOPLIST_FILE = com.antigravity.QuoteApp/Info.plist;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
@@ -594,7 +594,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.1.4;
+				MARKETING_VERSION = 1.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.antigravity.QuoteApp.QuoteWidget;
 				PRODUCT_NAME = QuoteWidget;
 				SDKROOT = iphoneos;
@@ -610,7 +610,7 @@
 				CODE_SIGN_ENTITLEMENTS = Sources/QuoteApp.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = 9W24U28U8Q;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
@@ -625,7 +625,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.4;
+				MARKETING_VERSION = 1.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.antigravity.QuoteApp;
 				PRODUCT_NAME = MyWords;
 				SDKROOT = iphoneos;

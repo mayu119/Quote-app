@@ -77,23 +77,19 @@ final class NotificationService: ObservableObject {
 
     private static let premiumTimeLabels = ["朝の一言", "昼の名言", "夜の言葉"]
     private static let savedQuotesKey = "notification_saved_quotes"
-    private static let notificationModeKey = "notification_copy_mode"
-
-    enum NotificationCopyMode: String {
-        case full
+    enum NotificationCopyMode: String, Equatable {
         case tease
     }
 
-    /// Keychain install_id + SHA256 で同一端末は常に同じ群に割り当てる。
-    private var notificationCopyMode: NotificationCopyMode {
-        if let stored = UserDefaults.standard.string(forKey: Self.notificationModeKey),
-           let mode = NotificationCopyMode(rawValue: stored) {
-            return mode
-        }
-        let assigned = ExperimentAssignmentService.shared.variant(for: "notification_copy_v2")
-        let mode = NotificationCopyMode(rawValue: assigned) ?? .full
-        UserDefaults.standard.set(mode.rawValue, forKey: Self.notificationModeKey)
-        return mode
+    /// 通知内で言葉を読み終えないよう、本文は開封理由だけを残す。
+    static let activeCopyMode: NotificationCopyMode = .tease
+
+    static func notificationType(for identifier: String) -> String {
+        if identifier == ID.dailyQuote { return "daily_quote" }
+        if ID.allPremiumSlots.contains(identifier) { return "premium_quote" }
+        if identifier == ID.weeklyShelf { return "weekly_shelf" }
+        if ID.allTrialReminders.contains(identifier) { return "trial_reminder" }
+        return identifier
     }
 
     // MARK: - 厳選フォールバック名言（釣り場理論の代わり）
@@ -196,6 +192,11 @@ final class NotificationService: ObservableObject {
         )
 
         try await center.add(request)
+        AnalyticsService.shared.logNotificationSchedule(
+            timeSlotCount: 1,
+            isPremium: false,
+            copyVariant: Self.activeCopyMode.rawValue
+        )
         print("✅ 通知スケジュール: \(hour):\(String(format: "%02d", minute)) → \(resolvedQuote.author)")
         await debugPrintPending()
     }
@@ -229,6 +230,11 @@ final class NotificationService: ObservableObject {
             try await center.add(request)
         }
 
+        AnalyticsService.shared.logNotificationSchedule(
+            timeSlotCount: times.count,
+            isPremium: true,
+            copyVariant: Self.activeCopyMode.rawValue
+        )
         print("✅ プレミアム通知を\(times.count)件スケジュール")
         await debugPrintPending()
     }
@@ -262,12 +268,8 @@ final class NotificationService: ObservableObject {
             content.subtitle = quote.author
         }
         
-        let mode = notificationCopyMode
-        if mode == .tease {
-            content.body = "まだ言葉にできない気持ちへ。今日の一枚を、引いてみませんか。"
-        } else {
-            content.body = quote.quoteJa.isEmpty ? quote.punchline : quote.quoteJa
-        }
+        let mode = Self.activeCopyMode
+        content.body = "まだ言葉にできない気持ちへ。今日の一枚を、引いてみませんか。"
         content.userInfo["copy_mode"] = mode.rawValue
         AnalyticsService.shared.logNotificationExperiment(mode: mode.rawValue, event: "scheduled")
 

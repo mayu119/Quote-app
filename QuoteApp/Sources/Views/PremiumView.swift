@@ -3,7 +3,10 @@ import RevenueCat
 import UIKit
 
 enum PaywallContext: String {
-    case onboarding, favoriteLimit, archive, wallpaper, categoryLock, insight, streakRescue, general
+    case onboarding, favoriteLimit, archive, wallpaper, categoryLock, insight, streakRescue
+    case freePreviewLocked = "free_preview_locked"
+    case homeToolbar = "home_toolbar"
+    case general
 }
 
 /// 女性向けの柔らかいプレミアム画面
@@ -36,6 +39,7 @@ struct PremiumView: View {
     @State private var appear = false
     @State private var heroPulse = false
     @State private var planType: PlanType = .yearly
+    @State private var didLogPaywallView = false
 
     enum PlanType {
         case yearly, monthly
@@ -110,6 +114,10 @@ struct PremiumView: View {
         }
         .onAppear {
             paywallOpenTime = Date()
+            if !didLogPaywallView {
+                didLogPaywallView = true
+                AnalyticsService.shared.logPaywallView(trigger: context.rawValue)
+            }
             withAnimation(.easeOut(duration: 0.8)) { appear = true }
             withAnimation(.easeInOut(duration: 4.0).repeatForever(autoreverses: true)) {
                 heroPulse = true
@@ -274,10 +282,10 @@ struct PremiumView: View {
         case .favoriteLimit: leading = shelf
         case .archive: leading = archive
         case .wallpaper: leading = wallpaper
-        case .categoryLock, .onboarding: leading = category
+        case .categoryLock, .onboarding, .freePreviewLocked: leading = category
         case .insight: leading = insight
         case .streakRescue: leading = streak
-        case .general: leading = shelf
+        case .homeToolbar, .general: leading = shelf
         }
         return [leading] + [shelf, archive, category, wallpaper, insight].filter { $0.title != leading.title }.prefix(3)
     }

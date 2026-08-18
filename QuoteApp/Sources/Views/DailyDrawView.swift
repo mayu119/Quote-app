@@ -75,6 +75,9 @@ struct DailyDrawView: View {
             presentedAt = Date()
             startAmbientMotion()
             AnalyticsService.shared.logDailyDrawPresented(timeSlot: timeSlot, source: "app_launch")
+            if isNight {
+                AnalyticsService.shared.logNightWordView()
+            }
         }
         .sensoryFeedback(.impact(weight: .light), trigger: isRevealing)
         .sensoryFeedback(.success, trigger: saved)

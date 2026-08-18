@@ -680,7 +680,7 @@ struct MinimalQuoteDetailView: View {
             )
         }
         .fullScreenCover(isPresented: $showPremiumView) {
-            PremiumView(context: .favoriteLimit)
+            PremiumView(context: .insight)
                 .environmentObject(userSettings)
         }
         .preferredColorScheme(.dark)
