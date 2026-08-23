@@ -1,0 +1,138 @@
+{
+ "pages": [
+  {
+   "file": "01-cover.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 137808,
+   "sha256": "ae933bd2a4b96f47904e29fb7c4eb0a7b8933e194666948b6d7eaa2ad4c4888c",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-16-renai-lineart-batch/02-wakarete-yameta/slides/01-cover.png"
+  },
+  {
+   "file": "02-item01.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 123657,
+   "sha256": "7a2f8cac6b721dbf97ee31daf3776f57fbb162125393865ce91389e06cd3764d",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-16-renai-lineart-batch/02-wakarete-yameta/slides/02-item01.png"
+  },
+  {
+   "file": "03-item02.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 116771,
+   "sha256": "8aa15e9529434370fcc8b6d7bbe0662b078d861daa490039f524f05b977a7916",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-16-renai-lineart-batch/02-wakarete-yameta/slides/03-item02.png"
+  },
+  {
+   "file": "04-item03.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 121958,
+   "sha256": "de7f74de83cdf2614c0c766725ce5b9264f404ca8bb7b564fa1cdd209ce5faeb",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-16-renai-lineart-batch/02-wakarete-yameta/slides/04-item03.png"
+  },
+  {
+   "file": "05-item04.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 137436,
+   "sha256": "324eddaf40029f12370ded8a5a0ba110cc4ea09e8eda2f054cb07d74ee41c667",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-16-renai-lineart-batch/02-wakarete-yameta/slides/05-item04.png"
+  },
+  {
+   "file": "06-item05.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 119977,
+   "sha256": "043738fd1cb68913f9b580e2e544efb9c80e831874a44527c8a8624219cbb719",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-16-renai-lineart-batch/02-wakarete-yameta/slides/06-item05.png"
+  },
+  {
+   "file": "07-item06.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 124021,
+   "sha256": "1478e1cf24d09675b42665bb8471b137beb3b2eef62ca3f22c96e1ac1d83aaac",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-16-renai-lineart-batch/02-wakarete-yameta/slides/07-item06.png"
+  },
+  {
+   "file": "08-item07.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 123428,
+   "sha256": "7c77a4f96077bd75f3df9d587df6a2de590c361ccab5ba48b4b319a2c4344ee8",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-16-renai-lineart-batch/02-wakarete-yameta/slides/08-item07.png"
+  },
+  {
+   "file": "09-item08.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 118310,
+   "sha256": "6cc7455120ecc1489f719f0ae66c9039f4b7e1ef5014dd89bbf6a5dab9095339",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-16-renai-lineart-batch/02-wakarete-yameta/slides/09-item08.png"
+  },
+  {
+   "file": "10-item09.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 130521,
+   "sha256": "34613f7cb4b5e3f7a54c65b691dff3da5e4479831d6a63f525ab0cd30acaad2c",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-16-renai-lineart-batch/02-wakarete-yameta/slides/10-item09.png"
+  },
+  {
+   "file": "11-item10.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 132112,
+   "sha256": "c7e6f70f22e368f9c7c25df4a026564e993a0657de6ec7ae6a65c8421a9c7a41",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-16-renai-lineart-batch/02-wakarete-yameta/slides/11-item10.png"
+  },
+  {
+   "file": "12-closing.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 143172,
+   "sha256": "b69793711b6623e61a4d9c917857e9d222e8bfac45bafbb037532e1be2b29ae7",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-16-renai-lineart-batch/02-wakarete-yameta/slides/12-closing.png"
+  }
+ ],
+ "order": [
+  "01-cover.jpg",
+  "02-item01.jpg",
+  "03-item02.jpg",
+  "04-item03.jpg",
+  "05-item04.jpg",
+  "06-item05.jpg",
+  "07-item06.jpg",
+  "08-item07.jpg",
+  "09-item08.jpg",
+  "10-item09.jpg",
+  "11-item10.jpg",
+  "12-closing.jpg"
+ ]
+}

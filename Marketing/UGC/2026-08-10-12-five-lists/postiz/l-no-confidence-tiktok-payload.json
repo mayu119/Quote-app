@@ -1,0 +1,53 @@
+{
+  "type": "now",
+  "date": "2026-08-09T17:43:00+09:00",
+  "shortLink": false,
+  "tags": [],
+  "posts": [
+    {
+      "integration": {
+        "id": "cmmwxv838000hp5734ulrbutj"
+      },
+      "value": [
+        {
+          "content": "自分に自信がない人の特徴5選。\n私は全部当てはまってたし、今も半分くらいはやってる。\nシャネルの言葉は Words For Me で会ったやつです。気分に合わせて今日の一枚を選べるので、朝に1枚だけ読んでる。\n何個当てはまったか、コメントで教えて。\nあとで読み返したい人は保存してね。\n#自己肯定感 #自分に自信がない #名言 #WordsForMe",
+          "image": [
+            {
+              "id": "4822d011-27e3-43e5-88b7-9b5a5ec2cd1e",
+              "path": "https://media.stoic-jornal.com/1YjWkMuPhi.png"
+            },
+            {
+              "id": "5fc6a548-6129-47f3-a1d2-24b71033d987",
+              "path": "https://media.stoic-jornal.com/ME65oAQNb6.png"
+            },
+            {
+              "id": "36b4ac05-edbd-487e-9347-db396fc4bdce",
+              "path": "https://media.stoic-jornal.com/t3wFrfT4D6.png"
+            },
+            {
+              "id": "e2b9dabf-bba2-4554-9f70-50c5d25d0691",
+              "path": "https://media.stoic-jornal.com/kIg45PCzZD.png"
+            },
+            {
+              "id": "88809c42-21a3-45d5-bfe2-950db8c3d1a6",
+              "path": "https://media.stoic-jornal.com/G9fSppMH8r.png"
+            }
+          ]
+        }
+      ],
+      "settings": {
+        "__type": "tiktok",
+        "privacy_level": "PUBLIC_TO_EVERYONE",
+        "duet": false,
+        "stitch": false,
+        "comment": true,
+        "autoAddMusic": "no",
+        "brand_content_toggle": false,
+        "brand_organic_toggle": false,
+        "video_made_with_ai": true,
+        "content_posting_method": "UPLOAD",
+        "title": "自分に自信がない人の特徴5選"
+      }
+    }
+  ]
+}

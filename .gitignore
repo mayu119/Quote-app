@@ -30,3 +30,33 @@ fastlane/test_output
 # 競合調査の一時成果物（第三者著作物の画像を含むためコミットしない）
 output/
 .playwright-cli/
+
+# --- UGC成果物（2026-08-23 / Linear P-653・P-652）---
+# 方針: 台帳・台本・生成スクリプトだけを追跡し、画像/動画/中間生成物は追跡しない。
+# 失いたくないのは「どのフックが何を生んだか」で、それは台帳とscript.mdに入っている。
+# 2026-08-08以前の旧バッチ161件は既に追跡済み。**遡って剥がさない**（履歴が壊れる。
+# ~/marketing/OUTPUT_SPEC.md §7「旧バッチは遡って直さない」と同じ理由）。
+# gitは追跡済みファイルに .gitignore を適用しないので、下の行は旧バッチに影響しない。
+Marketing/UGC/**/*.png
+Marketing/UGC/**/*.jpg
+Marketing/UGC/**/*.jpeg
+Marketing/UGC/**/*.webp
+Marketing/UGC/**/*.mp4
+Marketing/UGC/**/*.mov
+Marketing/UGC/**/*.webm
+Marketing/UGC/**/*.psd
+Marketing/UGC/**/*.bin
+Marketing/UGC/**/node_modules/
+# carousel.html は carousel.py が export-tiktok-1080x1920/ から生成する確認用プレビュー。
+# 画像をbase64で埋め込んでいる＝実質は画像の入れ物なので追跡しない（再生成できる）
+Marketing/UGC/**/carousel.html
+
+# 枠は rebuild_frames.py が毎回まるごと作り直すシンボリックリンク。実体ではない
+# （~/marketing/README.md §5「毎回まるごと作り直す。手で動かさない」）
+Marketing/枠/
+
+# learning-set.csv は content-ledger.json × performance-log.jsonl から
+# build_learning_set.py が再生成できる派生物。実行のたびに行順と参照番号が動くので
+# 追跡すると毎日ノイズdiffが出る。正本は台帳と成績ログの側に置く
+# （~/marketing/.cache/ugc.db を追跡しないのと同じ判断）
+Marketing/UGC/learning-set.csv

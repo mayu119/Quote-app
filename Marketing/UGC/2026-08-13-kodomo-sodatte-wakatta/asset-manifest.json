@@ -1,0 +1,63 @@
+{
+  "slug": "2026-08-13-kodomo-sodatte-wakatta",
+  "title": "子供が育ってわかったこと7選",
+  "target": "子供が成人し、子育ての中心期を終えた40代後半〜50代女性",
+  "format": "solid-gray-white-text-slideshow",
+  "slides": 9,
+  "slide_dimensions": "1080x1920",
+  "video": {
+    "path": "slideshow.mp4",
+    "source_path": "slideshow-horizontal-slide-v1.mp4",
+    "project_path": "remotion-page-turn/",
+    "composition_id": "KodomoSodatteWakattaHorizontalSlide",
+    "duration_seconds": 42.4,
+    "fps": "30/1",
+    "audio": false,
+    "audio_note": "BGMなし正式版。元の横スライド出力には無音AACストリームが残っているが、可聴BGM・ナレーションは含まない。",
+    "rejected_audio_variant": {
+      "path": "slideshow-bgm-v1.mp4",
+      "reason": "ボス判断によりBGM不採用"
+    },
+    "transition": "horizontal_slide",
+    "hold_seconds_per_slide": 4.0,
+    "horizontal_slide_seconds": 0.8,
+    "display_seconds_per_slide": {
+      "cover": 4.0,
+      "body": 4.0,
+      "words_for_me": 4.0,
+      "closing": 4.0
+    }
+  },
+  "quote": {
+    "id": "women_quote_053",
+    "text": "人生は、固まった完成品ではなく、\nなっていく途中にあるもの。",
+    "author": "Anais Nin",
+    "verified_against": "/Users/mac2-mayu/Quote-app/QuoteApp/Sources/Resources/quotes_full.json"
+  },
+  "background": {
+    "type": "solid_color",
+    "rgb": [
+      108,
+      108,
+      108
+    ],
+    "text_rgb": [
+      255,
+      255,
+      255
+    ],
+    "source": "reference-format replication",
+    "image_generation_used": false
+  },
+  "rejected_previous_version": {
+    "reason": "参照動画から外れた生成背景・茶系文字・中央の過剰な空白",
+    "paths": [
+      "generated/background-imagegen-source.png",
+      "slides/"
+    ]
+  },
+  "posting": {
+    "uploaded": false,
+    "scheduled": false
+  }
+}

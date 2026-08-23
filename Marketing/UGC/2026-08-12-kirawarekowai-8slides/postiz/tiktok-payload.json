@@ -1,0 +1,65 @@
+{
+  "type": "schedule",
+  "date": "2026-08-12T11:58:33+00:00",
+  "shortLink": false,
+  "tags": [],
+  "posts": [
+    {
+      "integration": {
+        "id": "cmmwxv838000hp5734ulrbutj"
+      },
+      "value": [
+        {
+          "content": "嫌われるのが怖い人の特徴5選。\n書きながら、ぜんぶ自分のことだった。\n寝る前にWords For Meで言葉をひとつだけ読んで、反省会はそこで終わりにしてる。\n少しずつ、自分の返事は自分で決めたい。\n残したいのがあったら保存してどうぞ。\n#人間関係 #自分を大切にする #言葉の力 #WordsForMe",
+          "image": [
+            {
+              "id": "f23df94b-e55d-4f40-a488-8c5509903656",
+              "path": "https://media.stoic-jornal.com/hnVytlXheb.png"
+            },
+            {
+              "id": "9211022d-e0af-4747-9a2a-61b61f5af180",
+              "path": "https://media.stoic-jornal.com/Yho2RIcafB.png"
+            },
+            {
+              "id": "480cc87d-520a-454b-940b-4cf5e7df78c1",
+              "path": "https://media.stoic-jornal.com/VFWrMECSbF.png"
+            },
+            {
+              "id": "82f270b9-92c8-45b4-8460-e9c263b88afd",
+              "path": "https://media.stoic-jornal.com/fnPtUbQHB1.png"
+            },
+            {
+              "id": "1133db87-5f98-4970-bb2a-87532cf642b3",
+              "path": "https://media.stoic-jornal.com/XcndgfkGF2.png"
+            },
+            {
+              "id": "359e6c39-5395-4791-9a69-650dded4d883",
+              "path": "https://media.stoic-jornal.com/9ajYTEo1IN.png"
+            },
+            {
+              "id": "0b5a00bc-d741-4d31-9f56-463c93d89a31",
+              "path": "https://media.stoic-jornal.com/RCL42Djc2E.png"
+            },
+            {
+              "id": "2f756335-57fd-4d31-970e-3cddf69f4cf8",
+              "path": "https://media.stoic-jornal.com/bAeKxyzbiQ.png"
+            }
+          ]
+        }
+      ],
+      "settings": {
+        "__type": "tiktok",
+        "privacy_level": "PUBLIC_TO_EVERYONE",
+        "duet": false,
+        "stitch": false,
+        "comment": true,
+        "autoAddMusic": "no",
+        "brand_content_toggle": false,
+        "brand_organic_toggle": false,
+        "video_made_with_ai": true,
+        "content_posting_method": "UPLOAD",
+        "title": "嫌われるのが怖い人の特徴5選"
+      }
+    }
+  ]
+}

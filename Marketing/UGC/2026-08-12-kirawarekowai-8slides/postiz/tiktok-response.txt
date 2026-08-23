@@ -1,0 +1,24 @@
+✅ Post created successfully!
+[
+  {
+    "postId": "cmsq1c1ib001zmj6p1abhzgwf",
+    "integration": "cmmwxv838000hp5734ulrbutj"
+  }
+]
+
+--- posts:list confirmation (2026-08-12 20:59 JST) ---
+{
+  "id": "cmsq1c1ib001zmj6p1abhzgwf",
+  "publishDate": "2026-08-12T11:58:33.000Z",
+  "releaseURL": "https://www.tiktok.com/messages?lang=en",
+  "releaseId": "missing",
+  "state": "PUBLISHED",
+  "integration": {
+    "id": "cmmwxv838000hp5734ulrbutj",
+    "providerIdentifier": "tiktok",
+    "name": "stoic -前へ進むための言葉"
+  }
+}
+
+Note: state=PUBLISHED / releaseURL=tiktok.com/messages (UPLOAD方式の標準応答、他バッチのUPLOAD投稿と同じパターン)。
+TikTok Inbox内での実受信確認はMayu本人によるアプリ側確認が必要。

@@ -1,0 +1,28 @@
+{
+  "type": "schedule",
+  "date": "2026-08-13T19:00:00+09:00",
+  "shortLink": false,
+  "tags": [],
+  "posts": [{
+    "integration": {"id": "cmmwxv838000hp5734ulrbutj"},
+    "value": [{"content": "自分軸がある人が毎日やってること5選。\nって言いつつ、全部できてる日の方が少ない。でも01と05だけは続いてる。\n05で読んでるのは Words For Me っていう名言アプリ。寝る前の一枚だけって決めてる。\nどれか一つでも刺さったら、保存してゆっくりどうぞ。\n#自分軸 #自分を大切にする #暮らしを整える #WordsForMe", "image": [
+      {"id": "8f9e29c9-0f2f-4afa-b399-605195e55b45", "path": "https://media.stoic-jornal.com/F43jmzcLVW.png"},
+      {"id": "ff0808d7-8f1b-417f-9e1c-da6e03fe22bc", "path": "https://media.stoic-jornal.com/RVfzpSZiWc.png"},
+      {"id": "27c109b9-f819-4c05-a6cb-27ebbc1cf6e9", "path": "https://media.stoic-jornal.com/2TnnOfZ6gM.png"},
+      {"id": "1bbb1184-2052-4e2f-a57f-78e12c9df1a9", "path": "https://media.stoic-jornal.com/dzfk7zN6Uv.png"},
+      {"id": "e39ce17a-ce48-404e-a4c2-fcd2e3943119", "path": "https://media.stoic-jornal.com/jboBpI22Om.png"},
+      {"id": "464d4ca8-7183-4631-ba9d-70197b380c3b", "path": "https://media.stoic-jornal.com/t23mWKqSeO.png"},
+      {"id": "9d81e03b-3e80-41c4-a735-b6fe1e4e3b89", "path": "https://media.stoic-jornal.com/slcTN6y4pq.png"}
+    ]}],
+    "settings": {
+      "__type": "tiktok",
+      "title": "自分軸がある人が毎日やってること5選",
+      "privacy_level": "PUBLIC_TO_EVERYONE",
+      "duet": false, "stitch": false, "comment": true,
+      "autoAddMusic": "no",
+      "brand_content_toggle": false, "brand_organic_toggle": false,
+      "video_made_with_ai": true,
+      "content_posting_method": "UPLOAD"
+    }
+  }]
+}

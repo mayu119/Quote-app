@@ -1,0 +1,53 @@
+{
+  "type": "schedule",
+  "date": "2026-08-11T19:00:00+09:00",
+  "shortLink": false,
+  "tags": [],
+  "posts": [
+    {
+      "integration": {
+        "id": "cmmwxv838000hp5734ulrbutj"
+      },
+      "value": [
+        {
+          "content": "自分を責めがちな人が寝る前にやってること5選。\n5個目までやって、そのまま朝になる日が多かった。\n最近は寝る前に Words For Me で一枚だけ読んで、閉じて寝るようにしてる。ワイルドの言葉はそこで会ったやつ。\n同じ夜を過ごしてる人は、保存して今夜使ってください。\n#夜の考え事 #自分を責めない #名言 #WordsForMe",
+          "image": [
+            {
+              "id": "2fb2d083-c5e4-4a6f-a7af-2a9ae3bc8213",
+              "path": "https://media.stoic-jornal.com/R5XUX9FJkz.png"
+            },
+            {
+              "id": "e089972f-4e0e-4ba6-a8b6-6e6551699f62",
+              "path": "https://media.stoic-jornal.com/bGSwNhRD3q.png"
+            },
+            {
+              "id": "7f8ea926-97cb-49dc-95c4-baa15b3fceeb",
+              "path": "https://media.stoic-jornal.com/y3vHzvT7f8.png"
+            },
+            {
+              "id": "27c6159b-9562-464f-bd59-fb16994d4533",
+              "path": "https://media.stoic-jornal.com/kVImy8DZeZ.png"
+            },
+            {
+              "id": "482959c3-2b76-4c76-b77e-47e94ecc5c5f",
+              "path": "https://media.stoic-jornal.com/qCurCJesgy.png"
+            }
+          ]
+        }
+      ],
+      "settings": {
+        "__type": "tiktok",
+        "privacy_level": "PUBLIC_TO_EVERYONE",
+        "duet": false,
+        "stitch": false,
+        "comment": true,
+        "autoAddMusic": "no",
+        "brand_content_toggle": false,
+        "brand_organic_toggle": false,
+        "video_made_with_ai": true,
+        "content_posting_method": "UPLOAD",
+        "title": "自分を責めがちな人が寝る前にやってること5選"
+      }
+    }
+  ]
+}

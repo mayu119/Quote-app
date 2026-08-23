@@ -1,0 +1,83 @@
+{
+ "pages": [
+  {
+   "file": "01-cover.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 67867,
+   "sha256": "06aee50d4fa9039f4cd3d33c19729f5ecbd1a5dd0f7858d9549b3bf566a8284e",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-19-iwanai-kotoba-5/slides/01-cover.png"
+  },
+  {
+   "file": "02-item01.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 58944,
+   "sha256": "33b02f32b8b9b86c3a889aa015f1df7229bd3886e4c8a429920a0de9cc31b0c1",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-19-iwanai-kotoba-5/slides/02-item01.png"
+  },
+  {
+   "file": "03-item02.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 60071,
+   "sha256": "0190929c69d5f6c25defa6308debc4057d7d2e43ae893839ff162a1d970cce74",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-19-iwanai-kotoba-5/slides/03-item02.png"
+  },
+  {
+   "file": "04-item03.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 63007,
+   "sha256": "b53365ae8403c1bbcd869f2a67891ddda990b4cf8bbfce7d669fcfafc4240934",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-19-iwanai-kotoba-5/slides/04-item03.png"
+  },
+  {
+   "file": "05-item04.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 61345,
+   "sha256": "adcc2a7890cb783490695f1c85d4ab2cd1b6d330b4e6920e0fa23592fc25f69c",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-19-iwanai-kotoba-5/slides/05-item04.png"
+  },
+  {
+   "file": "06-item05.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 61447,
+   "sha256": "699bc5672f3ae968adb90ff0874fe833810b499fd441fa6852f7565d879a7d5c",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-19-iwanai-kotoba-5/slides/06-item05.png"
+  },
+  {
+   "file": "07-closing.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 68850,
+   "sha256": "73b1205c0ecea2bc741aa6a81eef0fceadf9d45c4753dce16dbcb45beab212cc",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-19-iwanai-kotoba-5/slides/07-closing.png"
+  }
+ ],
+ "order": [
+  "01-cover.jpg",
+  "02-item01.jpg",
+  "03-item02.jpg",
+  "04-item03.jpg",
+  "05-item04.jpg",
+  "06-item05.jpg",
+  "07-closing.jpg"
+ ]
+}

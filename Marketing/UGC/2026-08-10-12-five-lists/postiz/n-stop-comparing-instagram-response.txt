@@ -1,0 +1,7 @@
+✅ Post created successfully!
+[
+  {
+    "postId": "cmsljz5ux001gmj6plkvg4phh",
+    "integration": "cmmwvxjv30001qr74l2knxama"
+  }
+]

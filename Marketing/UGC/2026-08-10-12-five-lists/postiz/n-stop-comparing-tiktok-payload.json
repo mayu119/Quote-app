@@ -1,0 +1,53 @@
+{
+  "type": "schedule",
+  "date": "2026-08-12T19:00:00+09:00",
+  "shortLink": false,
+  "tags": [],
+  "posts": [
+    {
+      "integration": {
+        "id": "cmmwxv838000hp5734ulrbutj"
+      },
+      "value": [
+        {
+          "content": "人と比べるのをやめたくて、やめたこと5つ。\n全部やめられてるわけじゃないけど、朝のSNSだけは本当にやめてよかった。\n黒柳徹子さんの言葉は Words For Me で会って、そのまま自分の棚に残してある。\nやめたいことがある人は、保存してゆっくりどうぞ。\n#人と比べない #自分軸 #名言 #WordsForMe",
+          "image": [
+            {
+              "id": "522f378e-703f-477a-93ee-e9b9927145aa",
+              "path": "https://media.stoic-jornal.com/U3cfCARBaA.png"
+            },
+            {
+              "id": "05a79e6c-dd56-4adb-afb9-197e27cf3de4",
+              "path": "https://media.stoic-jornal.com/dJPSgdwkse.png"
+            },
+            {
+              "id": "8cdf4b7c-9d4d-48b9-a6e0-5d12a0e1f348",
+              "path": "https://media.stoic-jornal.com/9T76MQu1BS.png"
+            },
+            {
+              "id": "996d5ed4-a6f3-4032-94b8-a5d0b1c2f960",
+              "path": "https://media.stoic-jornal.com/tKCdEaGkfv.png"
+            },
+            {
+              "id": "2bab3ba5-76f4-41f6-a5dd-34d86c01a595",
+              "path": "https://media.stoic-jornal.com/KAza6gQrBw.png"
+            }
+          ]
+        }
+      ],
+      "settings": {
+        "__type": "tiktok",
+        "privacy_level": "PUBLIC_TO_EVERYONE",
+        "duet": false,
+        "stitch": false,
+        "comment": true,
+        "autoAddMusic": "no",
+        "brand_content_toggle": false,
+        "brand_organic_toggle": false,
+        "video_made_with_ai": true,
+        "content_posting_method": "UPLOAD",
+        "title": "人と比べるのをやめたくて、やめたこと5つ"
+      }
+    }
+  ]
+}

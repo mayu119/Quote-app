@@ -1,0 +1,105 @@
+{
+ "pages": [
+  {
+   "file": "01-cover.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 69297,
+   "sha256": "d9b40becd8baaba8475022a631d97d09dc88f38d63934fed0ffe7f0748504204",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-17-namida-seishinka-7/slides/01-cover.png"
+  },
+  {
+   "file": "02-quote1.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 74613,
+   "sha256": "4e20b261971390307d948de5f2c4cc98a89bf984c74e35e29f343c605fbbdf6c",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-17-namida-seishinka-7/slides/02-quote1.png"
+  },
+  {
+   "file": "03-quote2.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 68734,
+   "sha256": "25a104edd4d65060e20e3c16bc0a231aebe7ea472ed1115f6b7599b1292db977",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-17-namida-seishinka-7/slides/03-quote2.png"
+  },
+  {
+   "file": "04-quote3.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 65482,
+   "sha256": "5c3fe0b3797298fe6fc929ca53fb58631e39edef0c9d197b59a06f112e3dab2a",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-17-namida-seishinka-7/slides/04-quote3.png"
+  },
+  {
+   "file": "05-quote4.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 74439,
+   "sha256": "2cc167c5dcbffadf25b4aa81ede7597695d035e5897f375d3a85b24c3af980cc",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-17-namida-seishinka-7/slides/05-quote4.png"
+  },
+  {
+   "file": "06-quote5.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 66445,
+   "sha256": "68324a1a9ea4ae8d5036e8e47cf18f410c983cdf30491412824dc5c645d0734e",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-17-namida-seishinka-7/slides/06-quote5.png"
+  },
+  {
+   "file": "07-quote6.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 68899,
+   "sha256": "3ea1eb0bb9cc553a573593e05bb2533c7e9ec03e95e3008d641ecbb4d848024b",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-17-namida-seishinka-7/slides/07-quote6.png"
+  },
+  {
+   "file": "08-withheld.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 54568,
+   "sha256": "a32772c0452a1ce9b0566a33a64fbbc94e77bc51d1356e3c90c6b9e976ca0a7a",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-17-namida-seishinka-7/slides/08-withheld.png"
+  },
+  {
+   "file": "09-closing.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 44354,
+   "sha256": "a683aeadc45ff470fa6e93a850d1b8419be35111c4f8b747c5ef73de1991cd98",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-17-namida-seishinka-7/slides/09-closing.png"
+  }
+ ],
+ "order": [
+  "01-cover.jpg",
+  "02-quote1.jpg",
+  "03-quote2.jpg",
+  "04-quote3.jpg",
+  "05-quote4.jpg",
+  "06-quote5.jpg",
+  "07-quote6.jpg",
+  "08-withheld.jpg",
+  "09-closing.jpg"
+ ]
+}

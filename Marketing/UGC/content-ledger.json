@@ -1,0 +1,1088 @@
+[
+  {
+    "slug": "2026-08-10-no-confidence",
+    "batch_dir": "Marketing/UGC/2026-08-10-12-five-lists/l-no-confidence",
+    "format": "v1-5slide-flat",
+    "theme": "自信のなさ",
+    "hook": "自分に自信がない人の特徴5選",
+    "hook_note": "※私は全部当てはまってた",
+    "quote": {
+      "id": "women_quote_029",
+      "author": "ココ・シャネル"
+    },
+    "wfm_placement": "5枚目に広告型実画面スライド(旧型)",
+    "caption_first_line": "自分に自信がない人の特徴5選。",
+    "posts": [
+      {
+        "platform": "tiktok",
+        "integration": "cmmwxv838000hp5734ulrbutj",
+        "postId": "cmslk2gsl001hmj6pxipgovi1",
+        "scheduled": "2026-08-09T17:43:00+09:00",
+        "releaseId": "7672025630430514453",
+        "releaseURL": "https://www.tiktok.com/@words_for_me_jp/video/7672025630430514453",
+        "note": "UPLOAD方式・受信箱経由で公開"
+      },
+      {
+        "platform": "instagram",
+        "integration": "cmmwvxjv30001qr74l2knxama",
+        "postId": "cmsljz4rj001cmj6pf3f4m62d",
+        "scheduled": "2026-08-09T17:45:00+09:00",
+        "releaseId": "Db0CNPvn1_1",
+        "releaseURL": "https://www.instagram.com/p/Db0CNPvn1_1/"
+      }
+    ],
+    "variables": {
+      "title_source": "original",
+      "title_source_ref": null,
+      "title_source_metric_saves": null,
+      "title_char_count": 14,
+      "title_has_number": true,
+      "title_names_target": true,
+      "title_type": "対象指名型",
+      "theme_category": "自己肯定-Pain型",
+      "format_version": "v1-5slide-flat",
+      "list_count": 5,
+      "device_slide_index": 5,
+      "total_slides": 5,
+      "device_position_label": "closing-adslide",
+      "post_time_slot": null,
+      "post_dow": null
+    }
+  },
+  {
+    "slug": "2026-08-11-night-self-blame",
+    "batch_dir": "Marketing/UGC/2026-08-10-12-five-lists/m-night-self-blame",
+    "format": "v1-5slide-flat",
+    "theme": "夜の自責",
+    "hook": "自分を責めがちな人が寝る前にやってること5選",
+    "hook_note": "※全部やってる夜ほど眠れない",
+    "quote": {
+      "id": "women_quote_111",
+      "author": "オスカー・ワイルド"
+    },
+    "wfm_placement": "5枚目に広告型実画面スライド(旧型)",
+    "caption_first_line": "自分を責めがちな人が寝る前にやってること5選。",
+    "posts": [
+      {
+        "platform": "tiktok",
+        "integration": "cmmwxv838000hp5734ulrbutj",
+        "postId": "cmslk2h09001imj6plq2pvhvt",
+        "scheduled": "2026-08-11T19:00:00+09:00",
+        "releaseId": null,
+        "releaseURL": null
+      },
+    {
+      "platform": "instagram",
+      "integration": "cmmwvxjv30001qr74l2knxama",
+      "postId": "cmsljz5cn001emj6p3fo4d47g",
+      "scheduled": "2026-08-11T19:00:00+09:00",
+      "releaseId": null,
+      "releaseURL": null
+      }
+    ],
+    "variables": {
+      "title_source": null,
+      "title_source_ref": null,
+      "title_source_metric_saves": null,
+      "title_char_count": 22,
+      "title_has_number": true,
+      "title_names_target": true,
+      "title_type": "対象指名型",
+      "theme_category": "自己肯定-Pain型",
+      "format_version": "v1-5slide-flat",
+      "list_count": 5,
+      "device_slide_index": 5,
+      "total_slides": 5,
+      "device_position_label": "closing-adslide",
+      "post_time_slot": "19:00",
+      "post_dow": "Tue",
+      "lane": null,
+      "appeal_mechanism": null
+    }
+  },
+  {
+    "slug": "2026-08-12-stop-comparing",
+    "batch_dir": "Marketing/UGC/2026-08-10-12-five-lists/n-stop-comparing",
+    "format": "v1-5slide-flat",
+    "theme": "人と比べる",
+    "hook": "人と比べるのをやめたくて、やめたこと5つ",
+    "hook_note": "※全部やめられたわけじゃない",
+    "quote": {
+      "id": "women_quote_112",
+      "author": "黒柳徹子"
+    },
+    "wfm_placement": "5枚目に広告型実画面スライド(旧型)",
+    "caption_first_line": "人と比べるのをやめたくて、やめたこと5つ。",
+    "posts": [
+      {
+        "platform": "tiktok",
+        "integration": "cmmwxv838000hp5734ulrbutj",
+        "postId": "cmslk2h8t001jmj6p20p7j5nd",
+        "scheduled": "2026-08-12T19:00:00+09:00",
+        "releaseId": null,
+        "releaseURL": null
+      },
+    {
+      "platform": "instagram",
+      "integration": "cmmwvxjv30001qr74l2knxama",
+      "postId": "cmsljz5ux001gmj6plkvg4phh",
+      "scheduled": "2026-08-12T19:00:00+09:00",
+      "releaseId": null,
+      "releaseURL": null
+      }
+    ],
+    "variables": {
+      "title_source": null,
+      "title_source_ref": null,
+      "title_source_metric_saves": null,
+      "title_char_count": 20,
+      "title_has_number": true,
+      "title_names_target": false,
+      "title_type": "言葉行動描写型",
+      "theme_category": "自己肯定-Pain型",
+      "format_version": "v1-5slide-flat",
+      "list_count": 5,
+      "device_slide_index": 5,
+      "total_slides": 5,
+      "device_position_label": "closing-adslide",
+      "post_time_slot": "19:00",
+      "post_dow": "Wed",
+      "lane": null,
+      "appeal_mechanism": null
+    }
+  },
+  {
+    "slug": "2026-08-13-jibunjiku",
+    "batch_dir": "Marketing/UGC/2026-08-13-jibunjiku-7slides",
+    "format": "v2-7slide-photo",
+    "theme": "自分軸",
+    "hook": "自分軸がある人が毎日やってること5選",
+    "hook_note": "※全部できてる日の方が少ない",
+    "quote": {
+      "id": null,
+      "author": null
+    },
+    "wfm_placement": "habit5の写真内に実画面+解説一言(広告スライドなし)",
+    "caption_first_line": "自分軸がある人が毎日やってること5選。",
+    "posts": [
+    {
+      "platform": "tiktok",
+      "integration": "cmmwxv838000hp5734ulrbutj",
+      "postId": "cmslude4v001mmj6p4td7k9yr",
+      "scheduled": "2026-08-13T19:00:00+09:00",
+      "releaseId": null,
+      "releaseURL": null
+      }
+    ],
+    "variables": {
+      "title_source": null,
+      "title_source_ref": null,
+      "title_source_metric_saves": null,
+      "title_char_count": 18,
+      "title_has_number": true,
+      "title_names_target": true,
+      "title_type": "言葉行動描写型",
+      "theme_category": "自己肯定-自分軸",
+      "format_version": "v2-7slide-photo",
+      "list_count": 5,
+      "device_slide_index": 6,
+      "total_slides": 7,
+      "device_position_label": "mid-item",
+      "post_time_slot": "19:00",
+      "post_dow": "Thu",
+      "lane": "cv-native",
+      "appeal_mechanism": "loss-framing"
+    }
+  },
+  {
+    "slug": "2026-08-12-kirawarekowai",
+    "batch_dir": "Marketing/UGC/2026-08-12-kirawarekowai-8slides",
+    "format": "v2-8slide-photo",
+    "theme": "嫌われ不安",
+    "hook": "嫌われるのが怖い人の特徴5選",
+    "hook_note": "※ぜんぶ私のことだった",
+    "quote": {
+      "id": "women_original_292",
+      "author": "Original"
+    },
+    "wfm_placement": "04(特徴3)の写真内スマホに実画面合成+解説一言(広告スライドなし)",
+    "caption_first_line": "嫌われるのが怖い人の特徴5選。",
+    "posts": [
+      {
+        "platform": "tiktok",
+        "integration": "cmmwxv838000hp5734ulrbutj",
+        "postId": "cmsq1c1ib001zmj6p1abhzgwf",
+        "scheduled": "2026-08-12T20:58:33+09:00",
+        "releaseId": "missing",
+        "releaseURL": "https://www.tiktok.com/messages?lang=en",
+        "state": "PUBLISHED",
+      "note": "Mayu指示により8/14 19:00予約を取り消し、UPLOAD方式で即時アップロードに変更(2026-08-12 20:58 JST)。旧postId cmsq0fik9001xmj6pok9a62t1は削除済み。TikTok Inbox到達はMayuアプリ側確認待ち。"
+      },
+      {
+        "platform": "instagram",
+        "integration": "cmmwvxjv30001qr74l2knxama",
+        "postId": "cmsq0fmj2001ymj6pf37zr00a",
+        "scheduled": "2026-08-14T19:00:00+09:00",
+      "releaseId": null,
+      "releaseURL": null
+      }
+    ],
+    "variables": {
+      "title_source": null,
+      "title_source_ref": null,
+      "title_source_metric_saves": null,
+      "title_char_count": 14,
+      "title_has_number": true,
+      "title_names_target": true,
+      "title_type": "対象指名型",
+      "theme_category": "人間関係-Pain型",
+      "format_version": "v2-8slide-photo",
+      "list_count": 5,
+      "device_slide_index": 4,
+      "total_slides": 8,
+      "device_position_label": "mid-item",
+      "post_time_slot": "20:58",
+      "post_dow": "Wed",
+      "lane": null,
+      "appeal_mechanism": null
+    }
+  },
+  {
+    "slug": "2026-08-14-titlebank-iraira",
+    "batch_dir": "Marketing/UGC/2026-08-14-titlebank-batch/01-iraira",
+    "format": "v2-7slide-photo",
+    "theme": "反芻思考・イライラ",
+    "hook": "イライラしない人は、こう考えています。",
+    "hook_note": null,
+    "quote": {
+      "id": "women_quote_070",
+      "author": "Marcus Aurelius"
+    },
+    "wfm_placement": "06の生活写真内スマホにお気に入り画面を合成(広告スライドなし)",
+    "caption_first_line": "送る前に何度も読み返して、",
+    "asset_state": "ASSETS_READY",
+    "posts": [],
+    "variables": {
+      "title_source": "lemon8-verbatim",
+      "title_source_ref": "勝ちタイトル銀行_2026-08-13.md: イライラしない人は、こう考えています。",
+      "title_source_metric_saves": 4470,
+      "title_char_count": 15,
+      "title_has_number": false,
+      "title_names_target": true,
+      "title_type": "感情状態名指し型",
+      "theme_category": "自己肯定-Pain型",
+      "format_version": "v2-7slide-photo",
+      "list_count": 5,
+      "device_slide_index": 6,
+      "total_slides": 7,
+      "device_position_label": "mid-item",
+      "post_time_slot": null,
+      "post_dow": null,
+      "lane": null,
+      "appeal_mechanism": null
+    }
+  },
+  {
+    "slug": "2026-08-14-titlebank-kuchiguse",
+    "batch_dir": "Marketing/UGC/2026-08-14-titlebank-batch/02-kuchiguse",
+    "format": "v2-7slide-photo",
+    "theme": "自分にかける言葉",
+    "hook": "#人生に効く名言 心が強い人の“口ぐせ”、実はこれでした",
+    "hook_note": null,
+    "quote": {
+      "id": "women_quote_069",
+      "author": "Ralph Waldo Emerson"
+    },
+    "wfm_placement": "06の生活写真内スマホにホーム画面を合成(広告スライドなし)",
+    "caption_first_line": "今日言ったことや、送る前の文章を",
+    "asset_state": "ASSETS_READY",
+    "posts": [],
+    "variables": {
+      "title_source": "lemon8-verbatim",
+      "title_source_ref": "勝ちタイトル銀行_2026-08-13.md: 心が強い人の口ぐせ、実はこれでした",
+      "title_source_metric_saves": 4093,
+      "title_char_count": 20,
+      "title_has_number": false,
+      "title_names_target": true,
+      "title_type": "感情状態名指し型",
+      "theme_category": "自己肯定-Pain型",
+      "format_version": "v2-7slide-photo",
+      "list_count": 5,
+      "device_slide_index": 6,
+      "total_slides": 7,
+      "device_position_label": "mid-item",
+      "post_time_slot": null,
+      "post_dow": null
+    }
+  },
+  {
+    "slug": "2026-08-14-titlebank-mental8",
+    "batch_dir": "Marketing/UGC/2026-08-14-titlebank-batch/03-mental8",
+    "format": "v2-8slide-photo",
+    "theme": "メンタル安定・夜の習慣",
+    "hook": "ウソみたいにメンタル安定する考え方８選",
+    "hook_note": null,
+    "quote": {
+      "id": "women_quote_063",
+      "author": "Seneca"
+    },
+    "wfm_placement": "06の生活写真内スマホに深く知る画面を合成(広告スライドなし)",
+    "caption_first_line": "夜になると、送った文を開き直したり、返信の画面を見に行ったりする。",
+    "asset_state": "ASSETS_READY",
+    "posts": [],
+    "variables": {
+      "title_source": "lemon8-verbatim",
+      "title_source_ref": "勝ちタイトル銀行_2026-08-13.md: ウソみたいにメンタル安定する考え方８選",
+      "title_source_metric_saves": 3510,
+      "title_char_count": 19,
+      "title_has_number": true,
+      "title_names_target": false,
+      "title_type": "数字リスト型",
+      "theme_category": "自己肯定-Pain型",
+      "format_version": "v2-8slide-photo",
+      "list_count": 8,
+      "device_slide_index": 6,
+      "total_slides": 8,
+      "device_position_label": "mid-item",
+      "post_time_slot": null,
+      "post_dow": null
+    }
+  },
+  {
+    "slug": "2026-08-14-titlebank-toriatsukai",
+    "batch_dir": "Marketing/UGC/2026-08-14-titlebank-batch/04-toriatsukai",
+    "format": "v2-7slide-photo",
+    "theme": "メンタルが弱った夜のセルフケア",
+    "hook": "【　メンタル弱い人のための取扱説明書　】📖🎧🤍",
+    "hook_note": null,
+    "quote": {
+      "id": "women_quote_002",
+      "author": "Brene Brown"
+    },
+    "wfm_placement": "06の生活写真内スマホにカテゴリー画面を合成(広告スライドなし)",
+    "caption_first_line": "返信を打ったままスマホを伏せたり、",
+    "asset_state": "ASSETS_READY",
+    "posts": [],
+    "variables": {
+      "title_source": "lemon8-verbatim",
+      "title_source_ref": "勝ちタイトル銀行_2026-08-13.md: 【　メンタル弱い人のための取扱説明書　】",
+      "title_source_metric_saves": 2354,
+      "title_char_count": 17,
+      "title_has_number": false,
+      "title_names_target": true,
+      "title_type": "対象指名型",
+      "theme_category": "自己肯定-Pain型",
+      "format_version": "v2-7slide-photo",
+      "list_count": 5,
+      "device_slide_index": 6,
+      "total_slides": 7,
+      "device_position_label": "mid-item",
+      "post_time_slot": null,
+      "post_dow": null
+    }
+  },
+  {
+    "slug": "2026-08-14-titlebank-hanashikata10",
+    "batch_dir": "Marketing/UGC/2026-08-14-titlebank-batch/05-hanashikata10",
+    "format": "v2-7slide-photo",
+    "theme": "話し方・人間関係",
+    "hook": "【実は】嫌われる人の話し方10選",
+    "hook_note": null,
+    "quote": {
+      "id": "women_quote_057",
+      "author": "Gloria Steinem"
+    },
+    "wfm_placement": "06の生活写真内スマホにお気に入り理由メモ画面を合成(広告スライドなし)",
+    "caption_first_line": "送る前に文章を消して、",
+    "asset_state": "ASSETS_READY",
+    "posts": [],
+    "variables": {
+      "title_source": "lemon8-verbatim",
+      "title_source_ref": "勝ちタイトル銀行_2026-08-13.md: 【実は】嫌われる人の話し方10選",
+      "title_source_metric_saves": 1056,
+      "title_char_count": 15,
+      "title_has_number": true,
+      "title_names_target": true,
+      "title_type": "対象指名型",
+      "theme_category": "人間関係-Pain型",
+      "format_version": "v2-7slide-photo",
+      "list_count": 10,
+      "device_slide_index": 6,
+      "total_slides": 7,
+      "device_position_label": "mid-item",
+      "post_time_slot": null,
+      "post_dow": null
+    }
+  },
+  {
+    "slug": "2026-08-13-kodomo-sodatte-wakatta",
+    "batch_dir": "Marketing/UGC/2026-08-13-kodomo-sodatte-wakatta",
+    "format": "v4-9slide-solid-gray-white-text-remotion-horizontal-slide",
+    "theme": "子供が成人した後の自分の時間・自分を整えること",
+    "hook": "子供が育ってわかったこと7選",
+    "hook_note": null,
+    "quote": {
+      "id": "women_quote_053",
+      "author": "Anais Nin"
+    },
+    "wfm_placement": "07枚目で生活の中の保存・メモとして自然に登場(広告型実画面スライドなし)",
+    "caption_first_line": "子供が育って、家の中の時間が少し変わった。",
+    "asset_state": "ASSETS_READY",
+    "posts": [],
+    "assets": {
+      "slides": "Marketing/UGC/2026-08-13-kodomo-sodatte-wakatta/slides-solid-gray/01.png-09.png",
+      "video": "Marketing/UGC/2026-08-13-kodomo-sodatte-wakatta/slideshow.mp4",
+      "video_source": "Marketing/UGC/2026-08-13-kodomo-sodatte-wakatta/slideshow-horizontal-slide-v1.mp4"
+    },
+    "visual_rule": "参照動画をそのまま踏襲：単色グレー背景＋白文字、文字を中央付近に大きくまとめる。切り替えは単純な横スライドのみ。紙の折れ目・3D回転・影・ハイライトは不採用。",
+    "rejected_assets": {
+      "slides": "Marketing/UGC/2026-08-13-kodomo-sodatte-wakatta/slides/",
+      "reason": "画像生成背景・茶系文字・中央の過剰な空白。ボス指摘により採用しない。"
+    },
+    "video_spec": {
+      "renderer": "Remotion 4.0.427",
+      "project": "Marketing/UGC/2026-08-13-kodomo-sodatte-wakatta/remotion-page-turn/",
+      "composition_id": "KodomoSodatteWakattaHorizontalSlide",
+      "duration_seconds": 42.4,
+      "fps": 30,
+      "dimensions": "1080x1920",
+      "audio": false,
+      "hold_seconds_per_slide": 4.0,
+      "horizontal_slide_seconds": 0.8,
+      "transition": "前ページが左へ抜け、次ページが右から入る単純な横スライド",
+      "verification": [
+        "ffprobe",
+        "実動画フレーム目視"
+      ],
+      "audio_note": "BGMなし正式版。元の横スライド出力には無音AACストリームが残るが、可聴BGM・ナレーションはなし。"
+    },
+    "rejected_audio": {
+      "path": "Marketing/UGC/2026-08-13-kodomo-sodatte-wakatta/slideshow-bgm-v1.mp4",
+      "title": "静かな夜 (Quiet Night)",
+      "creator": "蒲鉾さちこ",
+      "reason": "ボス判断によりBGM不採用。正式版には使用しない。",
+      "source_url": "https://dova-s.jp/bgm/detail/13958"
+    },
+    "variables": {
+      "title_source": "original",
+      "title_source_ref": null,
+      "title_source_metric_saves": null,
+      "title_char_count": 14,
+      "title_has_number": true,
+      "title_names_target": false,
+      "title_type": "数字リスト型",
+      "theme_category": "自己肯定-自分の時間",
+      "format_version": "v4-9slide-solid-gray-white-text-remotion-horizontal-slide",
+      "list_count": 7,
+      "device_slide_index": 7,
+      "total_slides": 9,
+      "device_position_label": "mid-item",
+      "post_time_slot": null,
+      "post_dow": null
+    }
+  },
+  {
+    "slug": "2026-08-16-furarenai-iionna",
+    "batch_dir": "Marketing/UGC/2026-08-16-renai-lineart-batch/01-furarenai-iionna",
+    "format": "v3-lineart-10list",
+    "theme": "恋愛(向上・攻略)",
+    "hook": "フラれないいい女の思考法10選",
+    "hook_note": "全部できてなくても大丈夫。私は3つからでした。",
+    "quote": {
+      "id": null,
+      "author": "ベル・フックス"
+    },
+    "wfm_placement": "4枚目(装置スライド)に実アプリ画面(ホーム画面/夏目漱石カード)を合成",
+    "caption_first_line": "「いい女は追わない」って言うけど、我慢とは違うんだよね。",
+    "posts": [
+      {
+        "platform": "tiktok",
+        "route": "upload-post",
+        "profile": "Wordsforme",
+        "handle": "words_for_me_jp",
+        "post_mode": "DIRECT_POST",
+        "job_id": "b414a796c4c94194b1e2cb3616994247",
+        "request_id": "cbafbe54eaea4de4b1a5ffdedfe7f188",
+        "scheduled": "2026-08-16T17:00:00+09:00",
+        "auto_add_music": true,
+        "releaseId": "7674536565124779272",
+        "releaseURL": "https://www.tiktok.com/@words_for_me_jp/photo/7674536565124779272",
+        "note": "Upload-Post経由。実行はMayuローカル(auto mode classifierのBashブロック回避後)"
+      }
+    ],
+    "variables": {
+      "title_source": "lemon8-derived",
+      "title_source_ref": "勝ちタイトル銀行_2026-08-13.md: フラれないいい女の思考法20選",
+      "title_source_metric_saves": 1683,
+      "title_char_count": 14,
+      "title_has_number": true,
+      "title_names_target": true,
+      "title_type": "対象指名型",
+      "theme_category": "恋愛-向上攻略",
+      "format_version": "v3-lineart-10list",
+      "list_count": 10,
+      "device_slide_index": 4,
+      "total_slides": 12,
+      "device_position_label": "item4",
+      "post_time_slot": "17:00",
+      "post_dow": "Sun"
+    }
+  },
+  {
+    "slug": "2026-08-16-ai-ga-nai-kodo",
+    "batch_dir": "Marketing/UGC/2026-08-16-renai-lineart-batch/03-ai-ga-nai-kodo",
+    "format": "v3-lineart-10list",
+    "theme": "恋愛(確認欲求)",
+    "hook": "愛がないと絶対しない男性の行動10選",
+    "hook_note": "いくつ当てはまるか、数えながらどうぞ。",
+    "quote": {
+      "id": null,
+      "author": "プリンセス・ダイアナ"
+    },
+    "wfm_placement": "締めスライドに実アプリアイコン(Icon-1024)を脚注上へ合成",
+    "caption_first_line": "いくつ当てはまった? コメントで数字だけ教えてください。",
+    "posts": [
+      {
+        "platform": "tiktok",
+        "route": "upload-post",
+        "profile": "Wordsforme",
+        "handle": "words_for_me_jp",
+        "post_mode": "DIRECT_POST",
+        "job_id": "6bfe456da1024c5d8aa02f07afeff16e",
+        "request_id": "6cd348072fe54ad1a67afc6f3ab2c766",
+        "scheduled": "2026-08-16T22:00:00+09:00",
+        "auto_add_music": true,
+        "releaseId": "7674613680956247314",
+        "releaseURL": "https://www.tiktok.com/@words_for_me_jp/photo/7674613680956247314",
+        "note": "Upload-Post経由。実行はMayuローカル(auto mode classifierのBashブロック回避後)"
+      }
+    ],
+    "variables": {
+      "title_source": "lemon8-derived",
+      "title_source_ref": "勝ちタイトル銀行_2026-08-13.md: 愛がないと絶対しない男性の行動20選",
+      "title_source_metric_saves": 946,
+      "title_char_count": 15,
+      "title_has_number": true,
+      "title_names_target": true,
+      "title_type": "対象指名型",
+      "theme_category": "恋愛-確認欲求",
+      "format_version": "v3-lineart-10list",
+      "list_count": 10,
+      "device_slide_index": null,
+      "total_slides": 12,
+      "device_position_label": "closing-footnote",
+      "post_time_slot": "22:00",
+      "post_dow": "Sun"
+    }
+  },
+  {
+    "slug": "2026-08-16-wakarete-yameta",
+    "batch_dir": "Marketing/UGC/2026-08-16-renai-lineart-batch/02-wakarete-yameta",
+    "format": "v3-lineart-10list",
+    "theme": "恋愛(失恋・回復)",
+    "hook": "別れてから、自分を守るためにやめたこと10選",
+    "hook_note": "全部やめたら、やっと眠れるようになった。",
+    "quote": {
+      "id": null,
+      "author": "マヤ・アンジェロウ"
+    },
+    "wfm_placement": "4枚目(装置スライド)は実アプリ画面差し替えを不採用(別アプリに見えるとMayu指摘)。タイポカード+実アプリアイコンに確定",
+    "caption_first_line": "やめるのに一番時間がかかったのは2番でした。",
+    "posts": [
+      {
+        "platform": "tiktok",
+        "route": "upload-post",
+        "profile": "Wordsforme",
+        "handle": "words_for_me_jp",
+        "post_mode": "DIRECT_POST",
+        "job_id": "1b2e0d92033d4387891e0419a11d2931",
+        "request_id": "539d837477cb443babc06b32fcc898b3",
+        "scheduled": "2026-08-17T17:00:00+09:00",
+        "auto_add_music": true,
+        "releaseId": "7674907672386342151",
+        "releaseURL": "https://www.tiktok.com/@words_for_me_jp/photo/7674907672386342151",
+        "note": "Upload-Post経由。①③と同じ日に出さず翌日17:00に分散(Mayu指定) | releaseURLをUpload-Postのstatus?job_idから解決(2026-08-22)。history窓外だったため未解決のままだった",
+        "verified_at": "2026-08-22T19:41:41+09:00"
+      }
+    ],
+    "variables": {
+      "title_source": "original",
+      "title_source_ref": null,
+      "title_source_metric_saves": null,
+      "title_char_count": 17,
+      "title_has_number": true,
+      "title_names_target": false,
+      "title_type": "言葉行動描写型",
+      "theme_category": "恋愛-失恋回復",
+      "format_version": "v3-lineart-10list",
+      "list_count": 10,
+      "device_slide_index": 4,
+      "total_slides": 12,
+      "device_position_label": "item4",
+      "post_time_slot": "17:00",
+      "post_dow": "Mon"
+    }
+  },
+  {
+    "slug": "2026-08-17-namida-seishinka-7",
+    "batch_dir": "Marketing/UGC/2026-08-17-namida-seishinka-7",
+    "format": "v3-lineart-withhold",
+    "theme": "言葉-専門家引用",
+    "hook": "涙が出てくる精神科医の言葉 7選",
+    "hook_note": "最後の1つだけ、今夜のあなたの番。",
+    "quote": {
+      "id": null,
+      "author": "6名(フランクル/ギノット/佐々木正美/フロム/ブラザーズ/ブラウン)"
+    },
+    "wfm_placement": "8枚目(伏せカード+日記調1行)。仕組みを説明する宣言口調は禁止に修正済み(2026-08-17)",
+    "caption_first_line": "6つは専門家が遺した言葉です。7つ目だけ書いていません。",
+    "variables": {
+      "title_source": "lemon8-verbatim",
+      "title_source_ref": "勝ちタイトル銀行_2026-08-13.md: 涙が出てくる精神科医の言葉 7選",
+      "title_source_metric_saves": 4455,
+      "title_char_count": 15,
+      "title_has_number": true,
+      "title_names_target": false,
+      "title_type": "感情状態名指し型",
+      "theme_category": "言葉-専門家引用",
+      "format_version": "v3-lineart-withhold",
+      "list_count": 7,
+      "device_slide_index": 7,
+      "total_slides": 9,
+      "device_position_label": "withheld-completion",
+      "post_time_slot": "21:00",
+      "post_dow": "Mon",
+      "lane": "quote-collection",
+      "appeal_mechanism": "withheld-completion"
+    },
+    "posts": [
+      {
+        "platform": "tiktok",
+        "route": "upload-post",
+        "profile": "Wordsforme",
+        "handle": "words_for_me_jp",
+        "post_mode": "DIRECT_POST",
+        "job_id": "8eecb2af286f42c685ff2b11d8747251",
+        "request_id": "d2565bd06a104eb3bd5316e5dc556edd",
+        "scheduled": "2026-08-17T21:00:00+09:00",
+        "auto_add_music": true,
+        "releaseId": "7674969340382301458",
+        "releaseURL": "https://www.tiktok.com/@words_for_me_jp/photo/7674969340382301458",
+        "note": "Upload-Post経由。空欄スライドの宣言口調を修正後に投稿(5枚目の字形不良も修正済み) | releaseURLをUpload-Postのstatus?job_idから解決(2026-08-22)。history窓外だったため未解決のままだった",
+        "verified_at": "2026-08-22T19:41:41+09:00"
+      }
+    ]
+  },
+  {
+    "slug": "2026-08-18-ganbarenai-yameta-7",
+    "batch_dir": "Marketing/UGC/2026-08-18-ganbarenai-yameta-7",
+    "format": "v3-lineart-7list-cvnative",
+    "theme": "恋愛-頑張らない",
+    "hook": "恋愛を頑張れない女性がやめたこと7選",
+    "hook_note": "全部やめたら、少し楽になった。",
+    "quote": {
+      "id": null,
+      "author": "C・S・ルイス(締め、WFM無関係)"
+    },
+    "wfm_placement": "3番目(項目)に他項目と完全同一体裁でネイティブ統合。損失フレーミング(保存墓場)",
+    "caption_first_line": "全部やめたら、少し楽になった。特に3番目。",
+    "variables": {
+      "title_source": "original",
+      "title_source_ref": null,
+      "title_source_metric_saves": null,
+      "title_char_count": 18,
+      "title_has_number": true,
+      "title_names_target": true,
+      "title_type": "言葉行動描写型",
+      "theme_category": "恋愛-頑張らない",
+      "format_version": "v3-lineart-7list-cvnative",
+      "list_count": 7,
+      "device_slide_index": 4,
+      "total_slides": 9,
+      "device_position_label": "item4-native",
+      "post_time_slot": "17:00",
+      "post_dow": "Tue",
+      "lane": "cv-native",
+      "appeal_mechanism": "loss-framing"
+    },
+    "posts": [
+      {
+        "platform": "tiktok",
+        "route": "upload-post",
+        "profile": "Wordsforme",
+        "handle": "words_for_me_jp",
+        "post_mode": "DIRECT_POST",
+        "job_id": "fcc7522cca7b4707939282152773423d",
+        "request_id": "f2571d3e6d1448f6b2711d57f3abb38d",
+        "scheduled": "2026-08-18T17:00:00+09:00",
+        "auto_add_music": true,
+        "releaseId": "7675278649544690951",
+        "releaseURL": "https://www.tiktok.com/@words_for_me_jp/photo/7675278649544690951",
+        "note": "cv-nativeレーン第1号。WFM項目を他項目と完全同一体裁で統合(専用カード枠なし) | releaseURLをUpload-Postのstatus?job_idから解決(2026-08-22)。history窓外だったため未解決のままだった",
+        "verified_at": "2026-08-22T19:41:41+09:00"
+      }
+    ]
+  },
+  {
+    "slug": "2026-08-18-fuan-sasenai-7",
+    "batch_dir": "Marketing/UGC/2026-08-18-fuan-sasenai-7",
+    "format": "v3-lineart-7list-impression",
+    "theme": "恋愛-確認欲求",
+    "hook": "不安にさせない男性の行動7選",
+    "hook_note": "特別なことは、何もしてない。",
+    "quote": {
+      "id": null,
+      "author": null
+    },
+    "wfm_placement": "締めのみ、名前+アイコンのみのplain-namedrop。個別化ナラティブなし",
+    "caption_first_line": "いくつ当てはまった? コメントで教えてください。",
+    "variables": {
+      "title_source": "original",
+      "title_source_ref": null,
+      "title_source_metric_saves": null,
+      "title_char_count": 14,
+      "title_has_number": true,
+      "title_names_target": true,
+      "title_type": "言葉行動描写型",
+      "theme_category": "恋愛-確認欲求",
+      "format_version": "v3-lineart-7list-impression",
+      "list_count": 7,
+      "device_slide_index": null,
+      "total_slides": 9,
+      "device_position_label": "closing-plain",
+      "post_time_slot": "21:00",
+      "post_dow": "Tue",
+      "lane": "impression-independent",
+      "appeal_mechanism": "plain-namedrop"
+    },
+    "posts": [
+      {
+        "platform": "tiktok",
+        "route": "upload-post",
+        "profile": "Wordsforme",
+        "handle": "words_for_me_jp",
+        "post_mode": "DIRECT_POST",
+        "job_id": "449106f13cc54144a1ea6a9e72bdbfa1",
+        "request_id": "7f89968abfb846c9b8bd5384796bbbd9",
+        "scheduled": "2026-08-18T21:00:00+09:00",
+        "auto_add_music": true,
+        "releaseId": "7675340356975660296",
+        "releaseURL": "https://www.tiktok.com/@words_for_me_jp/photo/7675340356975660296",
+        "note": "impression-independentレーン第1号。締めのみ名前+アイコン、インプ・認知獲得目的でCVは狙わない | releaseURLをUpload-Postのstatus?job_idから解決(2026-08-22)。history窓外だったため未解決のままだった",
+        "verified_at": "2026-08-22T19:41:41+09:00"
+      }
+    ]
+  },
+  {
+    "slug": "2026-08-19-iwanai-kotoba-5",
+    "batch_dir": "Marketing/UGC/2026-08-19-iwanai-kotoba-5",
+    "format": "v3-lineart-5list-cvnative",
+    "theme": "自己肯定-言わない言葉",
+    "hook": "自分を責める女性が言わない言葉5選",
+    "hook_note": "言わなくなったら、少し息がしやすくなった。",
+    "quote": {
+      "id": null,
+      "author": "ジッドゥ・クリシュナムルティ(締め、WFM無関係)"
+    },
+    "wfm_placement": "3番目(項目)に他項目と完全同一体裁でネイティブ統合。損失フレーミング。題材(言葉)とWFM本業の接続が一番自然",
+    "caption_first_line": "言わなくなったら、少し息がしやすくなった。特に3番目。",
+    "variables": {
+      "title_source": "original",
+      "title_source_ref": null,
+      "title_source_metric_saves": null,
+      "title_char_count": 17,
+      "title_has_number": true,
+      "title_names_target": true,
+      "title_type": "言葉行動描写型",
+      "theme_category": "自己肯定-言わない言葉",
+      "format_version": "v3-lineart-5list-cvnative",
+      "list_count": 5,
+      "device_slide_index": 4,
+      "total_slides": 8,
+      "device_position_label": "item4-native",
+      "post_time_slot": "17:00",
+      "post_dow": "Wed",
+      "lane": "cv-native",
+      "appeal_mechanism": "loss-framing"
+    },
+    "posts": [
+      {
+        "platform": "tiktok",
+        "route": "upload-post",
+        "profile": "Wordsforme",
+        "handle": "words_for_me_jp",
+        "post_mode": "DIRECT_POST",
+        "job_id": "f5c1cc547dcb4f4ba169068eddd697b1",
+        "request_id": "cc0b8ef4b09f4d6e8268aa5d5f6d1ed0",
+        "scheduled": "2026-08-19T17:00:00+09:00",
+        "auto_add_music": true,
+        "releaseId": "7675649795964325138",
+        "releaseURL": "https://www.tiktok.com/@words_for_me_jp/photo/7675649795964325138",
+        "note": "cv-nativeレーン第2号。題材自体が「言葉」なのでWFM接続が最も自然な回 | releaseURLをUpload-Postのstatus?job_idから解決(2026-08-22)。history窓外だったため未解決のままだった",
+        "verified_at": "2026-08-22T19:41:41+09:00"
+      }
+    ]
+  },
+  {
+    "slug": "2026-08-19-taisetsu-ni-sareru-7",
+    "batch_dir": "Marketing/UGC/2026-08-19-taisetsu-ni-sareru-7",
+    "format": "v3-lineart-7list-cvnative",
+    "theme": "恋愛-大切にされる",
+    "hook": "本当に大切にされる女性が、内緒でやってる行動７選",
+    "hook_note": "誰にも言ってないけど、これを続けてる。",
+    "quote": {
+      "id": "women_quote_431",
+      "author": "Elizabeth Gilbert"
+    },
+    "wfm_placement": "3番目(4枚目)の行動としてWords For Meを自然に記載。専用カード枠・大きなロゴ・機能説明なし",
+    "caption_first_line": "誰にも言ってないけど、これを続けてる。",
+    "variables": {
+      "title_source": "original",
+      "title_source_ref": null,
+      "title_source_metric_saves": null,
+      "title_char_count": 24,
+      "title_has_number": true,
+      "title_names_target": true,
+      "title_type": "言葉行動描写型",
+      "theme_category": "恋愛-大切にされる",
+      "format_version": "v3-lineart-7list-cvnative",
+      "list_count": 7,
+      "device_slide_index": 4,
+      "total_slides": 9,
+      "device_position_label": "item4-native",
+      "post_time_slot": "21:00",
+      "post_dow": "Wed",
+      "lane": "cv-native",
+      "appeal_mechanism": "personalization-draw"
+    },
+    "posts": [
+      {
+        "platform": "tiktok",
+        "route": "upload-post",
+        "profile": "Wordsforme",
+        "handle": "words_for_me_jp",
+        "post_mode": "DIRECT_POST",
+        "job_id": "c36f8b88897f47309c36c6e5fbf1f819",
+        "request_id": "wfm-20260819-taisetsu-ni-sareru-2100",
+        "scheduled": "2026-08-19T21:00:00+09:00",
+        "auto_add_music": true,
+        "releaseId": "7675711494025153800",
+        "releaseURL": "https://www.tiktok.com/@words_for_me_jp/photo/7675711494025153800",
+        "note": "Upload-Postで予約。TikTok言の葉アカウント。本文は予約編集APIで設定済み"
+      }
+    ]
+  },
+  {
+    "slug": "2026-08-20-erabu-before-erabareru-7",
+    "batch_dir": "Marketing/UGC/2026-08-20-erabu-before-erabareru-7",
+    "format": "v3-lineart-7list-cvnative",
+    "theme": "恋愛-自分で選ぶ",
+    "hook": "愛される女性が、誰かに選ばれる前に選んでいること７選",
+    "hook_note": "選ばれることばかり、待たなくていい。",
+    "quote": {
+      "id": null,
+      "author": null
+    },
+    "wfm_placement": "3番目(4枚目)の項目としてWords For Meを自然に記載。自分の本音を確かめる時間として統合",
+    "caption_first_line": "選ばれることだけを、恋愛の答えにしなくていい。",
+    "variables": {
+      "title_source": "original",
+      "title_source_ref": null,
+      "title_source_metric_saves": null,
+      "title_char_count": 28,
+      "title_has_number": true,
+      "title_names_target": true,
+      "title_type": "選択基準型",
+      "theme_category": "恋愛-自分で選ぶ",
+      "format_version": "v3-lineart-7list-cvnative",
+      "list_count": 7,
+      "device_slide_index": 4,
+      "total_slides": 9,
+      "device_position_label": "item3-native",
+      "post_time_slot": "22:00",
+      "post_dow": "Thu",
+      "lane": "cv-native",
+      "appeal_mechanism": "choice-empowerment"
+    },
+    "posts": [
+      {
+        "platform": "tiktok",
+        "route": "upload-post",
+        "profile": "Wordsforme",
+        "handle": "words_for_me_jp",
+        "post_mode": "DIRECT_POST",
+        "job_id": "370d6caccf4a4f508840e4fd58fa1b25",
+        "request_id": "wfm-20260820-erabu-before-erabareru-2200",
+        "scheduled": "2026-08-20T22:00:00+09:00",
+        "auto_add_music": true,
+        "releaseId": "7676097949608316178",
+        "releaseURL": "https://www.tiktok.com/@words_for_me_jp/photo/7676097949608316178",
+        "note": "Upload-Postで予約。TikTok言の葉アカウント。choice-empowermentレーン",
+        "metrics_snapshot": {
+          "collected_at": "2026-08-21T12:04:12+09:00",
+          "maturity": "early_checkpoint_14h",
+          "platform_post_id": "7676097949608316178",
+          "public_url": "https://www.tiktok.com/@words_for_me_jp/photo/7676097949608316178",
+          "views": 794,
+          "likes": 20,
+          "comments": 0,
+          "shares": 0,
+          "engagement_rate_like_comment_share": 0.0252,
+          "saves": null,
+          "app_downloads_same_day": 23,
+          "app_download_attribution": "unattributed_daily_total"
+        }
+      }
+    ]
+  },
+  {
+    "slug": "2026-08-20-ai-saraki-first-7",
+    "batch_dir": "Marketing/UGC/2026-08-20-ai-saraki-first-7",
+    "format": "v3-lineart-7list-cvnative",
+    "theme": "恋愛-自分を大切にする",
+    "hook": "愛される女性が、恋愛より先に大切にしていること７選",
+    "hook_note": "恋愛がうまくいく人は、恋愛だけを見ていない。",
+    "quote": {
+      "id": null,
+      "author": null
+    },
+    "wfm_placement": "3番目(4枚目)の項目としてWords For Meを自然に記載。自分の心に戻る時間として統合",
+    "caption_first_line": "愛される女性は、恋愛だけを最優先にしない。",
+    "variables": {
+      "title_source": "original",
+      "title_source_ref": null,
+      "title_source_metric_saves": null,
+      "title_char_count": 27,
+      "title_has_number": true,
+      "title_names_target": true,
+      "title_type": "価値観優先順位型",
+      "theme_category": "恋愛-自分を大切にする",
+      "format_version": "v3-lineart-7list-cvnative",
+      "list_count": 7,
+      "device_slide_index": 4,
+      "total_slides": 9,
+      "device_position_label": "item3-native",
+      "post_time_slot": "17:00",
+      "post_dow": "Fri",
+      "lane": "cv-native",
+      "appeal_mechanism": "self-worth-before-romance"
+    },
+    "posts": [
+      {
+        "platform": "tiktok",
+        "route": "upload-post",
+        "profile": "Wordsforme",
+        "handle": "words_for_me_jp",
+        "post_mode": "DIRECT_POST",
+        "job_id": "fb8ccff443cc41798fd83af7f6728394",
+        "request_id": "wfm-20260821-ai-saraki-first-1830",
+        "scheduled": "2026-08-21T17:00:00+09:00",
+        "auto_add_music": true,
+        "releaseId": "7676391958973091080",
+        "releaseURL": "https://www.tiktok.com/@words_for_me_jp/photo/7676391958973091080",
+        "note": "Upload-Postで17:00へ変更。TikTok言の葉アカウント。self-worth-before-romanceレーン"
+      }
+    ]
+  },
+  {
+    "slug": "2026-08-21-mental-antei-shukan-7",
+    "batch_dir": "Marketing/UGC/2026-08-21-mental-antei-shukan-7",
+    "format": "v3-lineart-7list-cvnative",
+    "theme": "自己肯定-メンタル安定",
+    "hook": "ウソみたいにメンタル安定する習慣７選",
+    "hook_note": "強くなるより、戻り方を知っておく。",
+    "quote": {
+      "id": null,
+      "author": null
+    },
+    "wfm_placement": "3番目(4枚目)の習慣としてWords For Meを自然に記載。寝る前に今日の一枚を読む習慣として統合",
+    "caption_first_line": "メンタルが安定してる人は、強いんじゃなくて戻り方を知ってる。",
+    "variables": {
+      "title_source": "lemon8-derived",
+      "title_source_ref": "勝ちタイトル銀行_2026-08-13.md: ウソみたいにメンタル安定する考え方８選",
+      "title_source_metric_saves": 3510,
+      "title_char_count": 18,
+      "title_has_number": true,
+      "title_names_target": false,
+      "title_type": "複合",
+      "theme_category": "自己肯定-メンタル安定",
+      "format_version": "v3-lineart-7list-cvnative",
+      "list_count": 7,
+      "device_slide_index": 4,
+      "total_slides": 9,
+      "device_position_label": "item3-native",
+      "post_time_slot": "20:00",
+      "post_dow": "Fri",
+      "lane": "cv-native",
+      "appeal_mechanism": "loss-framing"
+    },
+    "posts": [
+      {
+        "platform": "tiktok",
+        "route": "upload-post",
+        "profile": "Wordsforme",
+        "handle": "words_for_me_jp",
+        "post_mode": "DIRECT_POST",
+        "job_id": "baedc1ed7e2f40348320dbd93c74dcc4",
+        "request_id": "wfm-20260821-mental-antei-shukan-2000",
+        "scheduled": "2026-08-21T20:00:00+09:00",
+        "auto_add_music": true,
+        "releaseId": "7676438068626279688",
+        "releaseURL": "https://www.tiktok.com/@words_for_me_jp/photo/7676438068626279688",
+        "status": "published",
+        "scheduler_status": "completed",
+        "note": "Upload-Postで20:00予約。TikTok言の葉アカウント。lemon8-derivedのメンタル安定レーン",
+        "verified_at": "2026-08-22T11:00:00+09:00"
+      }
+    ]
+  },
+  {
+    "slug": "2026-08-22-v5-henji-konai-yoru",
+    "batch_dir": "Marketing/UGC/2026-08-22-v5-henji-konai-yoru",
+    "format": "v5a-daily-draw",
+    "theme": "恋愛-返事が来ない夜",
+    "hook": "既読のままの画面を、まだスワイプできない人へ",
+    "hook_note": "通知が来るたび、違う名前だった。",
+    "quote": {
+      "id": "women_original_212",
+      "author": "Original"
+    },
+    "wfm_placement": "型5は話者がWFM自身。全スライドが製品の画面言語で、専用紹介カード・機能説明・DLボタンは置かない。3枚目=実物カード、5枚目=WeeklyShelfViewの構造",
+    "caption_first_line": "通知が来るたび、違う名前だった。",
+    "asset_state": "POSTED",
+    "variables": {
+      "title_source": "original",
+      "title_source_ref": null,
+      "title_source_metric_saves": null,
+      "title_char_count": 22,
+      "title_has_number": false,
+      "title_names_target": true,
+      "title_type": "ナラティブ・未完了＋対象指名",
+      "theme_category": "love_crush",
+      "format_version": "v5a-daily-draw",
+      "cta_containment_type": 5,
+      "quote_id": "women_original_212",
+      "situation": "既読のまま返事を待つ夜",
+      "total_slides": 6,
+      "lane": "product-native",
+      "appeal_mechanism": "demonstration",
+      "cover_title_orientation": "horizontal",
+      "cover_text_elements": 1
+    },
+    "posts": [
+      {
+        "platform": "tiktok",
+        "route": "upload-post",
+        "profile": "Wordsforme",
+        "post_mode": "DIRECT_POST",
+        "auto_add_music": true,
+        "request_id": "wfm-20260822-v5-henji-konai-yoru-2003",
+        "job_id": "ba35e650b17e484b8fd0efe02aaa0245",
+        "posted": "2026-08-22T20:05:06+09:00",
+        "releaseId": "7676810036861013266",
+        "releaseURL": "https://www.tiktok.com/@words_for_me_jp/photo/7676810036861013266"
+      }
+    ],
+    "note": "2026-08-21に制作完了・全数QC PASS(1080x1920 JPEG 6枚)。2026-08-22 20:05 JSTにMayu指示でオーガニック投稿(Upload-Post/Wordsforme/DIRECT_POST)。型5(demonstration)をオーガニックで出した初の実測ケース。8/21の「実演系はオーガニックで伸びない」仮説の検証データとして扱う。同日の型3対照は未実施のため、型だけの比較にはなっていない。"
+  }
+]

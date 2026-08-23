@@ -1,0 +1,105 @@
+{
+ "pages": [
+  {
+   "file": "01-cover.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 68336,
+   "sha256": "c32a11a0a9c9fa8e476c8b52f4eadfff457e4ce3a8c2bc9a5367a80f01c0b2d4",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-18-ganbarenai-yameta-7/slides/01-cover.png"
+  },
+  {
+   "file": "02-item01.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 57984,
+   "sha256": "5caf5f01c1583bbc78540b047187075c58a85d22af4b582e27c81f7b85c770df",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-18-ganbarenai-yameta-7/slides/02-item01.png"
+  },
+  {
+   "file": "03-item02.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 58173,
+   "sha256": "df225ebc06692f438ee82fded2a475a54fcd2c0148e89744ee2483dd47a3626c",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-18-ganbarenai-yameta-7/slides/03-item02.png"
+  },
+  {
+   "file": "04-item03.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 55690,
+   "sha256": "522a471098657358133d887926d8a14b805de16b2045e16f4c648b8fd26df2a9",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-18-ganbarenai-yameta-7/slides/04-item03.png"
+  },
+  {
+   "file": "05-item04.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 62697,
+   "sha256": "f28d980bcf43c0d38c49028ecde2641a814b3112da7b32543b7d57d000a26969",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-18-ganbarenai-yameta-7/slides/05-item04.png"
+  },
+  {
+   "file": "06-item05.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 61295,
+   "sha256": "a449cd212b30f825929d126464eca0f54905743492c01e113e8a14109108c146",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-18-ganbarenai-yameta-7/slides/06-item05.png"
+  },
+  {
+   "file": "07-item06.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 57166,
+   "sha256": "2e9d5ec220f00ef3ed3310476c1f2cb0eadf7088b5d0060e8eba8bbc55e9a13e",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-18-ganbarenai-yameta-7/slides/07-item06.png"
+  },
+  {
+   "file": "08-item07.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 56700,
+   "sha256": "38b51966a0e8607fcf167cd359ed7db25ef9625e764cde4775bee1b445c49d53",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-18-ganbarenai-yameta-7/slides/08-item07.png"
+  },
+  {
+   "file": "09-closing.jpg",
+   "size": [
+    1080,
+    1920
+   ],
+   "bytes": 60080,
+   "sha256": "e84c5ccc2ed1fd9e6d43a88cb21fc33aef54b7a31da4ac295f7366512f33fbb9",
+   "source": "/Users/mac2-mayu/Quote-app/Marketing/UGC/2026-08-18-ganbarenai-yameta-7/slides/09-closing.png"
+  }
+ ],
+ "order": [
+  "01-cover.jpg",
+  "02-item01.jpg",
+  "03-item02.jpg",
+  "04-item03.jpg",
+  "05-item04.jpg",
+  "06-item05.jpg",
+  "07-item06.jpg",
+  "08-item07.jpg",
+  "09-closing.jpg"
+ ]
+}
