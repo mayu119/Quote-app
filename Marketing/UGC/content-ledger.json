@@ -41,6 +41,7 @@
       "title_type": "対象指名型",
       "theme_category": "自己肯定-Pain型",
       "format_version": "v1-5slide-flat",
+      "cta_containment_type": 2,
       "list_count": 5,
       "device_slide_index": 5,
       "total_slides": 5,
@@ -71,13 +72,13 @@
         "releaseId": null,
         "releaseURL": null
       },
-    {
-      "platform": "instagram",
-      "integration": "cmmwvxjv30001qr74l2knxama",
-      "postId": "cmsljz5cn001emj6p3fo4d47g",
-      "scheduled": "2026-08-11T19:00:00+09:00",
-      "releaseId": null,
-      "releaseURL": null
+      {
+        "platform": "instagram",
+        "integration": "cmmwvxjv30001qr74l2knxama",
+        "postId": "cmsljz5cn001emj6p3fo4d47g",
+        "scheduled": "2026-08-11T19:00:00+09:00",
+        "releaseId": null,
+        "releaseURL": null
       }
     ],
     "variables": {
@@ -90,6 +91,7 @@
       "title_type": "対象指名型",
       "theme_category": "自己肯定-Pain型",
       "format_version": "v1-5slide-flat",
+      "cta_containment_type": 2,
       "list_count": 5,
       "device_slide_index": 5,
       "total_slides": 5,
@@ -122,13 +124,13 @@
         "releaseId": null,
         "releaseURL": null
       },
-    {
-      "platform": "instagram",
-      "integration": "cmmwvxjv30001qr74l2knxama",
-      "postId": "cmsljz5ux001gmj6plkvg4phh",
-      "scheduled": "2026-08-12T19:00:00+09:00",
-      "releaseId": null,
-      "releaseURL": null
+      {
+        "platform": "instagram",
+        "integration": "cmmwvxjv30001qr74l2knxama",
+        "postId": "cmsljz5ux001gmj6plkvg4phh",
+        "scheduled": "2026-08-12T19:00:00+09:00",
+        "releaseId": null,
+        "releaseURL": null
       }
     ],
     "variables": {
@@ -141,6 +143,7 @@
       "title_type": "言葉行動描写型",
       "theme_category": "自己肯定-Pain型",
       "format_version": "v1-5slide-flat",
+      "cta_containment_type": 2,
       "list_count": 5,
       "device_slide_index": 5,
       "total_slides": 5,
@@ -165,13 +168,13 @@
     "wfm_placement": "habit5の写真内に実画面+解説一言(広告スライドなし)",
     "caption_first_line": "自分軸がある人が毎日やってること5選。",
     "posts": [
-    {
-      "platform": "tiktok",
-      "integration": "cmmwxv838000hp5734ulrbutj",
-      "postId": "cmslude4v001mmj6p4td7k9yr",
-      "scheduled": "2026-08-13T19:00:00+09:00",
-      "releaseId": null,
-      "releaseURL": null
+      {
+        "platform": "tiktok",
+        "integration": "cmmwxv838000hp5734ulrbutj",
+        "postId": "cmslude4v001mmj6p4td7k9yr",
+        "scheduled": "2026-08-13T19:00:00+09:00",
+        "releaseId": null,
+        "releaseURL": null
       }
     ],
     "variables": {
@@ -184,6 +187,7 @@
       "title_type": "言葉行動描写型",
       "theme_category": "自己肯定-自分軸",
       "format_version": "v2-7slide-photo",
+      "cta_containment_type": 3,
       "list_count": 5,
       "device_slide_index": 6,
       "total_slides": 7,
@@ -216,15 +220,15 @@
         "releaseId": "missing",
         "releaseURL": "https://www.tiktok.com/messages?lang=en",
         "state": "PUBLISHED",
-      "note": "Mayu指示により8/14 19:00予約を取り消し、UPLOAD方式で即時アップロードに変更(2026-08-12 20:58 JST)。旧postId cmsq0fik9001xmj6pok9a62t1は削除済み。TikTok Inbox到達はMayuアプリ側確認待ち。"
+        "note": "Mayu指示により8/14 19:00予約を取り消し、UPLOAD方式で即時アップロードに変更(2026-08-12 20:58 JST)。旧postId cmsq0fik9001xmj6pok9a62t1は削除済み。TikTok Inbox到達はMayuアプリ側確認待ち。"
       },
       {
         "platform": "instagram",
         "integration": "cmmwvxjv30001qr74l2knxama",
         "postId": "cmsq0fmj2001ymj6pf37zr00a",
         "scheduled": "2026-08-14T19:00:00+09:00",
-      "releaseId": null,
-      "releaseURL": null
+        "releaseId": null,
+        "releaseURL": null
       }
     ],
     "variables": {
@@ -237,6 +241,7 @@
       "title_type": "対象指名型",
       "theme_category": "人間関係-Pain型",
       "format_version": "v2-8slide-photo",
+      "cta_containment_type": 3,
       "list_count": 5,
       "device_slide_index": 4,
       "total_slides": 8,
@@ -272,6 +277,7 @@
       "title_type": "感情状態名指し型",
       "theme_category": "自己肯定-Pain型",
       "format_version": "v2-7slide-photo",
+      "cta_containment_type": 3,
       "list_count": 5,
       "device_slide_index": 6,
       "total_slides": 7,
@@ -307,6 +313,7 @@
       "title_type": "感情状態名指し型",
       "theme_category": "自己肯定-Pain型",
       "format_version": "v2-7slide-photo",
+      "cta_containment_type": 3,
       "list_count": 5,
       "device_slide_index": 6,
       "total_slides": 7,
@@ -340,6 +347,7 @@
       "title_type": "数字リスト型",
       "theme_category": "自己肯定-Pain型",
       "format_version": "v2-8slide-photo",
+      "cta_containment_type": 3,
       "list_count": 8,
       "device_slide_index": 6,
       "total_slides": 8,
@@ -373,6 +381,7 @@
       "title_type": "対象指名型",
       "theme_category": "自己肯定-Pain型",
       "format_version": "v2-7slide-photo",
+      "cta_containment_type": 3,
       "list_count": 5,
       "device_slide_index": 6,
       "total_slides": 7,
@@ -406,6 +415,7 @@
       "title_type": "対象指名型",
       "theme_category": "人間関係-Pain型",
       "format_version": "v2-7slide-photo",
+      "cta_containment_type": 3,
       "list_count": 10,
       "device_slide_index": 6,
       "total_slides": 7,
@@ -473,6 +483,7 @@
       "title_type": "数字リスト型",
       "theme_category": "自己肯定-自分の時間",
       "format_version": "v4-9slide-solid-gray-white-text-remotion-horizontal-slide",
+      "cta_containment_type": 3,
       "list_count": 7,
       "device_slide_index": 7,
       "total_slides": 9,
@@ -520,6 +531,7 @@
       "title_type": "対象指名型",
       "theme_category": "恋愛-向上攻略",
       "format_version": "v3-lineart-10list",
+      "cta_containment_type": null,
       "list_count": 10,
       "device_slide_index": 4,
       "total_slides": 12,
@@ -567,6 +579,7 @@
       "title_type": "対象指名型",
       "theme_category": "恋愛-確認欲求",
       "format_version": "v3-lineart-10list",
+      "cta_containment_type": 1,
       "list_count": 10,
       "device_slide_index": null,
       "total_slides": 12,
@@ -615,6 +628,7 @@
       "title_type": "言葉行動描写型",
       "theme_category": "恋愛-失恋回復",
       "format_version": "v3-lineart-10list",
+      "cta_containment_type": null,
       "list_count": 10,
       "device_slide_index": 4,
       "total_slides": 12,
@@ -646,6 +660,7 @@
       "title_type": "感情状態名指し型",
       "theme_category": "言葉-専門家引用",
       "format_version": "v3-lineart-withhold",
+      "cta_containment_type": 4,
       "list_count": 7,
       "device_slide_index": 7,
       "total_slides": 9,
@@ -696,6 +711,7 @@
       "title_type": "言葉行動描写型",
       "theme_category": "恋愛-頑張らない",
       "format_version": "v3-lineart-7list-cvnative",
+      "cta_containment_type": 3,
       "list_count": 7,
       "device_slide_index": 4,
       "total_slides": 9,
@@ -746,6 +762,7 @@
       "title_type": "言葉行動描写型",
       "theme_category": "恋愛-確認欲求",
       "format_version": "v3-lineart-7list-impression",
+      "cta_containment_type": 1,
       "list_count": 7,
       "device_slide_index": null,
       "total_slides": 9,
@@ -796,6 +813,7 @@
       "title_type": "言葉行動描写型",
       "theme_category": "自己肯定-言わない言葉",
       "format_version": "v3-lineart-5list-cvnative",
+      "cta_containment_type": 3,
       "list_count": 5,
       "device_slide_index": 4,
       "total_slides": 8,
@@ -846,6 +864,7 @@
       "title_type": "言葉行動描写型",
       "theme_category": "恋愛-大切にされる",
       "format_version": "v3-lineart-7list-cvnative",
+      "cta_containment_type": 3,
       "list_count": 7,
       "device_slide_index": 4,
       "total_slides": 9,
@@ -895,6 +914,7 @@
       "title_type": "選択基準型",
       "theme_category": "恋愛-自分で選ぶ",
       "format_version": "v3-lineart-7list-cvnative",
+      "cta_containment_type": 3,
       "list_count": 7,
       "device_slide_index": 4,
       "total_slides": 9,
@@ -958,6 +978,7 @@
       "title_type": "価値観優先順位型",
       "theme_category": "恋愛-自分を大切にする",
       "format_version": "v3-lineart-7list-cvnative",
+      "cta_containment_type": 3,
       "list_count": 7,
       "device_slide_index": 4,
       "total_slides": 9,
@@ -1007,6 +1028,7 @@
       "title_type": "複合",
       "theme_category": "自己肯定-メンタル安定",
       "format_version": "v3-lineart-7list-cvnative",
+      "cta_containment_type": 3,
       "list_count": 7,
       "device_slide_index": 4,
       "total_slides": 9,
